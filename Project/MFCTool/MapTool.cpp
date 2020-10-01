@@ -30,6 +30,7 @@ CMapTool::~CMapTool()
 void CMapTool::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+
 	DDX_Control(pDX, IDC_LIST1, _ListBox);
 	DDX_Control(pDX, IDC_PICTURE, _Picture);
 
@@ -38,6 +39,9 @@ void CMapTool::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_RADIO1, MapTexStateKeyRadioBtnMap[L"Mansion"s]);
 	DDX_Control(pDX, IDC_RADIO4, MapTexStateKeyRadioBtnMap[L"Chinatown"s]);
 	DDX_Control(pDX, IDC_RADIO6, MapTexStateKeyRadioBtnMap[L"Boss"s]);
+	DDX_Control(pDX, IDC_CHECK3, CheckBoxRenderTile);
+	DDX_Control(pDX, IDC_CHECK1, CheckBoxCollisionTile);
+	DDX_Control(pDX, IDC_CHECK2, CheckBoxLine);
 }
 
 
@@ -51,6 +55,9 @@ BEGIN_MESSAGE_MAP(CMapTool, CDialog)
 	ON_BN_CLICKED(IDC_RADIO1, &CMapTool::OnBnClickedRadio1)
 	ON_BN_CLICKED(IDC_RADIO4, &CMapTool::OnBnClickedRadio4)
 	ON_BN_CLICKED(IDC_RADIO6, &CMapTool::OnBnClickedRadio6)
+	ON_BN_CLICKED(IDC_CHECK3, &CMapTool::OnBnClickedCheckRenderTile)
+	ON_BN_CLICKED(IDC_CHECK1, &CMapTool::OnBnClickedCheckCollisionTile)
+	ON_BN_CLICKED(IDC_CHECK2, &CMapTool::OnBnClickedCheckLine)
 END_MESSAGE_MAP()
 
 // CMapTool 메시지 처리기입니다.
@@ -186,7 +193,19 @@ void CMapTool::OnBnClickedMapSaveButton()
 	std::wstring FilePath = FileHelper::GetOperationFilePath(FALSE, this);
 
 	if (!pView->up_Terrain)return;
-	pView->up_Terrain->SaveTilesCurrentStateKeyOnly(FilePath);
+
+	if (CheckBoxRenderTile.GetCheck())
+	{
+		MessageBox(L"Render Tile Info Save !", L"SAVE", MB_OK);
+		pView->up_Terrain->SaveTilesCurrentStateKeyOnly(FilePath);
+	}
+		
+	if (CheckBoxCollisionTile.GetCheck())
+	{
+		MessageBox(L"Collision Tile Info Save !", L"SAVE", MB_OK);
+		pView->_CollisionTileManager.SaveCollisionTile(FilePath);
+	}
+		
 }
 
 
@@ -199,7 +218,19 @@ void CMapTool::OnBnClickedMapLoadButton()
 	std::wstring FilePath = FileHelper::GetOperationFilePath(TRUE, this);
 
 	if (!pView->up_Terrain)return;
-	pView->up_Terrain->LoadTilesCurrentStateKeyOnly(FilePath);
+
+	if (CheckBoxRenderTile.GetCheck())
+	{
+		MessageBox(L"Render Tile Info Load !", L"LOAD", MB_OK);
+		pView->up_Terrain->LoadTilesCurrentStateKeyOnly(FilePath);
+	}
+
+	if (CheckBoxCollisionTile.GetCheck())
+	{
+		MessageBox(L"Collision Tile Info Load !", L"LOAD", MB_OK);
+		pView->_CollisionTileManager.LoadCollisionTile(FilePath);
+	}
+
 }
 
 CMFCToolView *  CMapTool::GetView() const &
@@ -213,31 +244,93 @@ CMFCToolView *  CMapTool::GetView() const &
 }
 
 
+void CMapTool::OnMapStateRadioBtnClickEvent()
+{
+	for (auto& Statekey_RadioBtn : MapTexStateKeyRadioBtnMap)
+	{
+		auto& RadioBtn = Statekey_RadioBtn.second;
+		auto& StateKey = Statekey_RadioBtn.first;
+
+		// 여기서 맵 모드 스테이트키 업데이트가 필요한 객체들에게 
+		// 변경사항을 전파합니다.
+		if (RadioBtn.GetCheck())
+		{
+			auto* pView = GetView();
+			if (!pView)return;
+			if (!pView->up_Terrain)return;
+
+			GetView()->up_Terrain->CurrentTileTextureStateKey = StateKey;
+		}
+			
+	}
+}
+
 void CMapTool::OnBnClickedRadioMapMode()
 {
+	OnMapStateRadioBtnClickEvent();
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
 
 void CMapTool::OnBnClickedRadio3()
 {
+	OnMapStateRadioBtnClickEvent();
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
 
 void CMapTool::OnBnClickedRadio1()
 {
+	OnMapStateRadioBtnClickEvent();
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
 
 void CMapTool::OnBnClickedRadio4()
 {
+	OnMapStateRadioBtnClickEvent();
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
 
 void CMapTool::OnBnClickedRadio6()
 {
+	OnMapStateRadioBtnClickEvent();
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+
+
+void CMapTool::OnBnClickedCheckRenderTile()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	auto*pView = GetView();
+	if (!pView)return;
+
+	pView->bRenderTileMode = CheckBoxRenderTile.GetCheck(); 
+}
+
+
+void CMapTool::OnBnClickedCheckCollisionTile()
+{
+	auto*pView=GetView();
+	if (!pView)return;
+
+	pView->bCollisionTileMode = CheckBoxCollisionTile.GetCheck(); 
+	
+
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CMapTool::OnBnClickedCheckLine()
+{
+
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	auto*pView = GetView();
+	if (!pView)return;
+
+	pView->bLineMode = CheckBoxLine.GetCheck();
 }

@@ -5,6 +5,7 @@
 // CMyForm Æû ºäÀÔ´Ï´Ù.
 #include "UnitTool.h"
 #include "MapTool.h"
+#include "afxwin.h"
 class CMyForm : public CFormView
 {
 	DECLARE_DYNCREATE(CMyForm)
@@ -35,6 +36,8 @@ public:
 	afx_msg void OnBnClickedUnitTool();
 	virtual void OnInitialUpdate();
 	afx_msg void OnBnClickedMapTool();
+	CButton ButtonDebug;
+	afx_msg void OnBnClickedCheckDebug();
 };
 
 

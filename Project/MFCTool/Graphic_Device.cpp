@@ -104,7 +104,7 @@ void GraphicDevice::RenderBegin()
 {
 	pDevice->Clear(0, nullptr, D3DCLEAR_TARGET | 
 	D3DCLEAR_STENCIL | D3DCLEAR_ZBUFFER,
-	D3DCOLOR_ARGB(255, 188, 255, 188), 0.f, 0);
+	D3DCOLOR_ARGB(255, 0, 0, 0), 0.f, 0);
 
 	pDevice->BeginScene();
 

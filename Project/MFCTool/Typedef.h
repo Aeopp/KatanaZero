@@ -14,7 +14,7 @@ static std::wostream& operator<<(std::wostream& os,
 		// 파일 저장 시작
 		<< _vec3.x << std::endl
 		<< _vec3.y << std::endl
-		<< _vec3.z;
+		<< _vec3.z << std::endl; 
 	// 파일 저장 끝
 };
 

@@ -29,7 +29,6 @@ Terrain::Terrain()
 	CurrentTileTextureStateKey = L"Prison";
 }
 
-
 Terrain::~Terrain()
 {
 	Release(); 
@@ -91,8 +90,6 @@ void Terrain::DeleteMapObjAtPointLocation(const vec3 & Position)
 	}
 }
 
-
-
 bool Terrain::IsPicking(const vec3& TilePosition, const vec3& Point)
 {
 	const float SizeX_half = global::TileSize.first / 2.0f;
@@ -111,6 +108,8 @@ bool Terrain::IsPicking(const vec3& TilePosition, const vec3& Point)
 void Terrain::DebugRender()
 {
 	if (!global::bDebug)return;
+
+	constexpr float DebugLineWidth = 0.5f;
 
 	assert(pView&&__FUNCTIONW__);
 
@@ -136,7 +135,7 @@ void Terrain::DebugRender()
 		LineVertexs[3] = { RenderPos.x- SizeX_half, RenderPos.y+ SizeY_half };
 		LineVertexs[4] = { RenderPos.x- SizeX_half, RenderPos.y- SizeY_half };
 		
-		GraphicDevice::instance().GetLine()->SetWidth(1.f);
+		GraphicDevice::instance().GetLine()->SetWidth(DebugLineWidth);
 		GraphicDevice::instance().GetLine()->Draw(LineVertexs.data(), LineVertexs.size(),
 		(D3DCOLOR_ARGB(147, 255, 170, 165)));
 	}
@@ -252,7 +251,6 @@ void Terrain::SaveTilesCurrentStateKeyOnly(const std::wstring& FilePath)
 			file_Input << _RenderMapObj;
 		}
 	}
-
 }
 
 void Terrain::LoadTilesCurrentStateKeyOnly(const std::wstring& FilePath)

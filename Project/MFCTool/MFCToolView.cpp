@@ -39,6 +39,7 @@ END_MESSAGE_MAP()
 
 CMFCToolView::CMFCToolView()
 {
+	
 	// TODO: 여기에 생성 코드를 추가합니다.
 }
 
@@ -68,6 +69,8 @@ void CMFCToolView::OnDraw(CDC* /*pDC*/)
 	GraphicDevice::instance().RenderBegin();
 
 	up_Terrain->Render();
+
+	_CollisionTileManager.DebugRender();
 
 	GraphicDevice::instance().RenderEnd();
 }
@@ -153,9 +156,18 @@ void CMFCToolView::OnInitialUpdate()
 	// 여기서 텍스쳐를 미리 로딩합니다.
 #pragma region TEXTURE_LOAD
 	{
+
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 			L"../Resource/Texture/Prison/%d.png", L"Map", L"Prison", 27)))
 			return;
+
+		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+			L"../Resource/Texture/Factory/%d.png", L"Map", L"Factory", 21)))
+			return;
+		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+			L"../Resource/Texture/Mansion/%d.png", L"Map", L"Mansion", 38)))
+			return;
+
 	}
 #pragma endregion _TEXTURE_LOAD_END
 	
@@ -171,9 +183,19 @@ void CMFCToolView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 
-	MousePickPushTile(point);
+	if (bRenderTileMode)
+		MousePickPushTile(point);
+	if (bCollisionTileMode)
+		_CollisionTileManager.Push(vec3{ (float)point.x,(float)point.y,0.f });
 
-	CView::OnLButtonDown(nFlags, point);
+	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
+	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
+	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
+
+	InvalidateRect(nullptr, FALSE);
+	pMiniView->InvalidateRect(nullptr, FALSE);
+
+	CScrollView::OnLButtonDown(nFlags, point);
 };
 
 
@@ -182,13 +204,31 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (!up_Terrain)return;
 
-	if ( GetAsyncKeyState(VK_LBUTTON) & 0x8000 )
-		MousePickPushTile(point);
+	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
+	{
+		if(bRenderTileMode)
+			MousePickPushTile(point);
+		if (bCollisionTileMode)
+			_CollisionTileManager.Push(vec3{ (float)point.x,(float)point.y,0.f });
+	}
+		
 
 	if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
-		MousePickDeleteTile(point);
+	{
+		if (bRenderTileMode)
+			MousePickDeleteTile(point);
+		if (bCollisionTileMode)
+			_CollisionTileManager.Erase(vec3{ (float)point.x,(float)point.y,0.f });
+	}
+		
+	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
+	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
+	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
 
-	CView::OnMouseMove(nFlags, point);
+	InvalidateRect(nullptr, FALSE);
+	pMiniView->InvalidateRect(nullptr, FALSE);
+
+	CScrollView::OnMouseMove(nFlags, point);
 }
 
 
@@ -227,8 +267,18 @@ void CMFCToolView::MousePickDeleteTile(const CPoint & point)
 void CMFCToolView::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	
-	MousePickDeleteTile(point);
+	if(bRenderTileMode)
+		MousePickDeleteTile(point);
+	if(bCollisionTileMode)
+		_CollisionTileManager.Erase(vec3{ (float)point.x,(float)point.y,0.f });
+
+	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
+	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
+	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
+
+	InvalidateRect(nullptr, FALSE);
+	pMiniView->InvalidateRect(nullptr, FALSE);
+
 	CScrollView::OnRButtonDown(nFlags, point);
 }
 
@@ -242,3 +292,5 @@ void CMFCToolView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	CScrollView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
+
+

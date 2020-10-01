@@ -36,9 +36,19 @@ private:
 	class CMFCToolView*   GetView()const&;
 public:
 	std::map<std::wstring, CButton > MapTexStateKeyRadioBtnMap;
+
+	void OnMapStateRadioBtnClickEvent();
+
 	afx_msg void OnBnClickedRadioMapMode();
 	afx_msg void OnBnClickedRadio3();
 	afx_msg void OnBnClickedRadio1();
 	afx_msg void OnBnClickedRadio4();
 	afx_msg void OnBnClickedRadio6();
+
+	CButton CheckBoxRenderTile;
+	CButton CheckBoxCollisionTile;
+	CButton CheckBoxLine;
+	afx_msg void OnBnClickedCheckRenderTile();
+	afx_msg void OnBnClickedCheckCollisionTile();
+	afx_msg void OnBnClickedCheckLine();
 };

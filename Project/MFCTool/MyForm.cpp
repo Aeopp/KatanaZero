@@ -23,11 +23,13 @@ CMyForm::~CMyForm()
 void CMyForm::DoDataExchange(CDataExchange* pDX)
 {
 	CFormView::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_CHECK1, ButtonDebug);
 }
 
 BEGIN_MESSAGE_MAP(CMyForm, CFormView)
 	ON_BN_CLICKED(IDC_BUTTON2, &CMyForm::OnBnClickedUnitTool)
 	ON_BN_CLICKED(IDC_BUTTON6, &CMyForm::OnBnClickedMapTool)
+	ON_BN_CLICKED(IDC_CHECK1, &CMyForm::OnBnClickedCheckDebug)
 END_MESSAGE_MAP()
 
 
@@ -68,6 +70,8 @@ void CMyForm::OnInitialUpdate()
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 	_Font.CreatePointFont(150, L"메이플스토리");
 	GetDlgItem(IDC_BUTTON2)->SetFont(&_Font);
+
+	global::bDebug = ButtonDebug.GetCheck();
 }
 
 
@@ -79,4 +83,11 @@ void CMyForm::OnBnClickedMapTool()
 		_MapTool.Create(IDD_MAPTOOL);
 
 	_MapTool.ShowWindow(SW_SHOW);
+}
+
+
+void CMyForm::OnBnClickedCheckDebug()
+{
+	global::bDebug = ButtonDebug.GetCheck();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }

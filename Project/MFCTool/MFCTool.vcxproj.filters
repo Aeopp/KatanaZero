@@ -123,6 +123,7 @@
     <ClInclude Include="MFCToolView.h">
       <Filter>00.View\MiniView</Filter>
     </ClInclude>
+    <ClInclude Include="CollisionTileManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCTool.cpp">
@@ -174,6 +175,7 @@
     <ClCompile Include="math.cpp" />
     <ClCompile Include="singleton_interface.cpp" />
     <ClCompile Include="Define.cpp" />
+    <ClCompile Include="CollisionTileManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MFCTool.ico">

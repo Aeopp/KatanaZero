@@ -208,6 +208,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CollisionTileManager.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="Extern.h" />
     <ClInclude Include="FileInfo.h" />
@@ -236,6 +237,7 @@
     <ClInclude Include="UnitTool.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionTileManager.cpp" />
     <ClCompile Include="Define.cpp" />
     <ClCompile Include="FileInfo.cpp" />
     <ClCompile Include="Graphic_Device.cpp" />
