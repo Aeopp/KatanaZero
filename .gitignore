@@ -1,6 +1,9 @@
 # Prerequisites
 .vs/
 ipch/
+Debug/
+Release/
+x64/
 
 # Compiled Object files
 *.ipch
