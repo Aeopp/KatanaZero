@@ -3,7 +3,6 @@
 #include "Single_Texture.h"
 #include "Multi_Texture.h"
 
-
 Texture_Manager::~Texture_Manager()noexcept
 {
 
@@ -12,8 +11,7 @@ Texture_Manager::~Texture_Manager()noexcept
 std::shared_ptr<class TexInfo> Texture_Manager::Get_TexInfo(const wstring & ObjectKey,
 const wstring & StateKey /*=L""*/, const DWORD & Index /*= 0*/)
 {
-	
-	auto& iter_find = TextureMap.find(ObjectKey);
+	auto iter_find = TextureMap.find(ObjectKey);
 	if (TextureMap.end() == iter_find)
 		return nullptr; 
 

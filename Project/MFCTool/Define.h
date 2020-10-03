@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include "Typedef.h"
 
 class global
 {
@@ -7,6 +8,9 @@ public:
 	static constexpr std::pair<float, float > ClientSize = { 1920 ,1080 };
 	static constexpr std::pair<float, float > TileNums = { 100 ,100 };
 	static constexpr std::pair<float, float > TileSize = { 32 ,32 };
+	
+	static std::array<vec3, 4ul> GetScreenRect();
+	
 	static HWND hWND;
 	static bool bDebug;
 };

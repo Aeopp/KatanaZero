@@ -7,6 +7,7 @@
 
 
 #include "CollisionTileManager.h"
+#include "CollisionLineManager.h"
 
 // 이제 스크롤을 사용하기 위해서 원래 상속받고 있던 cView가 아니라 CScrollView로 바꿔줌,. 
 // 바꿔주면서 원래 쓰던 CView를 전부 CScrollView로 바꿔주자!!! 
@@ -26,6 +27,7 @@ public:
 	bool bCollisionTileMode = false;
 	bool bLineMode = false;
 
+	CollisionLineManager _CollisionLineManager; 
 	CollisionTileManager _CollisionTileManager;
 	std::unique_ptr<class Terrain> up_Terrain{ nullptr };
 	float Angle = 0.f; 

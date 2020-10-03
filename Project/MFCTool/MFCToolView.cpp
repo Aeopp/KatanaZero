@@ -3,6 +3,8 @@
 //
 
 #include "stdafx.h"
+#include <queue>
+
 // SHARED_HANDLERS는 미리 보기, 축소판 그림 및 검색 필터 처리기를 구현하는 ATL 프로젝트에서 정의할 수 있으며
 // 해당 프로젝트와 문서 코드를 공유하도록 해 줍니다.
 #ifndef SHARED_HANDLERS
@@ -68,9 +70,10 @@ void CMFCToolView::OnDraw(CDC* /*pDC*/)
 
 	GraphicDevice::instance().RenderBegin();
 
+	
 	up_Terrain->Render();
-
 	_CollisionTileManager.DebugRender();
+	_CollisionLineManager.DebugRender();
 
 	GraphicDevice::instance().RenderEnd();
 }
@@ -117,7 +120,6 @@ CMFCToolDoc* CMFCToolView::GetDocument() const // 디버그되지 않은 버전은 인라인�
 
 
 // CMFCToolView 메시지 처리기
-
 
 void CMFCToolView::OnInitialUpdate()
 {
@@ -182,16 +184,40 @@ void CMFCToolView::OnInitialUpdate()
 void CMFCToolView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
-	if (bRenderTileMode)
-		MousePickPushTile(point);
-	if (bCollisionTileMode)
-		_CollisionTileManager.Push(vec3{ (float)point.x,(float)point.y,0.f });
-
+	static std::queue<vec3> _LinePointQ{};
 	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
 	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
 	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
 
+	// 마우스 스크린 좌표를 월드 좌표로
+	const vec3 WorldPoint = 
+		vec3{ 
+		(float)point.x + GetScrollPos(0),
+		(float)point.y + GetScrollPos(1),
+		0.f  };
+
+	if (bRenderTileMode)
+		MousePickPushTile(point);
+	if (bCollisionTileMode)
+	{
+		_CollisionTileManager.Push(WorldPoint);
+	}
+
+	if (bLineMode)
+	{
+		_LinePointQ.push(WorldPoint);
+
+		if (_LinePointQ.size() >= 2)
+		{
+			vec3 LineFirst = _LinePointQ.front();
+			_LinePointQ.pop();
+			vec3 LineSecond = _LinePointQ.front();
+			_LinePointQ.pop();
+			_CollisionLineManager.Push({std::move(LineFirst),std::move(LineSecond)});
+		}
+	}
+		
+	
 	InvalidateRect(nullptr, FALSE);
 	pMiniView->InvalidateRect(nullptr, FALSE);
 
@@ -204,21 +230,45 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (!up_Terrain)return;
 
+	static std::queue<vec3> _LinePointQ{};
+
+	const vec3 WorldPoint =
+		vec3{
+		(float)point.x + GetScrollPos(0),
+		(float)point.y + GetScrollPos(1),
+		0.f };
+
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
 	{
-		if(bRenderTileMode)
+		if (bRenderTileMode)
 			MousePickPushTile(point);
 		if (bCollisionTileMode)
-			_CollisionTileManager.Push(vec3{ (float)point.x,(float)point.y,0.f });
-	}
-		
+		{
+			_CollisionTileManager.Push(WorldPoint);
+		}
 
+		if (bLineMode)
+		{
+			_LinePointQ.push(WorldPoint);
+
+			if (_LinePointQ.size() >= 2)
+			{
+				vec3 LineFirst = _LinePointQ.front();
+				_LinePointQ.pop();
+				vec3 LineSecond = _LinePointQ.front();
+				_LinePointQ.pop();
+				_CollisionLineManager.Push({ std::move(LineFirst),std::move(LineSecond) });
+			}
+		}
+	}
 	if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
 	{
 		if (bRenderTileMode)
 			MousePickDeleteTile(point);
 		if (bCollisionTileMode)
-			_CollisionTileManager.Erase(vec3{ (float)point.x,(float)point.y,0.f });
+			_CollisionTileManager.Erase(WorldPoint);
+		if (bLineMode)
+			_CollisionLineManager.Erase(WorldPoint);
 	}
 		
 	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
@@ -267,14 +317,22 @@ void CMFCToolView::MousePickDeleteTile(const CPoint & point)
 void CMFCToolView::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	const vec3 WorldPoint =
+		vec3{
+		(float)point.x + GetScrollPos(0),
+		(float)point.y + GetScrollPos(1),
+		0.f };
+
 	if(bRenderTileMode)
 		MousePickDeleteTile(point);
 	if(bCollisionTileMode)
-		_CollisionTileManager.Erase(vec3{ (float)point.x,(float)point.y,0.f });
+		_CollisionTileManager.Erase(WorldPoint);
+	if (bLineMode)
+		_CollisionLineManager.Erase(WorldPoint);
 
 	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
-	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
-	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
+	CMyForm*	pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
+	CMiniView*	 pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
 
 	InvalidateRect(nullptr, FALSE);
 	pMiniView->InvalidateRect(nullptr, FALSE);

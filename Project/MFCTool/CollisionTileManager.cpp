@@ -26,12 +26,31 @@ void CollisionTileManager::Push(const vec3 & Position) &
 	_Points[2] = { CollisionTileX + SizeXHalf , CollisionTileY + SizeYHalf, 0.f };
 	_Points[3] = { CollisionTileX - SizeXHalf , CollisionTileY + SizeYHalf, 0.f };
 
-	_CollisionTilePointsVec.push_back(std::move(_Points));
+	const vec3 InsertPoint = { CollisionTileX,CollisionTileY,0.f };
+
+	auto IsContain = [InsertPoint](const auto& TilePoints)
+	{
+		const float x=  TilePoints[0].x + (TilePoints[2].x - TilePoints[0].x) / 2.f;
+		const float y = TilePoints[0].y + (TilePoints[2].y - TilePoints[0].y) / 2.f;
+
+		const vec3 CurrentTileCenter{ x,y,0.f };
+
+		return InsertPoint == CurrentTileCenter;
+	};
+
+	auto IsFindIter = std::find_if(std::begin(_CollisionTilePointsVec), std::end(_CollisionTilePointsVec),
+		std::move(IsContain));
+
+	bool IsInsertable = (IsFindIter == std::end(_CollisionTilePointsVec));
+
+	if (IsInsertable)
+		_CollisionTilePointsVec.push_back(std::move(_Points));
 }
 
 void CollisionTileManager::Erase(const vec3 & TargetPosition) &
 {
-	auto IsFindIter = std::find_if(std::begin(_CollisionTilePointsVec),std::end(_CollisionTilePointsVec),
+	 auto IsFindIter = std::find_if(std::begin
+		(_CollisionTilePointsVec),std::end(_CollisionTilePointsVec),
 		[TargetPosition](const auto& CurrentTilePoints) 
 		{
 			return math::IsPointInnerRect(CurrentTilePoints, TargetPosition);
@@ -44,7 +63,7 @@ void CollisionTileManager::Erase(const vec3 & TargetPosition) &
 void CollisionTileManager::DebugRender() const &
 {
 	if (!global::bDebug)return;
-	constexpr float DebugLineWidth = 1.f;
+	constexpr float DebugLineWidth = 2.f;
 
 	std::pair<float, float > CameraPos{ 0.f,0.f }; 
 
@@ -59,21 +78,41 @@ void CollisionTileManager::DebugRender() const &
 	#endif
 
 	GraphicDevice::instance().GetSprite()->End();
+	GraphicDevice::instance().GetLine()->SetWidth(DebugLineWidth);
+
+	uint32_t RenderCount = 0;
 
 	for (const auto& CollisionTilePoints : _CollisionTilePointsVec)
 	{
+		bool IsRenderable = false;
 		std::array < vec2, 4ul > CollisionTilePoints2D;
 		// Convert 3D->2D
 		for (size_t i = 0; i < 4; ++i)
 		{
-			CollisionTilePoints2D[i] = { CollisionTilePoints[i].x -CameraPos.first ,
-										CollisionTilePoints[i].y  - CameraPos.second};
+			CollisionTilePoints2D[i] = { CollisionTilePoints[i].x - CameraPos.first ,
+										CollisionTilePoints[i].y - CameraPos.second };
+
+			vec3 Point3D = { CollisionTilePoints2D[i].x, CollisionTilePoints2D[i].y, 0.f };
+
+			IsRenderable |= math::IsPointInnerRect(global::GetScreenRect(), Point3D);
 		}
-	
-		GraphicDevice::instance().GetLine()->SetWidth(DebugLineWidth);
-		GraphicDevice::instance().GetLine()->Draw(CollisionTilePoints2D.data(),
-					CollisionTilePoints.size(), (D3DCOLOR_ARGB(123, 255, 155, 250)));
+		
+		if (IsRenderable)
+		{
+			++RenderCount;
+
+			GraphicDevice::instance().GetLine()->Draw(CollisionTilePoints2D.data(),
+				CollisionTilePoints.size(), (D3DCOLOR_ARGB(123, 255, 0, 0)));
+		}
 	}
+
+	std::wstring DebugTileStr = L"RenderDebugCollisionTile : " + std::to_wstring(RenderCount);
+	RECT rectRender{ 0,50,500,75 };
+	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
+
+	DebugTileStr = L"CullingDebugCollisionTile : " + std::to_wstring(_CollisionTilePointsVec.size() - RenderCount);
+	rectRender = { 0,75,500,100};
+	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 
 	GraphicDevice::instance().GetSprite()->Begin(D3DXSPRITE_ALPHABLEND);
 }

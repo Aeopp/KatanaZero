@@ -205,7 +205,12 @@ void CMapTool::OnBnClickedMapSaveButton()
 		MessageBox(L"Collision Tile Info Save !", L"SAVE", MB_OK);
 		pView->_CollisionTileManager.SaveCollisionTile(FilePath);
 	}
-		
+
+	if (CheckBoxLine.GetCheck())
+	{
+		MessageBox(L"Collision Line Info Save !", L"SAVE", MB_OK);
+		pView->_CollisionLineManager.SaveCollisionLine(FilePath);
+	}
 }
 
 
@@ -229,6 +234,12 @@ void CMapTool::OnBnClickedMapLoadButton()
 	{
 		MessageBox(L"Collision Tile Info Load !", L"LOAD", MB_OK);
 		pView->_CollisionTileManager.LoadCollisionTile(FilePath);
+	}
+
+	if (CheckBoxLine.GetCheck())
+	{
+		MessageBox(L"Collision Line Info Load !", L"LOAD", MB_OK);
+		pView->_CollisionLineManager.LoadCollisionLine(FilePath);
 	}
 
 }
