@@ -19,7 +19,7 @@ void CollisionLineManager::Erase(const vec3 & TargetPosition) &
 								   std::end(_CollisionLineVec),
 		[TargetPosition](const auto& CollisionLine)
 	{
-		constexpr float DistanceMin = 16.f;
+		constexpr float DistanceMin = 20.f;
 		return (
 				DistanceMin > math::GetPointDistance({ TargetPosition,CollisionLine.first })
 			||
@@ -35,7 +35,7 @@ void CollisionLineManager::DebugRender() const &
 	if (!global::bDebug)return;
 
 	constexpr float DebugLineWidth = 3.f;
-	constexpr auto DebugLineColor = D3DCOLOR_ARGB(255, 0, 255, 0);
+	constexpr auto DebugLineColor = D3DCOLOR_ARGB(255, 86, 100, 255);
 
 	std::pair<float, float > CameraPos{ 0.f,0.f };
 
