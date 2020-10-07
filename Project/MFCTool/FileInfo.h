@@ -10,3 +10,13 @@ public:
 	static std::wstring GetOperationFilePath(bool FileModeFlag,CWnd*const MFCWndClassPtr);
 };
 
+class CFileInfo
+{
+public:
+	CFileInfo();
+	~CFileInfo();
+
+public:
+	static CString ConvertReletivePath(CString strFullPath);
+};
+

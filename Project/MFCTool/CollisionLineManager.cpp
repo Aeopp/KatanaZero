@@ -10,13 +10,15 @@
 
 void CollisionLineManager::Push(std::pair<vec3, vec3> Line) &
 {
-	_CollisionLineVec.push_back(std::move(Line));
+	_CollisionLineMap[CurrentStateKey].push_back(std::move(Line));
 }
 
 void CollisionLineManager::Erase(const vec3 & TargetPosition) &
 {
-	 auto IsFindIter = std::find_if(std::begin(_CollisionLineVec),
-								   std::end(_CollisionLineVec),
+	auto& CurrentCollisionLineVec = _CollisionLineMap[CurrentStateKey];
+
+	 auto IsFindIter = std::find_if(std::begin(CurrentCollisionLineVec),
+								   std::end(CurrentCollisionLineVec),
 		[TargetPosition](const auto& CollisionLine)
 	{
 		constexpr float DistanceMin = 20.f;
@@ -26,19 +28,20 @@ void CollisionLineManager::Erase(const vec3 & TargetPosition) &
 				DistanceMin > math::GetPointDistance({ TargetPosition,CollisionLine.second }));
 	});
 
-	if (IsFindIter != _CollisionLineVec.end())
-		_CollisionLineVec.erase(IsFindIter);
+	if (IsFindIter != std::end(CurrentCollisionLineVec))
+		CurrentCollisionLineVec.erase(IsFindIter);
 }
 
-void CollisionLineManager::DebugRender() const &
+void CollisionLineManager::DebugRender()  &
 {
 	if (!global::bDebug)return;
 
 	constexpr float DebugLineWidth = 3.f;
-	constexpr auto DebugLineColor = D3DCOLOR_ARGB(255, 86, 100, 255);
+	constexpr auto DebugLineColor = D3DCOLOR_ARGB(255, 0, 0, 255);
 
 	std::pair<float, float > CameraPos{ 0.f,0.f };
-
+	float JoomScale = 1.f;
+	matrix MJoom;
 #ifdef _AFX
 	CMainFrame*pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
 	if (!pMain)return;
@@ -47,13 +50,19 @@ void CollisionLineManager::DebugRender() const &
 
 	CameraPos.first = pView->GetScrollPos(0);
 	CameraPos.second = pView->GetScrollPos(1);
+	JoomScale = pView->JoomScale;
 #endif
 	GraphicDevice::instance().GetSprite()->End();
 	GraphicDevice::instance().GetLine()->SetWidth(DebugLineWidth);
 
-	
-	uint32_t RenderCount = 0; 
-	for (const auto& CollisionLine : _CollisionLineVec)
+
+	MJoom = math::GetCameraJoomMatrix(JoomScale, vec3{ global::ClientSize.first,
+		global::ClientSize.second,0.f });
+	uint32_t RenderCount = 0;
+
+	const auto& CurrentCollisionLineVec = _CollisionLineMap[CurrentStateKey];
+
+	for (const auto& CollisionLine : CurrentCollisionLineVec)
 	{
 		std::array<vec2, 2> Line2Ds;
 
@@ -62,7 +71,10 @@ void CollisionLineManager::DebugRender() const &
 
 		Line2Ds[1] = { CollisionLine.second.x - CameraPos.first,
 			CollisionLine.second.y - CameraPos.second };
-		
+
+		D3DXVec2TransformCoord(&Line2Ds[0], &Line2Ds[0], &MJoom);
+		D3DXVec2TransformCoord(&Line2Ds[1], &Line2Ds[1], &MJoom);
+
 		bool IsRenderable = false;
 
 		IsRenderable |= math::IsPointInnerRect(global::GetScreenRect(), vec3{ Line2Ds[0].x,Line2Ds[0].y,0.f });
@@ -80,7 +92,7 @@ void CollisionLineManager::DebugRender() const &
 	RECT rectRender{ 0,100,500,125 };
 	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 
-	DebugTileStr = L"CullingRenderDebugLine : " + std::to_wstring(_CollisionLineVec.size() - RenderCount);
+	DebugTileStr = L"CullingRenderDebugLine : " + std::to_wstring(CurrentCollisionLineVec.size() - RenderCount);
 	rectRender = { 0,125,500,150};
 	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 
@@ -93,14 +105,16 @@ void CollisionLineManager::LoadCollisionLine(const std::wstring & FilePath) &
 	size_t _InfoSize{};
 	file_output >> _InfoSize;
 
+	 auto& CurrentCollisionLineVec = _CollisionLineMap[CurrentStateKey];
+
 	for (size_t i = 0; i < _InfoSize; ++i)
 	{
-		decltype(_CollisionLineVec)::value_type _CollisionLine;
+		typename std::decay_t<decltype(CurrentCollisionLineVec)>::value_type _CollisionLine;
 
 		file_output >> _CollisionLine.first; 
 		file_output >> _CollisionLine.second;
 
-		_CollisionLineVec.push_back(std::move(_CollisionLine));
+		CurrentCollisionLineVec.push_back(std::move(_CollisionLine));
 	}
 }
 
@@ -108,11 +122,13 @@ void CollisionLineManager::SaveCollisionLine(const std::wstring & FilePath) &
 {
 	std::wofstream file_Input(FilePath);
 
-	size_t _InfoSize = _CollisionLineVec.size();
+	const auto& CurrentCollisionLineVec = _CollisionLineMap[CurrentStateKey];
+
+	size_t _InfoSize = CurrentCollisionLineVec.size();
 
 	file_Input << _InfoSize << std::endl;
 
-	for (const auto& CollisionLine : _CollisionLineVec)
+	for (const auto& CollisionLine : CurrentCollisionLineVec)
 	{
 		file_Input << CollisionLine.first;
 		file_Input << CollisionLine.second;
@@ -121,5 +137,5 @@ void CollisionLineManager::SaveCollisionLine(const std::wstring & FilePath) &
 
 void CollisionLineManager::Clear() &
 {
-	_CollisionLineVec.clear();
+	_CollisionLineMap.clear();
 }

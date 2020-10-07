@@ -16,6 +16,15 @@ struct TexInfo
 	~TexInfo()noexcept{DXRelease(pTexture);}
 };
 
+typedef struct tagTexInfo
+{
+	// 이미지 한장을 제어하기 위한 컴객체. 예쩐에 쓰던 HBITMAP과 동일한 역할을 수행할 것. 
+	LPDIRECT3DTEXTURE9 pTexture;
+
+	// 이미지에 대한 정보를 담고 있을 구조체. 
+	D3DXIMAGE_INFO tImageInfo;
+}TEXINFO;
+
 // 맵 오브젝트들 그리는 순서 통제
 enum ELayer_Map  : int32_t
 {
@@ -33,6 +42,42 @@ struct RenderMapObjInfo
 	vec3 Position{};
 	int32_t DrawID{};
 };
+
+struct ObjectInfo
+{
+	enum EObjectID : uint32_t
+	{
+		NONE,
+	}; 
+	ObjectInfo() = default;
+	ObjectInfo(const uint32_t _ObjectID, const vec3& Position) : _ObjectID{ _ObjectID }, Position{ Position } {};
+
+	uint32_t _ObjectID{};
+	vec3 Position{};
+};
+static std::wostream& operator<<(std::wostream& os,
+	const ObjectInfo& _ObjectInfo)
+{
+	return os
+
+		// 파일 저장 시작
+		<< _ObjectInfo._ObjectID << std::endl
+		<< _ObjectInfo.Position << std::endl;
+		// 파일 저장 끝
+}
+
+static std::wistream& operator >> (std::wistream& is,
+	ObjectInfo& _ObjectInfo)
+{
+	uint32_t temp{}; 
+
+	is
+		>> _ObjectInfo._ObjectID
+		>> _ObjectInfo.Position;
+
+	return is;
+};
+
 
 
 static std::wostream& operator<<(std::wostream& os,

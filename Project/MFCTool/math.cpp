@@ -2,6 +2,16 @@
 #include "math.h"
 
 
+matrix math::GetCameraJoomMatrix(const float JoomScale, const vec3 & ScreenSize)
+{
+	matrix MCameraRelativeTranslation, MJoomScale, MScreenReturn;
+	const float halfX = ScreenSize.x / 2.f;
+	const float halfY = ScreenSize.y / 2.f;
+	D3DXMatrixTranslation(&MCameraRelativeTranslation, -halfX, -halfY, 0.f);
+	D3DXMatrixScaling(&MJoomScale, JoomScale, JoomScale, 0.f);
+	D3DXMatrixTranslation(&MScreenReturn, +halfX, +halfY, 0.f);
+	return MCameraRelativeTranslation*MJoomScale*MScreenReturn;
+}
 
 float math::Angle360conversion(float degree)
 {

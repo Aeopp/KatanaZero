@@ -1,7 +1,6 @@
 #pragma once
 #include "afxwin.h"
-
-
+#include <set>
 // CMapTool 대화 상자입니다.
 
 class CMapTool : public CDialog
@@ -26,6 +25,7 @@ public:
 	CListBox _ListBox;
 	CStatic _Picture;
 
+	std::wstring CurrentSelectRadioBtnText;
 	int _DrawID{ 0 };
 	ELayer_Map _CurrentSelectLayerMap{ ELayer_Map::BACK_GROUND }; 
 
@@ -35,7 +35,7 @@ public:
 private:
 	class CMFCToolView*   GetView()const&;
 public:
-	std::map<std::wstring, CButton > MapTexStateKeyRadioBtnMap;
+	std::map<std::wstring,std::pair<CButton,std::set<std::wstring>>> MapTexStateKeyRadioBtnMap;
 
 	void OnMapStateRadioBtnClickEvent();
 
@@ -44,6 +44,8 @@ public:
 	afx_msg void OnBnClickedRadio1();
 	afx_msg void OnBnClickedRadio4();
 	afx_msg void OnBnClickedRadio6();
+	afx_msg void OnBnClickedRadio5();
+	afx_msg void OnBnClickedRadio7();
 
 	CButton CheckBoxRenderTile;
 	CButton CheckBoxCollisionTile;
@@ -51,4 +53,6 @@ public:
 	afx_msg void OnBnClickedCheckRenderTile();
 	afx_msg void OnBnClickedCheckCollisionTile();
 	afx_msg void OnBnClickedCheckLine();
+	afx_msg void OnBnClickedCheckObjectToggle();
+	CButton CheckBoxObjectMode;
 };

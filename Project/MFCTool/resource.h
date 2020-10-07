@@ -9,10 +9,12 @@
 #define IDD_MYFORM                      310
 #define IDD_UNITTOOL                    311
 #define IDD_MAPTOOL                     312
+#define IDD_ITEMTOOL                    313
 #define IDC_BUTTON2                     1001
 #define IDC_EDIT1                       1002
 #define IDC_BUTTON6                     1002
 #define IDC_EDIT2                       1003
+#define IDC_BUTTON7                     1003
 #define IDC_BUTTON1                     1004
 #define IDC_EDIT3                       1005
 #define IDC_EDIT4                       1006
@@ -27,18 +29,22 @@
 #define IDC_CHECK2                      1015
 #define IDC_CHECK3                      1016
 #define IDC_BUTTON4                     1017
+#define IDC_CHECK4                      1017
 #define IDC_PICTURE                     1018
 #define IDC_RADIO4                      1019
 #define IDC_BUTTON5                     1020
 #define IDC_RADIO6                      1021
+#define IDC_RADIO5                      1022
+#define IDC_RADIO7                      1023
+#define IDC_SCROLLBAR1                  1023
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        313
+#define _APS_NEXT_RESOURCE_VALUE        315
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1022
+#define _APS_NEXT_CONTROL_VALUE         1024
 #define _APS_NEXT_SYMED_VALUE           313
 #endif
 #endif

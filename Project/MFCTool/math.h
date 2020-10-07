@@ -31,6 +31,8 @@ public:
 	// 데카르트 좌표계
 	static std::array<vec3, 4ul> GetLocalRect(const vec2 & Size/*전체사이즈 입력 (절반이 아님)*/);
 
+	static matrix GetCameraJoomMatrix(const float JoomScale,
+		/*전체 사이즈 입력(절반아님)*/const vec3& ScreenSize);
 	class Collision
 	{
 		// 사각형과 원충돌

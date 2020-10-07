@@ -49,6 +49,12 @@
     <Filter Include="FileInfo">
       <UniqueIdentifier>{0e7a96a7-51b8-4727-b5dd-3b9ac9b2f197}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{76cef6bd-3c31-4d6e-8e2a-30f58014e64b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00.View\Form\ObjectTool">
+      <UniqueIdentifier>{2b9f3926-4891-47fd-a07a-0ee5a312a0f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MFCTool.h">
@@ -117,14 +123,22 @@
     <ClInclude Include="MapTool.h">
       <Filter>00.View\Form\MapTool</Filter>
     </ClInclude>
-    <ClInclude Include="FileInfo.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="singleton_interface.h" />
-    <ClInclude Include="MFCToolView.h">
-      <Filter>00.View\MiniView</Filter>
-    </ClInclude>
     <ClInclude Include="CollisionTileManager.h" />
     <ClInclude Include="CollisionLineManager.h" />
+    <ClInclude Include="MFCToolView.h">
+      <Filter>00.View</Filter>
+    </ClInclude>
+    <ClInclude Include="FileInfo.h">
+      <Filter>FileInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectTool.h">
+      <Filter>00.View\Form\ObjectTool</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectEdit.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCTool.cpp">
@@ -172,12 +186,20 @@
     <ClCompile Include="MapTool.cpp">
       <Filter>00.View\Form\MapTool</Filter>
     </ClCompile>
-    <ClCompile Include="FileInfo.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="singleton_interface.cpp" />
     <ClCompile Include="Define.cpp" />
     <ClCompile Include="CollisionTileManager.cpp" />
     <ClCompile Include="CollisionLineManager.cpp" />
+    <ClCompile Include="FileInfo.cpp">
+      <Filter>FileInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectTool.cpp">
+      <Filter>00.View\Form\ObjectTool</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectEdit.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MFCTool.ico">

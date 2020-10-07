@@ -16,11 +16,7 @@ IMPLEMENT_DYNAMIC(CMapTool, CDialog)
 CMapTool::CMapTool(CWnd* pParent /*=NULL*/)
 	: CDialog(IDD_MAPTOOL, pParent)
 {
-	MapTexStateKeyRadioBtnMap[L"Prison"s];
-	MapTexStateKeyRadioBtnMap[L"Mansion"s];
-	MapTexStateKeyRadioBtnMap[L"Factory"s];
-	MapTexStateKeyRadioBtnMap[L"Chinatown"s];
-	MapTexStateKeyRadioBtnMap[L"Boss"s];
+
 }
 
 CMapTool::~CMapTool()
@@ -34,14 +30,17 @@ void CMapTool::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST1, _ListBox);
 	DDX_Control(pDX, IDC_PICTURE, _Picture);
 
-	DDX_Control(pDX, IDC_RADIO2, MapTexStateKeyRadioBtnMap[L"Prison"s]);
-	DDX_Control(pDX, IDC_RADIO3, MapTexStateKeyRadioBtnMap[L"Factory"s]);
-	DDX_Control(pDX, IDC_RADIO1, MapTexStateKeyRadioBtnMap[L"Mansion"s]);
-	DDX_Control(pDX, IDC_RADIO4, MapTexStateKeyRadioBtnMap[L"Chinatown"s]);
-	DDX_Control(pDX, IDC_RADIO6, MapTexStateKeyRadioBtnMap[L"Boss"s]);
+	DDX_Control(pDX, IDC_RADIO2, MapTexStateKeyRadioBtnMap[L"Prison"s].first);
+	DDX_Control(pDX, IDC_RADIO3, MapTexStateKeyRadioBtnMap[L"Factory"s].first);
+	DDX_Control(pDX, IDC_RADIO1, MapTexStateKeyRadioBtnMap[L"Mansion"s].first);
+	DDX_Control(pDX, IDC_RADIO4, MapTexStateKeyRadioBtnMap[L"Chinatown"s].first);
+	DDX_Control(pDX, IDC_RADIO6, MapTexStateKeyRadioBtnMap[L"Boss"s].first);
+	DDX_Control(pDX, IDC_RADIO5, MapTexStateKeyRadioBtnMap[L"Stage1"s].first);
+	DDX_Control(pDX, IDC_RADIO7, MapTexStateKeyRadioBtnMap[L"Stage2"s].first);
 	DDX_Control(pDX, IDC_CHECK3, CheckBoxRenderTile);
 	DDX_Control(pDX, IDC_CHECK1, CheckBoxCollisionTile);
 	DDX_Control(pDX, IDC_CHECK2, CheckBoxLine);
+	DDX_Control(pDX, IDC_CHECK4, CheckBoxObjectMode);
 }
 
 
@@ -55,9 +54,12 @@ BEGIN_MESSAGE_MAP(CMapTool, CDialog)
 	ON_BN_CLICKED(IDC_RADIO1, &CMapTool::OnBnClickedRadio1)
 	ON_BN_CLICKED(IDC_RADIO4, &CMapTool::OnBnClickedRadio4)
 	ON_BN_CLICKED(IDC_RADIO6, &CMapTool::OnBnClickedRadio6)
+	ON_BN_CLICKED(IDC_RADIO5, &CMapTool::OnBnClickedRadio5)
+	ON_BN_CLICKED(IDC_RADIO7, &CMapTool::OnBnClickedRadio7)
 	ON_BN_CLICKED(IDC_CHECK3, &CMapTool::OnBnClickedCheckRenderTile)
 	ON_BN_CLICKED(IDC_CHECK1, &CMapTool::OnBnClickedCheckCollisionTile)
 	ON_BN_CLICKED(IDC_CHECK2, &CMapTool::OnBnClickedCheckLine)
+	ON_BN_CLICKED(IDC_CHECK4, &CMapTool::OnBnClickedCheckObjectToggle)
 END_MESSAGE_MAP()
 
 // CMapTool 메시지 처리기입니다.
@@ -65,7 +67,24 @@ END_MESSAGE_MAP()
 void CMapTool::OnDropFiles(HDROP hDropInfo)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	UpdateData(TRUE); 
+	UpdateData(TRUE);
+	// 리스트 박스를 초기화 합니다. 
+	_ListBox.ResetContent();
+	//////////
+	
+	// 현재 선택된 라디오 버튼의 문자열을 찾습니다.
+	std::wstring CurrentSelectRadioBtnStr; 
+	for (const auto& StateKey_RadioBtnFileNameSet : MapTexStateKeyRadioBtnMap)
+	{
+		const auto& RadioBtn = StateKey_RadioBtnFileNameSet.second.first;
+		if (RadioBtn.GetCheck())
+		{
+			CString CurrentRadioBtnText{};
+			RadioBtn.GetWindowText(CurrentRadioBtnText);
+			CurrentSelectRadioBtnStr = CurrentRadioBtnText.GetString();
+		}
+	}
+
 	TCHAR FilePath[MAX_PATH] = L"";
 	TCHAR FileName[MAX_PATH] = L"";
 	CString ReletivePath = L""; 
@@ -79,8 +98,11 @@ void CMapTool::OnDropFiles(HDROP hDropInfo)
 		lstrcpy(FileName, FileNameAndExtant.GetString());
 		PathRemoveExtension(FileName);
 		_ListBox.AddString(FileName);
+		MapTexStateKeyRadioBtnMap[CurrentSelectRadioBtnStr].second.emplace(FileName);
 	}
+
 	HorizontalScroll();
+
 	UpdateData(FALSE); 
 	CDialog::OnDropFiles(hDropInfo);
 }
@@ -120,55 +142,55 @@ void CMapTool::OnLbnSelchangePicture()
 	if (!pView->up_Terrain)return;
 
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	UpdateData(TRUE); 
-	CString CurrentSelectName = L""; 
+	UpdateData(TRUE);
+	CString CurrentSelectName = L"";
 	// 제로인덱스부터 시작하는 리스트 박스의 현재 선택한 인덱스입니다 (파일명과 혼동하지 마세요..)
-	int32_t SelectFileIndex = _ListBox.GetCurSel(); 
+	int32_t SelectFileIndex = _ListBox.GetCurSel();
 
 	if (LB_ERR == SelectFileIndex)
-		return; 
+		return;
 
 	// 리스트박스의 현재선택 인덱스로부터 문자열을 얻어옵니다.
-	_ListBox.GetText(SelectFileIndex, CurrentSelectName); 
+	_ListBox.GetText(SelectFileIndex, CurrentSelectName);
 
 	// 파일명중 숫자만 남기기 위해 추적합니다.
-	int i = 0; 
-	for (; i < CurrentSelectName.GetLength(); ++i)
+	int32_t i = CurrentSelectName.GetLength() - 1;
+	for (; i >= 0; --i)
 	{
-		if(isdigit(CurrentSelectName[i]))
+		if (false == isdigit(CurrentSelectName[i]))
 			break;
 	}
 	// 해당 작업 이후 파일명에서 숫자만 남습니다.
-	CurrentSelectName.Delete(0,i);
+	CurrentSelectName.Delete(0, i+1);
 
 	// 숫자 문자열을 실제 정수로 변환합니다.
-	_DrawID = _wtoi(CurrentSelectName.GetString()); 
+	_DrawID = _wtoi(CurrentSelectName.GetString());
 
 	GraphicDevice::instance().RenderBegin();
 
-	matrix MScale, MTranslation, MWorld; 
+	matrix MScale, MTranslation, MWorld;
 	auto sp_TexInfo = Texture_Manager::instance().
-	Get_TexInfo(L"Map", pView->up_Terrain->CurrentTileTextureStateKey, _DrawID);
+		Get_TexInfo(L"Map", pView->up_Terrain->CurrentTileTextureStateKey, _DrawID);
 
 	if (nullptr == sp_TexInfo)
-		return; 
+		return;
 
 	float CenterX = sp_TexInfo->ImageInfo.Width >> 1;
 	float CenterY = sp_TexInfo->ImageInfo.Height >> 1;
 
 	const float ClientSizeX = global::ClientSize.first;
-	const float ClientSizeY = global::ClientSize.second; 
+	const float ClientSizeY = global::ClientSize.second;
 
-	D3DXMatrixTranslation(&MTranslation, 
+	D3DXMatrixTranslation(&MTranslation,
 		ClientSizeX* 0.5f,
-		ClientSizeY *0.5f,0.f);
+		ClientSizeY *0.5f, 0.f);
 
 	float SizeX = ClientSizeX / float(sp_TexInfo->ImageInfo.Width);
 	float SizeY = ClientSizeY / float(sp_TexInfo->ImageInfo.Height);
 
 	D3DXMatrixScaling(&MScale, SizeX*SelectPictureViewScale, SizeY*SelectPictureViewScale, 0.f);
 
-	MWorld = MScale * MTranslation; 
+	MWorld = MScale * MTranslation;
 
 	auto& _GraphicDeviceRef = GraphicDevice::instance();
 
@@ -179,7 +201,7 @@ void CMapTool::OnLbnSelchangePicture()
 
 	_GraphicDeviceRef.RenderEnd(_Picture.GetSafeHwnd());
 
-	UpdateData(FALSE); 
+	UpdateData(FALSE);
 }
 
 
@@ -189,27 +211,36 @@ void CMapTool::OnBnClickedMapSaveButton()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	auto* pView = GetView();
 	if (!pView)return;
-
-	std::wstring FilePath = FileHelper::GetOperationFilePath(FALSE, this);
-
 	if (!pView->up_Terrain)return;
 
 	if (CheckBoxRenderTile.GetCheck())
 	{
 		MessageBox(L"Render Tile Info Save !", L"SAVE", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(FALSE, this);
 		pView->up_Terrain->SaveTilesCurrentStateKeyOnly(FilePath);
 	}
 		
 	if (CheckBoxCollisionTile.GetCheck())
 	{
 		MessageBox(L"Collision Tile Info Save !", L"SAVE", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(FALSE, this);
 		pView->_CollisionTileManager.SaveCollisionTile(FilePath);
 	}
 
 	if (CheckBoxLine.GetCheck())
 	{
 		MessageBox(L"Collision Line Info Save !", L"SAVE", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(FALSE, this);
+
 		pView->_CollisionLineManager.SaveCollisionLine(FilePath);
+	}
+
+	if (CheckBoxObjectMode.GetCheck())
+	{
+		MessageBox(L"Object Info Save !", L"SAVE", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(FALSE, this);
+
+		pView->_ObjectEdit.SaveCurrentStageObjInfo(FilePath);
 	}
 }
 
@@ -219,29 +250,35 @@ void CMapTool::OnBnClickedMapLoadButton()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	auto* pView = GetView();
 	if (!pView)return;
-
-	std::wstring FilePath = FileHelper::GetOperationFilePath(TRUE, this);
-
 	if (!pView->up_Terrain)return;
 
 	if (CheckBoxRenderTile.GetCheck())
 	{
 		MessageBox(L"Render Tile Info Load !", L"LOAD", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(TRUE, this);
 		pView->up_Terrain->LoadTilesCurrentStateKeyOnly(FilePath);
 	}
 
 	if (CheckBoxCollisionTile.GetCheck())
 	{
 		MessageBox(L"Collision Tile Info Load !", L"LOAD", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(TRUE, this);
 		pView->_CollisionTileManager.LoadCollisionTile(FilePath);
 	}
 
 	if (CheckBoxLine.GetCheck())
 	{
 		MessageBox(L"Collision Line Info Load !", L"LOAD", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(TRUE, this);
 		pView->_CollisionLineManager.LoadCollisionLine(FilePath);
 	}
 
+	if (CheckBoxObjectMode.GetCheck())
+	{
+		MessageBox(L"Object Info Load !", L"LOAD", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(TRUE, this);
+		pView->_ObjectEdit.LoadCurrentStageObjInfo(FilePath);
+	}
 }
 
 CMFCToolView *  CMapTool::GetView() const &
@@ -257,11 +294,15 @@ CMFCToolView *  CMapTool::GetView() const &
 
 void CMapTool::OnMapStateRadioBtnClickEvent()
 {
+	UpdateData(TRUE);
+
+	_ListBox.ResetContent();
+
 	for (auto& Statekey_RadioBtn : MapTexStateKeyRadioBtnMap)
 	{
-		auto& RadioBtn = Statekey_RadioBtn.second;
+		auto& RadioBtn = Statekey_RadioBtn.second.first;
 		auto& StateKey = Statekey_RadioBtn.first;
-
+		
 		// 여기서 맵 모드 스테이트키 업데이트가 필요한 객체들에게 
 		// 변경사항을 전파합니다.
 		if (RadioBtn.GetCheck())
@@ -271,9 +312,22 @@ void CMapTool::OnMapStateRadioBtnClickEvent()
 			if (!pView->up_Terrain)return;
 
 			GetView()->up_Terrain->CurrentTileTextureStateKey = StateKey;
+			GetView()->_CollisionTileManager.CurrentStateKey = StateKey;
+			GetView()->_CollisionLineManager.CurrentStateKey = StateKey;
+			GetView()->_ObjectEdit.CurrentEditStage = StateKey;
+
+			CurrentSelectRadioBtnText = StateKey;
+
+			const auto& CurrentSelectFileSet = Statekey_RadioBtn.second.second;
+
+			for (const auto& FileName : CurrentSelectFileSet)
+			{
+				_ListBox.AddString(FileName.c_str());
+			}
 		}
-			
 	}
+
+	UpdateData(FALSE);
 }
 
 void CMapTool::OnBnClickedRadioMapMode()
@@ -311,6 +365,20 @@ void CMapTool::OnBnClickedRadio6()
 }
 
 
+//Stage1
+void CMapTool::OnBnClickedRadio5()
+{
+	OnMapStateRadioBtnClickEvent();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+//Stage2
+void CMapTool::OnBnClickedRadio7()
+{
+	OnMapStateRadioBtnClickEvent();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
 
 
 void CMapTool::OnBnClickedCheckRenderTile()
@@ -344,4 +412,14 @@ void CMapTool::OnBnClickedCheckLine()
 	if (!pView)return;
 
 	pView->bLineMode = CheckBoxLine.GetCheck();
+}
+
+
+void CMapTool::OnBnClickedCheckObjectToggle()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	auto*pView = GetView();
+	if (!pView)return;
+
+	pView->bObjectMode= CheckBoxObjectMode.GetCheck();
 }

@@ -30,6 +30,7 @@ BEGIN_MESSAGE_MAP(CMyForm, CFormView)
 	ON_BN_CLICKED(IDC_BUTTON2, &CMyForm::OnBnClickedUnitTool)
 	ON_BN_CLICKED(IDC_BUTTON6, &CMyForm::OnBnClickedMapTool)
 	ON_BN_CLICKED(IDC_CHECK1, &CMyForm::OnBnClickedCheckDebug)
+	ON_BN_CLICKED(IDC_BUTTON7, &CMyForm::OnBnClickedItemEdit)
 END_MESSAGE_MAP()
 
 
@@ -85,9 +86,21 @@ void CMyForm::OnBnClickedMapTool()
 	_MapTool.ShowWindow(SW_SHOW);
 }
 
+void CMyForm::OnBnClickedItemEdit()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (nullptr == _ObjectTool.GetSafeHwnd())
+		_ObjectTool.Create(IDD_ITEMTOOL);
+
+	_ObjectTool.ShowWindow(SW_SHOW);
+
+}
+
 
 void CMyForm::OnBnClickedCheckDebug()
 {
 	global::bDebug = ButtonDebug.GetCheck();
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
+
+

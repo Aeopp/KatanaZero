@@ -6,11 +6,13 @@ class CollisionTileManager
 private:
 	// 충돌 검출 , 디버그 드로잉 할시 연산 하는게 아님.
 	// 미리 포인트 4개를 구해놓는다.
-	std::vector<std::array<vec3, 4ul>> _CollisionTilePointsVec;
+	//           Key StateKey        Value Tile Points
+	std::map<std::wstring,std::vector<std::array<vec3, 4ul>>> _CollisionTilePointsMap;
 public:
+	std::wstring CurrentStateKey;
 	void Push(const vec3& Position)&;
 	void Erase(const vec3& TargetPosition)&;
-	void DebugRender()const&;
+	void DebugRender()&;
 	void LoadCollisionTile(const std::wstring& FilePath)&;
 	void SaveCollisionTile(const std::wstring& FilePath) &; 
 	void Clear()&;

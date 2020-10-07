@@ -19,13 +19,13 @@ void CollisionTileManager::Push(const vec3 & Position) &
 	float CollisionTileY = std::floor(Position.y / global::TileSize.second) * 
 		global::TileSize.second + SizeYHalf;
 
-	decltype(_CollisionTilePointsVec)::value_type _Points;
+	typename decltype(_CollisionTilePointsMap)::mapped_type::value_type _Points;
 
 	_Points[0] = { CollisionTileX - SizeXHalf , CollisionTileY - SizeYHalf, 0.f };
 	_Points[1] = { CollisionTileX + SizeXHalf , CollisionTileY - SizeYHalf, 0.f };
 	_Points[2] = { CollisionTileX + SizeXHalf , CollisionTileY + SizeYHalf, 0.f };
 	_Points[3] = { CollisionTileX - SizeXHalf , CollisionTileY + SizeYHalf, 0.f };
-
+	
 	const vec3 InsertPoint = { CollisionTileX,CollisionTileY,0.f };
 
 	auto IsContain = [InsertPoint](const auto& TilePoints)
@@ -38,34 +38,41 @@ void CollisionTileManager::Push(const vec3 & Position) &
 		return InsertPoint == CurrentTileCenter;
 	};
 
-	auto IsFindIter = std::find_if(std::begin(_CollisionTilePointsVec), std::end(_CollisionTilePointsVec),
+	auto& CurrentTilePointsVec = _CollisionTilePointsMap[CurrentStateKey];
+
+	auto IsFindIter = std::find_if(std::begin(CurrentTilePointsVec),
+		std::end(CurrentTilePointsVec),
 		std::move(IsContain));
 
-	bool IsInsertable = (IsFindIter == std::end(_CollisionTilePointsVec));
+	bool IsInsertable = (IsFindIter == std::end(CurrentTilePointsVec));
 
 	if (IsInsertable)
-		_CollisionTilePointsVec.push_back(std::move(_Points));
+		CurrentTilePointsVec.push_back(std::move(_Points));
 }
 
 void CollisionTileManager::Erase(const vec3 & TargetPosition) &
 {
+	auto& CurrentTilePointsVec = _CollisionTilePointsMap[CurrentStateKey];
+
 	 auto IsFindIter = std::find_if(std::begin
-		(_CollisionTilePointsVec),std::end(_CollisionTilePointsVec),
+		(CurrentTilePointsVec),std::end(CurrentTilePointsVec),
 		[TargetPosition](const auto& CurrentTilePoints) 
 		{
 			return math::IsPointInnerRect(CurrentTilePoints, TargetPosition);
 		});
 
-	if ( IsFindIter !=_CollisionTilePointsVec.end())
-		_CollisionTilePointsVec.erase(IsFindIter);
+	if ( IsFindIter !=std::end(CurrentTilePointsVec))
+		CurrentTilePointsVec.erase(IsFindIter);
 }
 
-void CollisionTileManager::DebugRender() const &
+void CollisionTileManager::DebugRender()&
 {
 	if (!global::bDebug)return;
 	constexpr float DebugLineWidth = 2.f;
 
 	std::pair<float, float > CameraPos{ 0.f,0.f }; 
+	float JoomScale = 1.f;
+	matrix MJoom;
 
 	#ifdef _AFX
 		CMainFrame*pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
@@ -75,6 +82,8 @@ void CollisionTileManager::DebugRender() const &
 
 		CameraPos.first = pView->GetScrollPos(0);
 		CameraPos.second = pView->GetScrollPos(1);
+
+		JoomScale = pView->JoomScale;
 	#endif
 
 	GraphicDevice::instance().GetSprite()->End();
@@ -82,27 +91,32 @@ void CollisionTileManager::DebugRender() const &
 
 	uint32_t RenderCount = 0;
 
-	for (const auto& CollisionTilePoints : _CollisionTilePointsVec)
+	MJoom = math::GetCameraJoomMatrix(JoomScale,
+		vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
+
+	for (const auto& CollisionTilePoints : _CollisionTilePointsMap[CurrentStateKey])
 	{
 		bool IsRenderable = false;
-		std::array < vec2, 4ul > CollisionTilePoints2D;
+		std::array < vec2, 5ul> CollisionTilePoints2D;
 		// Convert 3D->2D
-		for (size_t i = 0; i < 4; ++i)
+		for (size_t i = 0; i < 4ul; ++i)
 		{
 			CollisionTilePoints2D[i] = { CollisionTilePoints[i].x - CameraPos.first ,
 										CollisionTilePoints[i].y - CameraPos.second };
 
 			vec3 Point3D = { CollisionTilePoints2D[i].x, CollisionTilePoints2D[i].y, 0.f };
-
+			D3DXVec3TransformCoord(&Point3D, &Point3D, &MJoom);
+			CollisionTilePoints2D[i].x = Point3D.x;
+			CollisionTilePoints2D[i].y = Point3D.y;
 			IsRenderable |= math::IsPointInnerRect(global::GetScreenRect(), Point3D);
 		}
-		
+		CollisionTilePoints2D.back() = CollisionTilePoints2D.front();
 		if (IsRenderable)
 		{
 			++RenderCount;
 
 			GraphicDevice::instance().GetLine()->Draw(CollisionTilePoints2D.data(),
-				CollisionTilePoints.size(), (D3DCOLOR_ARGB(123, 255, 0, 0)));
+				CollisionTilePoints2D.size(), (D3DCOLOR_ARGB(255, 255, 0, 0)));
 		}
 	}
 
@@ -110,7 +124,7 @@ void CollisionTileManager::DebugRender() const &
 	RECT rectRender{ 0,50,500,75 };
 	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 
-	DebugTileStr = L"CullingDebugCollisionTile : " + std::to_wstring(_CollisionTilePointsVec.size() - RenderCount);
+	DebugTileStr = L"CullingDebugCollisionTile : " + std::to_wstring(_CollisionTilePointsMap[CurrentStateKey].size() - RenderCount);
 	rectRender = { 0,75,500,100};
 	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 
@@ -125,14 +139,14 @@ void CollisionTileManager::LoadCollisionTile(const std::wstring & FilePath) &
 
 	for (size_t i = 0; i < _InfoSize; ++i)
 	{
-		decltype(_CollisionTilePointsVec)::value_type _CollisionTilePoints;
+		typename decltype(_CollisionTilePointsMap)::mapped_type::value_type _CollisionTilePoints;
 
 		for (auto& _Points : _CollisionTilePoints)
 		{
 			file_output >> _Points;
 		}
 
-		_CollisionTilePointsVec.push_back(std::move(_CollisionTilePoints));
+		_CollisionTilePointsMap[CurrentStateKey].push_back(std::move(_CollisionTilePoints));
 	}
 }
 
@@ -141,22 +155,22 @@ void CollisionTileManager::SaveCollisionTile(const std::wstring & FilePath) &
 	std::wofstream file_Input(FilePath);
 
 	// 현재 맵 모드 의 모든 레이어 의 사이즈가 곧 타일의 개수
-	size_t _InfoSize = _CollisionTilePointsVec.size();
+	size_t _InfoSize = _CollisionTilePointsMap[CurrentStateKey].size();
 
 	file_Input << _InfoSize << std::endl;
 
-	for (const auto& CollisionTilePoints : _CollisionTilePointsVec)
+	for (const auto& CurrentCollisionTilePoints : _CollisionTilePointsMap[CurrentStateKey]    )
 	{
-		for (const auto& Point: CollisionTilePoints)
+		for (const auto& Points : CurrentCollisionTilePoints)
 		{
-			file_Input << Point;
+			file_Input << Points;
 		}
 	}
 }
 
 void CollisionTileManager::Clear() &
 {
-	_CollisionTilePointsVec.clear();
+	_CollisionTilePointsMap.clear();
 }
 
 

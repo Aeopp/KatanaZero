@@ -5,7 +5,8 @@
 // CMyForm Æû ºäÀÔ´Ï´Ù.
 #include "UnitTool.h"
 #include "MapTool.h"
-#include "afxwin.h"
+#include "ObjectTool.h"
+
 class CMyForm : public CFormView
 {
 	DECLARE_DYNCREATE(CMyForm)
@@ -16,6 +17,7 @@ protected:
 public:
 	CUnitTool _UnitTool; 
 	CMapTool _MapTool; 
+	CObjectTool _ObjectTool;
 	CFont _Font; 
 public:
 #ifdef AFX_DESIGN_TIME
@@ -36,8 +38,10 @@ public:
 	afx_msg void OnBnClickedUnitTool();
 	virtual void OnInitialUpdate();
 	afx_msg void OnBnClickedMapTool();
+	afx_msg void OnBnClickedItemEdit();
 	CButton ButtonDebug;
 	afx_msg void OnBnClickedCheckDebug();
+	
 };
 
 

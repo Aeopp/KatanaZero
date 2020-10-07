@@ -16,9 +16,11 @@
 #include "Single_Texture.h"
 #include "Texture_Manager.h"
 #include "Terrain.h"
+#include "ObjectEdit.h"
 #include "MainFrm.h"
 #include "MiniView.h"
 #include "MyForm.h"
+#include <mutex>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,6 +37,7 @@ BEGIN_MESSAGE_MAP(CMFCToolView, CScrollView)
 	ON_WM_MOUSEMOVE()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_KEYDOWN()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 // CMFCToolView 생성/소멸
@@ -59,6 +62,83 @@ BOOL CMFCToolView::PreCreateWindow(CREATESTRUCT& cs)
 
 // CMFCToolView 그리기
 
+void CMFCToolView::TileEditPushEvent(const CPoint point)
+{
+	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
+	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
+	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
+
+	// 마우스 스크린 좌표를 월드 좌표로
+	const vec3 WorldPoint = ClientPosToJoomApplyWorldPosition(point);
+
+
+	if (bRenderTileMode)
+		MousePickPushTile(WorldPoint);
+	if (bCollisionTileMode)
+	{
+		_CollisionTileManager.Push(WorldPoint);
+	}
+
+	if (bLineMode)
+	{
+		_LinePointQ.push(WorldPoint);
+
+		if (_LinePointQ.size() >= 2)
+		{
+			vec3 LineFirst = _LinePointQ.front();
+			_LinePointQ.pop();
+			vec3 LineSecond = _LinePointQ.front();
+			_LinePointQ.pop();
+			_CollisionLineManager.Push({ std::move(LineFirst),std::move(LineSecond) });
+		}
+	}
+	if (bObjectMode)
+	{
+		int32_t DrawID = pMyForm->_ObjectTool._DrawID;
+		_ObjectEdit.PushObjectInStage(WorldPoint, DrawID);
+	}
+	
+	InvalidateRect(nullptr, FALSE);
+	pMiniView->InvalidateRect(nullptr, FALSE);
+}
+
+void CMFCToolView::TileEditEraseEvent(const CPoint point)
+{
+	const vec3 WorldPoint = ClientPosToJoomApplyWorldPosition(point);
+
+	if (bRenderTileMode)
+		MousePickDeleteTile(WorldPoint);
+	if (bCollisionTileMode)
+		_CollisionTileManager.Erase(WorldPoint);
+	if (bLineMode)
+		_CollisionLineManager.Erase(WorldPoint);
+	if (bObjectMode)
+		_ObjectEdit.DeleteObjAtPointLocation(WorldPoint);
+
+	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
+	CMyForm*	pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
+	CMiniView*	 pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
+
+	InvalidateRect(nullptr, FALSE);
+	pMiniView->InvalidateRect(nullptr, FALSE);
+}
+
+vec3 CMFCToolView::ClientPosToJoomApplyWorldPosition(const CPoint point)
+{
+	vec3 WorldPoint =
+		vec3{static_cast<float>(point.x),static_cast<float>(point.y),0.f };
+
+	vec3 ScreenCenterPoint = { global::ClientSize.first / 2.f,global::ClientSize.second / 2.f,0.f };
+	vec3 ScrollPoint = { (float)GetScrollPos(0),(float)GetScrollPos(1),0.f };
+
+	WorldPoint -= ScreenCenterPoint;
+	WorldPoint /= JoomScale;
+	WorldPoint += ScrollPoint;
+	WorldPoint += ScreenCenterPoint;
+
+	return WorldPoint;
+}
+
 void CMFCToolView::OnDraw(CDC* /*pDC*/)
 {
 	CMFCToolDoc* pDoc = GetDocument();
@@ -69,11 +149,11 @@ void CMFCToolView::OnDraw(CDC* /*pDC*/)
 	if (!up_Terrain)return;
 
 	GraphicDevice::instance().RenderBegin();
-
 	
 	up_Terrain->Render();
 	_CollisionTileManager.DebugRender();
 	_CollisionLineManager.DebugRender();
+	_ObjectEdit.Render();
 
 	GraphicDevice::instance().RenderEnd();
 }
@@ -132,11 +212,10 @@ void CMFCToolView::OnInitialUpdate()
 	
 	SetScrollSizes(MM_TEXT,
 
-		CSize{  int32_t(global::TileSize.first * global::TileNums.first),
-				int32_t(global::TileSize.second* global::TileNums.second), }
+		CSize{  int32_t(global::TileSize.first * global::TileNums.first*2.0 + global::ClientViewMinLeftTop) ,
+				int32_t(global::TileSize.second* global::TileNums.second*2.0 + global::ClientViewMinLeftTop), }
 
 	);
-
 
 	// //1.메인 프레임 획득
 	CMainFrame* pMain = (CMainFrame*)::AfxGetApp()->GetMainWnd();
@@ -170,6 +249,16 @@ void CMFCToolView::OnInitialUpdate()
 			L"../Resource/Texture/Mansion/%d.png", L"Map", L"Mansion", 38)))
 			return;
 
+		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+			L"../Resource/Texture/Stage01/%d.png", L"Map", L"Stage1", 2)))
+			return;
+		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+			L"../Resource/Texture/Stage02/%d.png", L"Map", L"Stage2", 2)))
+			return;
+																		
+		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+			L"../Resource/Texture/EditObject/Object%d.png", L"ObjectPicture", L"ObjectPicture1", 9)))
+			return;
 	}
 #pragma endregion _TEXTURE_LOAD_END
 	
@@ -179,69 +268,36 @@ void CMFCToolView::OnInitialUpdate()
 		up_Terrain = std::make_unique<Terrain>();
 		up_Terrain->Set_View(this);
 	}
+
+	_ObjectEdit.Set_View(this);
 };
 
 void CMFCToolView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	static std::queue<vec3> _LinePointQ{};
-	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
-	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
-	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
-
-	// 마우스 스크린 좌표를 월드 좌표로
-	const vec3 WorldPoint = 
-		vec3{ 
-		(float)point.x + GetScrollPos(0),
-		(float)point.y + GetScrollPos(1),
-		0.f  };
-
-	if (bRenderTileMode)
-		MousePickPushTile(point);
-	if (bCollisionTileMode)
-	{
-		_CollisionTileManager.Push(WorldPoint);
-	}
-
-	if (bLineMode)
-	{
-		_LinePointQ.push(WorldPoint);
-
-		if (_LinePointQ.size() >= 2)
-		{
-			vec3 LineFirst = _LinePointQ.front();
-			_LinePointQ.pop();
-			vec3 LineSecond = _LinePointQ.front();
-			_LinePointQ.pop();
-			_CollisionLineManager.Push({std::move(LineFirst),std::move(LineSecond)});
-		}
-	}
-		
-	
-	InvalidateRect(nullptr, FALSE);
-	pMiniView->InvalidateRect(nullptr, FALSE);
+	TileEditPushEvent(point);
 
 	CScrollView::OnLButtonDown(nFlags, point);
 };
-
 
 void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (!up_Terrain)return;
 
-	static std::queue<vec3> _LinePointQ{};
-
-	const vec3 WorldPoint =
-		vec3{
-		(float)point.x + GetScrollPos(0),
-		(float)point.y + GetScrollPos(1),
-		0.f };
+	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
+	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
+	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
 
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
 	{
+
+		// 마우스 스크린 좌표를 월드 좌표로
+		const vec3 WorldPoint = ClientPosToJoomApplyWorldPosition(point);
+
+
 		if (bRenderTileMode)
-			MousePickPushTile(point);
+			MousePickPushTile(WorldPoint);
 		if (bCollisionTileMode)
 		{
 			_CollisionTileManager.Push(WorldPoint);
@@ -263,17 +319,15 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 	if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
 	{
+		const vec3 WorldPoint = ClientPosToJoomApplyWorldPosition(point);
+
 		if (bRenderTileMode)
-			MousePickDeleteTile(point);
+			MousePickDeleteTile(WorldPoint);
 		if (bCollisionTileMode)
 			_CollisionTileManager.Erase(WorldPoint);
 		if (bLineMode)
 			_CollisionLineManager.Erase(WorldPoint);
 	}
-		
-	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
-	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
-	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
 
 	InvalidateRect(nullptr, FALSE);
 	pMiniView->InvalidateRect(nullptr, FALSE);
@@ -281,8 +335,7 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 	CScrollView::OnMouseMove(nFlags, point);
 }
 
-
-void CMFCToolView::MousePickPushTile(const CPoint & point)
+void CMFCToolView::MousePickPushTile(const vec3& WorldPos)
 {
 	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
 	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
@@ -291,56 +344,28 @@ void CMFCToolView::MousePickPushTile(const CPoint & point)
 	int32_t DrawID = pMyForm->_MapTool._DrawID;
 	ELayer_Map CurrentSelectLayerMap = pMyForm->_MapTool._CurrentSelectLayerMap;
 
-	vec3 vMouse = { (float)point.x + GetScrollPos(0), (float)point.y + GetScrollPos(1), 0.f };
-
-	up_Terrain->PickingPushMapObj(vMouse, DrawID, CurrentSelectLayerMap);
+	up_Terrain->PickingPushMapObj(WorldPos, DrawID, CurrentSelectLayerMap);
 
 	InvalidateRect(nullptr, FALSE);
 	pMiniView->InvalidateRect(nullptr, FALSE);
 }
-
-void CMFCToolView::MousePickDeleteTile(const CPoint & point)
+void CMFCToolView::MousePickDeleteTile(const vec3& WorldPos)
 {
 	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
 	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
 	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
-
-	vec3 vMouse = { (float)point.x + GetScrollPos(0), (float)point.y + GetScrollPos(1), 0.f };
-
-	up_Terrain->DeleteMapObjAtPointLocation(vMouse);
+	
+	up_Terrain->DeleteMapObjAtPointLocation(WorldPos);
 
 	InvalidateRect(nullptr, FALSE);
 	pMiniView->InvalidateRect(nullptr, FALSE);
 }
-
-
 void CMFCToolView::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	const vec3 WorldPoint =
-		vec3{
-		(float)point.x + GetScrollPos(0),
-		(float)point.y + GetScrollPos(1),
-		0.f };
-
-	if(bRenderTileMode)
-		MousePickDeleteTile(point);
-	if(bCollisionTileMode)
-		_CollisionTileManager.Erase(WorldPoint);
-	if (bLineMode)
-		_CollisionLineManager.Erase(WorldPoint);
-
-	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
-	CMyForm*	pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
-	CMiniView*	 pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
-
-	InvalidateRect(nullptr, FALSE);
-	pMiniView->InvalidateRect(nullptr, FALSE);
-
+	TileEditEraseEvent(point);
 	CScrollView::OnRButtonDown(nFlags, point);
 }
-
-
 void CMFCToolView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -350,5 +375,29 @@ void CMFCToolView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	CScrollView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
+BOOL CMFCToolView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	constexpr float MouseWheelResponsiVeness = 1.f;
 
+	//pt.x += GetScrollPos(0);
+	//pt.y += GetScrollPos(1);
 
+	//const float CurrentMousePosScrollX = max(0.f, pt.x - global::ClientSize.first / 2.f);
+	//const float CurrentMousePosScrollY = max(0.f, pt.y - global::ClientSize.second / 2.f);
+
+	//SetScrollPos(0, CurrentMousePosScrollX, TRUE);
+	//SetScrollPos(1, CurrentMousePosScrollY, TRUE);
+
+	JoomScale = max(1.f, ( (zDelta / 1200.f)*MouseWheelResponsiVeness) + JoomScale);
+
+	SetScrollSizes(MM_TEXT,
+
+		CSize{ int32_t(global::TileSize.first * global::TileNums.first*max(2.0,JoomScale )  +global::ClientViewMinLeftTop),
+				int32_t(global::TileSize.second* global::TileNums.second*max(2.0,JoomScale ) + global::ClientViewMinLeftTop), }
+
+	);
+	InvalidateRect(nullptr, TRUE);
+
+	return CScrollView::OnMouseWheel(nFlags, zDelta, pt);
+}

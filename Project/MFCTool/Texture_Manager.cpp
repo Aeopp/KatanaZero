@@ -35,7 +35,7 @@ const wstring & StateKey/*=L""*/, const DWORD & Index/*=0*/)
 			if (FAILED(pTexture->Insert_Texture(FilePath, StateKey, Index)))
 			{
 				delete pTexture;
-				ERR_MSG(L"Texture Insert Failed - Texture_Manager.cpp");
+				ERR_MSG(L"SINGLE - Texture Insert Failed - Texture_Manager.cpp");
 				return E_FAIL;
 			}
 

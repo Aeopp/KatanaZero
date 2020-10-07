@@ -40,6 +40,24 @@ std::wstring FileHelper::GetOperationFilePath(bool FileModeFlag,CWnd*const MFCWn
 	return FilePath;
 }
 
+CFileInfo::CFileInfo()
+{
+}
+
+
+CFileInfo::~CFileInfo()
+{
+}
+
+CString CFileInfo::ConvertReletivePath(CString strFullPath)
+{
+	TCHAR szReletivePath[MAX_PATH] = L"";
+
+	TCHAR szCurrentDirectory[MAX_PATH] = L"";
+	GetCurrentDirectory(MAX_PATH, szCurrentDirectory);
+	PathRelativePathTo(szReletivePath, szCurrentDirectory, FILE_ATTRIBUTE_DIRECTORY, strFullPath.GetString(), FILE_ATTRIBUTE_DIRECTORY);
+	return CString(szReletivePath);
+}
 
 
 

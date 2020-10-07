@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Terrain.h"
+#include "ObjectTool.h"
 #include "MFCToolView.h"
 #include "math.h"
 #include <cassert>
@@ -22,8 +23,8 @@ Terrain::Terrain()
 	for (uint32_t i = 0; i < _DebugTiles.size(); ++i)
 	{
 		_DebugTiles[i].z = 0.f;
-		_DebugTiles[i].x = ((SizeX) / 2) + ((i % TileNumY) * SizeX);
-		_DebugTiles[i].y = ((SizeY) / 2) + ((i / TileNumX) * SizeY);
+		_DebugTiles[i].x = global::ClientViewMinLeftTop + ((SizeX) / 2) + ((i % TileNumY) * SizeX);
+		_DebugTiles[i].y = global::ClientViewMinLeftTop + ((SizeY) / 2) + ((i / TileNumX) * SizeY);
 	}
 
 	CurrentTileTextureStateKey = L"Prison";
@@ -31,10 +32,10 @@ Terrain::Terrain()
 
 Terrain::~Terrain()
 {
-	Release(); 
+	Release();
 }
 
-void Terrain::PickingPushMapObj(const vec3& Position,const int32_t DrawID, const ELayer_Map _LayerMap)
+void Terrain::PickingPushMapObj(const vec3& Position, const int32_t DrawID, const ELayer_Map _LayerMap)
 {
 	for (auto & DebugTilePosition : _DebugTiles)
 	{
@@ -47,7 +48,7 @@ void Terrain::PickingPushMapObj(const vec3& Position,const int32_t DrawID, const
 
 			// 레이어에 상관 없이 동일한 위치에 같은 타일이 중복 삽입되는 것을 방지합니다.
 			for (const auto& _LayerMap_RenderMapObjVec :
-			_TilesMap[CurrentTileTextureStateKey])
+				_TilesMap[CurrentTileTextureStateKey])
 			{
 				const auto& _RenderMapObjVec = _LayerMap_RenderMapObjVec.second;
 
@@ -55,7 +56,7 @@ void Terrain::PickingPushMapObj(const vec3& Position,const int32_t DrawID, const
 					[DrawID, DebugTilePosition](const auto& _RenderMapObj)
 				{
 					return _RenderMapObj.DrawID == DrawID &&
-							_RenderMapObj.Position == DebugTilePosition;
+						_RenderMapObj.Position == DebugTilePosition;
 				});
 
 				if (is_find != std::end(_RenderMapObjVec))
@@ -66,7 +67,7 @@ void Terrain::PickingPushMapObj(const vec3& Position,const int32_t DrawID, const
 			_TilesMap[CurrentTileTextureStateKey][_LayerMap].
 				emplace_back(std::move(_PushRenderMapObjInfo));
 
-				return;
+			return;
 		}
 	}
 }
@@ -81,7 +82,7 @@ void Terrain::DeleteMapObjAtPointLocation(const vec3 & Position)
 		auto& _RenderMapObjVec = _LayerMap_RenderMapObjVec.second;
 
 		auto erase_begin = std::remove_if(std::begin(_RenderMapObjVec),
-			std::end(_RenderMapObjVec), [this,Position](auto& _RenderMapObj)
+			std::end(_RenderMapObjVec), [this, Position](auto& _RenderMapObj)
 		{
 			return IsPicking(_RenderMapObj.Position, Position);
 		});
@@ -111,13 +112,25 @@ void Terrain::DebugRender()
 	if (!global::bDebug)return;
 
 	constexpr float DebugLineWidth = 0.5f;
+	constexpr float ScreenCenterX = global::ClientSize.first / 2.f;
+	constexpr float ScreenCenterY = global::ClientSize.second / 2.f;
 
-	assert(pView&&__FUNCTIONW__);
-
+	float JoomScale = 1.f;
+	vec2 CameraPos{ 0.f,0.f };
 	matrix MScale, MTranslation, MWorld;
 
-	const int32_t SizeX_half = global::TileSize.first  / 2;
-	const int32_t SizeY_half = global::TileSize.second / 2;
+	const float SizeX_half = global::TileSize.first / 2.f;
+	const float SizeY_half = global::TileSize.second / 2.f;
+
+#ifdef _AFX
+	assert(pView&&__FUNCTIONW__);
+	CameraPos = { (float)pView->GetScrollPos(0) ,(float)pView->GetScrollPos(1) };
+	JoomScale = pView->JoomScale;
+#endif
+
+	matrix MJoom = math::GetCameraJoomMatrix
+	(JoomScale, vec3{ global::ClientSize.first,
+		global::ClientSize.second,0.f });
 
 	GraphicDevice::instance().GetSprite()->End();
 
@@ -125,33 +138,41 @@ void Terrain::DebugRender()
 
 	uint32_t RenderCount = 0;
 
-	for (const auto& DebugTile : _DebugTiles)
+	// 로컬 사각형 좌표 구하기
+	const std::array<vec3, 4ul> LocalPoints =
+		math::GetLocalRect(vec2{ global::TileSize.first, global::TileSize.second });
+
+	for (const auto& DebugTilePos : _DebugTiles)
 	{
-		vec3 RenderPos = DebugTile;
+		std::array<vec2, 5ul> WorldPoints;
 
-		RenderPos -= vec3{ static_cast<float> (pView->GetScrollPos(0)),
-						   static_cast<float>( pView->GetScrollPos(1)),0.f };
-	
-		std::array<D3DXVECTOR2 ,5> LineVertexs;
-
-		LineVertexs[0] = { RenderPos.x- SizeX_half, RenderPos.y- SizeY_half };
-		LineVertexs[1] = { RenderPos.x+ SizeX_half, RenderPos.y- SizeY_half };
-		LineVertexs[2] = { RenderPos.x+ SizeX_half, RenderPos.y+ SizeY_half };
-		LineVertexs[3] = { RenderPos.x- SizeX_half, RenderPos.y+ SizeY_half };
-		LineVertexs[4] = { RenderPos.x- SizeX_half, RenderPos.y- SizeY_half };
-
-		bool IsRenderable = false; 
-
-		for (const auto& LineVertex : LineVertexs)
+		std::transform(std::begin(LocalPoints), std::end(LocalPoints), std::begin(WorldPoints),
+			[DebugTilePos, CameraPos, ScreenCenterX, ScreenCenterY, JoomScale, SizeX_half, SizeY_half](const auto& LocalPoint)
 		{
-			IsRenderable  |= math::IsPointInnerRect(global::GetScreenRect(), vec3{ LineVertex.x,LineVertex.y,0.f });
-			if (IsRenderable)break;
+			vec3 ScreenPoint = LocalPoint + DebugTilePos;
+
+			ScreenPoint.x -= (CameraPos.x + ScreenCenterX);
+			ScreenPoint.y -= (CameraPos.y + ScreenCenterY);
+			ScreenPoint.x *= JoomScale;
+			ScreenPoint.y *= JoomScale;
+			ScreenPoint.x += ScreenCenterX;
+			ScreenPoint.y += ScreenCenterY;
+			return vec2{ ScreenPoint.x,ScreenPoint.y };
+		});
+		WorldPoints.back() = WorldPoints.front();
+
+		bool IsRenderable = false;
+
+		// 여기서 for 돌며 컬링
+		for (const auto& WorldPoint : WorldPoints)
+		{
+			IsRenderable |= math::IsPointInnerRect(global::GetScreenRect(), vec3{ WorldPoint.x,WorldPoint.y,0.f });
 		}
-		
+
 		if (IsRenderable)
 		{
 			++RenderCount;
-			GraphicDevice::instance().GetLine()->Draw(LineVertexs.data(), LineVertexs.size(),
+			GraphicDevice::instance().GetLine()->Draw(WorldPoints.data(), WorldPoints.size(),
 				(D3DCOLOR_ARGB(255, 107, 255, 124)));
 		}
 	}
@@ -160,7 +181,7 @@ void Terrain::DebugRender()
 	RECT rectRender{ 0,0,500,25 };
 	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 
-	DebugTileStr = L"CullingDebugTile : "  + std::to_wstring(_DebugTiles.size() - RenderCount);
+	DebugTileStr = L"CullingDebugTile : " + std::to_wstring(_DebugTiles.size() - RenderCount);
 	rectRender = { 0,25,500,50 };
 	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 
@@ -169,85 +190,16 @@ void Terrain::DebugRender()
 
 void Terrain::Render()
 {
+#ifdef _AFX
+	assert(pView&&__FUNCTION__);
+#endif // _AFX
 	DebugRender();
 
-	matrix MScale,MWorld;
+	matrix MScale, MWorld;
 	D3DXMatrixScaling(&MScale, 1.f, 1.f, 0.f);
 
 	uint32_t RenderCount = 0;
-	uint32_t CurrentStateMapObjCount = 0;
-	for (auto& layer_TileVec: _TilesMap[CurrentTileTextureStateKey])
-	{
-		CurrentStateMapObjCount += layer_TileVec.second.size();
 
-		for (auto& MapObj : layer_TileVec.second)
-		{
-			matrix MTrans;
-			// TODO :: 개선할 여지가 있는 코드 => DrawID 로 MapObj 를 한번더 
-			//그룹으로 묶어준다면 호출횟수가 많이 줄어든다
-			// 프로파일링 이후 수정 요망
-			auto sp_TexInfo = Texture_Manager::instance().Get_TexInfo(L"Map", 
-			CurrentTileTextureStateKey, MapObj.DrawID);
-
-			if (!sp_TexInfo)continue;
-
-			D3DXMatrixTranslation(&MTrans, 
-
-				MapObj.Position.x - pView->GetScrollPos(0)+ 
-					sp_TexInfo->ImageInfo.Width/2 - global::TileSize.first/2, 
-
-				MapObj.Position.y- pView->GetScrollPos(1) + 
-					sp_TexInfo->ImageInfo.Height/2 - global::TileSize.second/ 2, 0.f);
-
-				MWorld = MScale* MTrans;
-
-				// TODO :: 자동으로 컬링 해준다면 해당 코드는 삭제바람
-				const auto LocalPoints=math::GetLocalRect(vec2{ (float)sp_TexInfo->ImageInfo.Width,(float)sp_TexInfo->ImageInfo.Height });
-
-				bool IsRenderable = false; 
-
-				for (const auto& LocalPoint : LocalPoints)
-				{
-					vec3 WorldPoint{ 0,0,0 };
-					D3DXVec3TransformCoord(&WorldPoint, &LocalPoint, &MWorld);
-					IsRenderable |= math::IsPointInnerRect(global::GetScreenRect(), WorldPoint);
-					if (IsRenderable)break;
-				}
-
-				//////////////////
-				if(IsRenderable)
-				{
-					++RenderCount; 
-					RECT srcRect = { 0,0,static_cast<int32_t>(sp_TexInfo->ImageInfo.Width),static_cast<int32_t>(sp_TexInfo->ImageInfo.Height) };
-					vec3 TextureCenter = { sp_TexInfo->ImageInfo.Width / 2.f,sp_TexInfo->ImageInfo.Height / 2.f,0.f };
-					GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
-					GraphicDevice::instance().GetSprite()->Draw(sp_TexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
-						D3DCOLOR_ARGB(255, 255, 255, 255));
-				}
-		}
-	}
-
-	if (global::bDebug)
-	{
-		std::wstring DebugTileStr = L"RenderMapTexture : " + std::to_wstring(RenderCount);
-		RECT rectRender{ 0,150,500,175 };
-		GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
-
-		DebugTileStr = L"CullingMapTexture : " + std::to_wstring(CurrentStateMapObjCount - RenderCount);
-		rectRender = { 0,175,500,200 };
-		GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
-	}
-
-}
-void Terrain::MiniRender()
-{
-	constexpr float MiniRenderViewScale = 0.7f;
-
-	matrix MScale, MWorld;
-
-	D3DXMatrixScaling(&MScale, MiniRenderViewScale, MiniRenderViewScale, 0.f);
-
-	uint32_t RenderCount = 0;
 	uint32_t CurrentStateMapObjCount = 0;
 	for (auto& layer_TileVec : _TilesMap[CurrentTileTextureStateKey])
 	{
@@ -261,12 +213,18 @@ void Terrain::MiniRender()
 			// 프로파일링 이후 수정 요망
 			auto sp_TexInfo = Texture_Manager::instance().Get_TexInfo(L"Map",
 				CurrentTileTextureStateKey, MapObj.DrawID);
+
 			if (!sp_TexInfo)continue;
 
-			D3DXMatrixTranslation(&MTrans, MapObj.Position.x - pView->GetScrollPos(0),
-				MapObj.Position.y - pView->GetScrollPos(1), 0.f);
-			MWorld = MTrans*MScale;
+			D3DXMatrixTranslation(&MTrans,
 
+				MapObj.Position.x - pView->GetScrollPos(0) +
+				sp_TexInfo->ImageInfo.Width / 2 - global::TileSize.first / 2,
+
+				MapObj.Position.y - pView->GetScrollPos(1) +
+				sp_TexInfo->ImageInfo.Height / 2 - global::TileSize.second / 2, 0.f);
+
+			MWorld = MScale* MTrans  * math::GetCameraJoomMatrix(pView->JoomScale, vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
 			// TODO :: 자동으로 컬링 해준다면 해당 코드는 삭제바람
 			const auto LocalPoints = math::GetLocalRect(vec2{ (float)sp_TexInfo->ImageInfo.Width,(float)sp_TexInfo->ImageInfo.Height });
 
@@ -284,26 +242,90 @@ void Terrain::MiniRender()
 			if (IsRenderable)
 			{
 				++RenderCount;
-
-				CRect srcRect = { 0,0,static_cast<int32_t>(sp_TexInfo->ImageInfo.Width),static_cast<int32_t>(sp_TexInfo->ImageInfo.Height) };
+				RECT srcRect = { 0,0,static_cast<int32_t>(sp_TexInfo->ImageInfo.Width),static_cast<int32_t>(sp_TexInfo->ImageInfo.Height) };
 				vec3 TextureCenter = { sp_TexInfo->ImageInfo.Width / 2.f,sp_TexInfo->ImageInfo.Height / 2.f,0.f };
 				GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
-				GraphicDevice::instance().GetSprite()->Draw(sp_TexInfo->pTexture, srcRect, &TextureCenter, nullptr, D3DCOLOR_ARGB(255, 255, 255, 255));
+				GraphicDevice::instance().GetSprite()->Draw(sp_TexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
+					D3DCOLOR_ARGB(255, 255, 255, 255));
 			}
 		}
 	}
 
-	//if (global::bDebug)
-	//{
+	if (global::bDebug)
+	{
+		std::wstring DebugTileStr = L"RenderMapTexture : " + std::to_wstring(RenderCount);
+		RECT rectRender{ 0,150,500,175 };
+		GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 
-	//	std::wstring DebugTileStr = L"RenderMiniMapTexture : " + std::to_wstring(RenderCount);
-	//	RECT rectRender{ 0,300,500,350 };
-	//	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
+		DebugTileStr = L"CullingMapTexture : " + std::to_wstring(CurrentStateMapObjCount - RenderCount);
+		rectRender = { 0,175,500,200 };
+		GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
+	}
+}
+void Terrain::MiniRender()
+{
+	// Scale 
+	constexpr float MiniRenderViewScale = 2.f;
 
-	//	DebugTileStr = L"CullingMiniMapTexture : " + std::to_wstring(CurrentStateMapObjCount - RenderCount);
-	//	rectRender = { 0,350,500,400 };
-	//	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
-	//}
+#ifdef _AFX
+	assert(pView&&__FUNCTION__);
+#endif // _AFX
+
+	matrix MScale, MWorld;
+	D3DXMatrixScaling(&MScale, 1.f, 1.f, 0.f);
+
+	uint32_t RenderCount = 0;
+
+	uint32_t CurrentStateMapObjCount = 0;
+	for (auto& layer_TileVec : _TilesMap[CurrentTileTextureStateKey])
+	{
+		CurrentStateMapObjCount += layer_TileVec.second.size();
+
+		for (auto& MapObj : layer_TileVec.second)
+		{
+			matrix MTrans;
+			// TODO :: 개선할 여지가 있는 코드 => DrawID 로 MapObj 를 한번더 
+			//그룹으로 묶어준다면 호출횟수가 많이 줄어든다
+			// 프로파일링 이후 수정 요망
+			auto sp_TexInfo = Texture_Manager::instance().Get_TexInfo(L"Map",
+				CurrentTileTextureStateKey, MapObj.DrawID);
+
+			if (!sp_TexInfo)continue;
+
+			D3DXMatrixTranslation(&MTrans,
+
+				MapObj.Position.x - pView->GetScrollPos(0) +
+				sp_TexInfo->ImageInfo.Width / 2 - global::TileSize.first / 2,
+
+				MapObj.Position.y - pView->GetScrollPos(1) +
+				sp_TexInfo->ImageInfo.Height / 2 - global::TileSize.second / 2, 0.f);
+
+			MWorld = MScale* MTrans  * math::GetCameraJoomMatrix(pView->JoomScale*MiniRenderViewScale, vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
+			// TODO :: 자동으로 컬링 해준다면 해당 코드는 삭제바람
+			const auto LocalPoints = math::GetLocalRect(vec2{ (float)sp_TexInfo->ImageInfo.Width,(float)sp_TexInfo->ImageInfo.Height });
+
+			bool IsRenderable = false;
+
+			for (const auto& LocalPoint : LocalPoints)
+			{
+				vec3 WorldPoint{ 0,0,0 };
+				D3DXVec3TransformCoord(&WorldPoint, &LocalPoint, &MWorld);
+				IsRenderable |= math::IsPointInnerRect(global::GetScreenRect(), WorldPoint);
+				if (IsRenderable)break;
+			}
+
+			//////////////////
+			if (IsRenderable)
+			{
+				++RenderCount;
+				RECT srcRect = { 0,0,static_cast<int32_t>(sp_TexInfo->ImageInfo.Width),static_cast<int32_t>(sp_TexInfo->ImageInfo.Height) };
+				vec3 TextureCenter = { sp_TexInfo->ImageInfo.Width / 2.f,sp_TexInfo->ImageInfo.Height / 2.f,0.f };
+				GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+				GraphicDevice::instance().GetSprite()->Draw(sp_TexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
+					D3DCOLOR_ARGB(255, 255, 255, 255));
+			}
+		}
+	}
 }
 
 void Terrain::Release()
@@ -312,15 +334,15 @@ void Terrain::Release()
 	{
 		for (auto& _LayerMap_TileVec : _StateKey_LayerMap_TileVec.second)
 		{
-			auto& _TileVec =  _LayerMap_TileVec.second;
-				_TileVec .clear();
-				_TileVec .shrink_to_fit();
+			auto& _TileVec = _LayerMap_TileVec.second;
+			_TileVec.clear();
+			_TileVec.shrink_to_fit();
 		}
 
 		_StateKey_LayerMap_TileVec.second.clear();
 	}
 
-	_TilesMap.clear(); 
+	_TilesMap.clear();
 }
 
 void Terrain::SaveTilesCurrentStateKeyOnly(const std::wstring& FilePath)
@@ -331,13 +353,13 @@ void Terrain::SaveTilesCurrentStateKeyOnly(const std::wstring& FilePath)
 	size_t _InfoSize = std::accumulate(
 		std::begin(_TilesMap[CurrentTileTextureStateKey]),
 		std::end(_TilesMap[CurrentTileTextureStateKey]),
-		0ul,[](size_t Size,const auto& LayerMap_RenderMapObjVec){
+		0ul, [](size_t Size, const auto& LayerMap_RenderMapObjVec) {
 		return LayerMap_RenderMapObjVec.second.size() + Size;
 	});
 
 	file_Input << _InfoSize << std::endl;
 
-	for (const auto& LayerMap_RenderMapObjVec:_TilesMap[CurrentTileTextureStateKey])
+	for (const auto& LayerMap_RenderMapObjVec : _TilesMap[CurrentTileTextureStateKey])
 	{
 		for (const auto& _RenderMapObj : LayerMap_RenderMapObjVec.second)
 		{
