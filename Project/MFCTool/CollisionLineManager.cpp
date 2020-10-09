@@ -133,6 +133,7 @@ void CollisionLineManager::SaveCollisionLine(const std::wstring & FilePath) &
 		file_Input << CollisionLine.first;
 		file_Input << CollisionLine.second;
 	}
+
 }
 
 void CollisionLineManager::Clear() &

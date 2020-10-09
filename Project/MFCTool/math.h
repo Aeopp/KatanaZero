@@ -2,7 +2,7 @@
 #include <utility>
 #include <random>
 #include <array>
-
+#include <forward_list>
 using float_t = float;
 
 class math
@@ -61,6 +61,7 @@ auto math::LOOP(std::pair<T, T> Range, T Target)
 {
 	auto [left, right] = Range;
 
+	
 	if (Target <= left)
 	{
 		return right - (left - Target);

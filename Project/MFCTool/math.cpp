@@ -4,6 +4,9 @@
 
 matrix math::GetCameraJoomMatrix(const float JoomScale, const vec3 & ScreenSize)
 {
+	
+	
+	
 	matrix MCameraRelativeTranslation, MJoomScale, MScreenReturn;
 	const float halfX = ScreenSize.x / 2.f;
 	const float halfY = ScreenSize.y / 2.f;

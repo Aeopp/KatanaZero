@@ -1,4 +1,5 @@
 #pragma once
+#include <istream>
 #include <ostream>
 
 using vec2= D3DXVECTOR2 ;
@@ -18,7 +19,7 @@ static std::wostream& operator<<(std::wostream& os,
 	// 파일 저장 끝
 };
 
-static std::wistream& operator >> (std::wistream& is,
+static std::wistream& operator>>(std::wistream& is,
 	vec3& _vec3)
 {
 	return is
