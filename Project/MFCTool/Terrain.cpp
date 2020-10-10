@@ -46,48 +46,44 @@ void Terrain::PickingPushMapObj(const vec3& Position, const int32_t DrawID, cons
 			_PushRenderMapObjInfo.DrawID = DrawID;
 			_PushRenderMapObjInfo._LayerMap = _LayerMap;
 
-			// 레이어에 상관 없이 동일한 위치에 같은 타일이 중복 삽입되는 것을 방지합니다.
-			for (const auto& _LayerMap_RenderMapObjVec :
-				_TilesMap[CurrentTileTextureStateKey])
-			{
-				const auto& _RenderMapObjVec = _LayerMap_RenderMapObjVec.second;
+			// 현재 레이어에 동일한 위치에 같은 타일이 중복 삽입되는 것을 방지합니다.
+			auto& _LayerMap_RenderMapObjVec = 
+				_TilesMap[CurrentTileTextureStateKey][_LayerMap];
 
-				auto is_find = std::find_if(std::begin(_RenderMapObjVec), std::end(_RenderMapObjVec),
+				auto is_find = std::find_if(std::begin(_LayerMap_RenderMapObjVec), std::end(_LayerMap_RenderMapObjVec),
 					[DrawID, DebugTilePosition](const auto& _RenderMapObj)
 				{
-					return _RenderMapObj.DrawID == DrawID &&
+					return /*_RenderMapObj.DrawID == DrawID &&*/
 						_RenderMapObj.Position == DebugTilePosition;
 				});
 
-				if (is_find != std::end(_RenderMapObjVec))
+				if (is_find != std::end(_LayerMap_RenderMapObjVec))
 					return;
-			}
 			//////////////////////////////////////
-
-			_TilesMap[CurrentTileTextureStateKey][_LayerMap].
-				emplace_back(std::move(_PushRenderMapObjInfo));
+			_LayerMap_RenderMapObjVec.emplace_back(std::move(_PushRenderMapObjInfo));
 
 			return;
 		}
 	}
 }
 
-void Terrain::DeleteMapObjAtPointLocation(const vec3 & Position)
+void Terrain::DeleteMapObjAtPointLocation(const vec3 & Position, const ELayer_Map _LayerMap)
 {
-	// 레이어 상관 없이 타겟 포지션의 모든 타일 삭제
-	for (auto& _LayerMap_RenderMapObjVec : _TilesMap[CurrentTileTextureStateKey])
-	{
-		auto& _RenderMapObjVec = _LayerMap_RenderMapObjVec.second;
+		// 현재 레이어 타겟 포지션의 모든 타일 삭제
+		auto& _RenderMapObjVec = _TilesMap[CurrentTileTextureStateKey][_LayerMap];
 
-		auto erase_begin = std::remove_if(std::begin(_RenderMapObjVec),
+		auto erase_target = std::find_if(std::begin(_RenderMapObjVec),
 			std::end(_RenderMapObjVec), [this, Position](auto& _RenderMapObj)
 		{
 			return IsPicking(_RenderMapObj.Position, Position);
 		});
 
-		_RenderMapObjVec.erase(erase_begin, std::end(_RenderMapObjVec));
+		if (erase_target == std::end(_RenderMapObjVec))return;
+
+		*erase_target = _RenderMapObjVec.back();
+
+		_RenderMapObjVec.pop_back();
 		_RenderMapObjVec.shrink_to_fit();
-	}
 }
 
 bool Terrain::IsPicking(const vec3& TilePosition, const vec3& Point)

@@ -354,8 +354,10 @@ void CMFCToolView::MousePickDeleteTile(const vec3& WorldPos)
 	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
 	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
 	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
-	
-	up_Terrain->DeleteMapObjAtPointLocation(WorldPos);
+
+	ELayer_Map CurrentSelectLayerMap = pMyForm->_MapTool._CurrentSelectLayerMap;
+
+	up_Terrain->DeleteMapObjAtPointLocation(WorldPos, CurrentSelectLayerMap);
 
 	InvalidateRect(nullptr, FALSE);
 	pMiniView->InvalidateRect(nullptr, FALSE);
