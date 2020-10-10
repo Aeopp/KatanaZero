@@ -2,7 +2,8 @@
 #include "Function.h"
 #include <iostream>
 #include "Typedef.h"
-
+#include <ostream>
+#include <istream>
 // TODO :: ZeroMemory 를 사용해서 초기화 하는 코드가 많다
 // 포인터와 상속을 사용하고 싶어진다면 고민해봐야한다.
 struct TexInfo
@@ -33,6 +34,11 @@ enum ELayer_Map  : int32_t
 	DECORATIONS,
 	NONE,
 };
+
+static ELayer_Map operator++(ELayer_Map& _ELayer_Map) {
+	_ELayer_Map = static_cast<ELayer_Map>(_ELayer_Map + 1);
+	return _ELayer_Map;
+}
 
 // 렌더링 하기위해 필요한 정보
 struct RenderMapObjInfo

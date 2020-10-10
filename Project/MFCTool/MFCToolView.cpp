@@ -243,7 +243,7 @@ void CMFCToolView::OnInitialUpdate()
 			return;
 
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Factory/%d.png", L"Map", L"Factory", 21)))
+			L"../Resource/Texture/Multiplayer/%d.png", L"Map", L"Multiplayer", 376)))
 			return;
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 			L"../Resource/Texture/Mansion/%d.png", L"Map", L"Mansion", 38)))

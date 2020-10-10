@@ -31,12 +31,18 @@ void CMapTool::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PICTURE, _Picture);
 
 	DDX_Control(pDX, IDC_RADIO2, MapTexStateKeyRadioBtnMap[L"Prison"s].first);
-	DDX_Control(pDX, IDC_RADIO3, MapTexStateKeyRadioBtnMap[L"Factory"s].first);
+	DDX_Control(pDX, IDC_RADIO3, MapTexStateKeyRadioBtnMap[L"Multiplayer"s].first);
 	DDX_Control(pDX, IDC_RADIO1, MapTexStateKeyRadioBtnMap[L"Mansion"s].first);
 	DDX_Control(pDX, IDC_RADIO4, MapTexStateKeyRadioBtnMap[L"Chinatown"s].first);
 	DDX_Control(pDX, IDC_RADIO6, MapTexStateKeyRadioBtnMap[L"Boss"s].first);
 	DDX_Control(pDX, IDC_RADIO5, MapTexStateKeyRadioBtnMap[L"Stage1"s].first);
 	DDX_Control(pDX, IDC_RADIO7, MapTexStateKeyRadioBtnMap[L"Stage2"s].first);
+
+	// 레이어 버튼 테이블 세팅
+	DDX_Control(pDX, IDC_RADIO8, MapLayerSelectRadioBtnTable[ELayer_Map::BACK_GROUND]);
+	DDX_Control(pDX, IDC_RADIO10, MapLayerSelectRadioBtnTable[ELayer_Map::FORE_GROUND]);
+	DDX_Control(pDX, IDC_RADIO9, MapLayerSelectRadioBtnTable[ELayer_Map::DECORATIONS]);
+
 	DDX_Control(pDX, IDC_CHECK3, CheckBoxRenderTile);
 	DDX_Control(pDX, IDC_CHECK1, CheckBoxCollisionTile);
 	DDX_Control(pDX, IDC_CHECK2, CheckBoxLine);
@@ -49,17 +55,23 @@ BEGIN_MESSAGE_MAP(CMapTool, CDialog)
 	ON_LBN_SELCHANGE(IDC_LIST1, &CMapTool::OnLbnSelchangePicture)
 	ON_BN_CLICKED(IDC_BUTTON1, &CMapTool::OnBnClickedMapSaveButton)
 	ON_BN_CLICKED(IDC_BUTTON2, &CMapTool::OnBnClickedMapLoadButton)
-	ON_BN_CLICKED(IDC_RADIO2, &CMapTool::OnBnClickedRadioMapMode)
-	ON_BN_CLICKED(IDC_RADIO3, &CMapTool::OnBnClickedRadio3)
-	ON_BN_CLICKED(IDC_RADIO1, &CMapTool::OnBnClickedRadio1)
-	ON_BN_CLICKED(IDC_RADIO4, &CMapTool::OnBnClickedRadio4)
-	ON_BN_CLICKED(IDC_RADIO6, &CMapTool::OnBnClickedRadio6)
-	ON_BN_CLICKED(IDC_RADIO5, &CMapTool::OnBnClickedRadio5)
-	ON_BN_CLICKED(IDC_RADIO7, &CMapTool::OnBnClickedRadio7)
+
+	ON_BN_CLICKED(IDC_RADIO2, &CMapTool::OnMapStateRadioBtnClickEvent)
+	ON_BN_CLICKED(IDC_RADIO3, &CMapTool::OnMapStateRadioBtnClickEvent)
+	ON_BN_CLICKED(IDC_RADIO1, &CMapTool::OnMapStateRadioBtnClickEvent)
+	ON_BN_CLICKED(IDC_RADIO4, &CMapTool::OnMapStateRadioBtnClickEvent)
+	ON_BN_CLICKED(IDC_RADIO6, &CMapTool::OnMapStateRadioBtnClickEvent)
+	ON_BN_CLICKED(IDC_RADIO5, &CMapTool::OnMapStateRadioBtnClickEvent)
+	ON_BN_CLICKED(IDC_RADIO7, &CMapTool::OnMapStateRadioBtnClickEvent)
+
 	ON_BN_CLICKED(IDC_CHECK3, &CMapTool::OnBnClickedCheckRenderTile)
 	ON_BN_CLICKED(IDC_CHECK1, &CMapTool::OnBnClickedCheckCollisionTile)
 	ON_BN_CLICKED(IDC_CHECK2, &CMapTool::OnBnClickedCheckLine)
 	ON_BN_CLICKED(IDC_CHECK4, &CMapTool::OnBnClickedCheckObjectToggle)
+	// 여기에 함수를 바인딩 합니다.
+	ON_BN_CLICKED(IDC_RADIO8, &CMapTool::OnMapLayerRadioBtnClickEvent)
+	ON_BN_CLICKED(IDC_RADIO10, &CMapTool::OnMapLayerRadioBtnClickEvent)
+	ON_BN_CLICKED(IDC_RADIO9, &CMapTool::OnMapLayerRadioBtnClickEvent)
 END_MESSAGE_MAP()
 
 // CMapTool 메시지 처리기입니다.
@@ -330,56 +342,14 @@ void CMapTool::OnMapStateRadioBtnClickEvent()
 	UpdateData(FALSE);
 }
 
-void CMapTool::OnBnClickedRadioMapMode()
+void CMapTool::OnMapLayerRadioBtnClickEvent()
 {
-	OnMapStateRadioBtnClickEvent();
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	for (ELayer_Map LayerMapIDX = ELayer_Map::BACK_GROUND; LayerMapIDX != ELayer_Map::NONE; ++LayerMapIDX)
+	{
+		if (MapLayerSelectRadioBtnTable[LayerMapIDX].GetCheck())
+			_CurrentSelectLayerMap = LayerMapIDX;
+	};
 }
-
-
-void CMapTool::OnBnClickedRadio3()
-{
-	OnMapStateRadioBtnClickEvent();
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
-
-void CMapTool::OnBnClickedRadio1()
-{
-	OnMapStateRadioBtnClickEvent();
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
-
-void CMapTool::OnBnClickedRadio4()
-{
-	OnMapStateRadioBtnClickEvent();
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
-
-void CMapTool::OnBnClickedRadio6()
-{
-	OnMapStateRadioBtnClickEvent();
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
-
-//Stage1
-void CMapTool::OnBnClickedRadio5()
-{
-	OnMapStateRadioBtnClickEvent();
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
-
-//Stage2
-void CMapTool::OnBnClickedRadio7()
-{
-	OnMapStateRadioBtnClickEvent();
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
 
 void CMapTool::OnBnClickedCheckRenderTile()
 {
@@ -423,3 +393,4 @@ void CMapTool::OnBnClickedCheckObjectToggle()
 
 	pView->bObjectMode= CheckBoxObjectMode.GetCheck();
 }
+

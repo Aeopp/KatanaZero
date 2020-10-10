@@ -74,9 +74,7 @@ void Terrain::PickingPushMapObj(const vec3& Position, const int32_t DrawID, cons
 
 void Terrain::DeleteMapObjAtPointLocation(const vec3 & Position)
 {
-
 	// 레이어 상관 없이 타겟 포지션의 모든 타일 삭제
-
 	for (auto& _LayerMap_RenderMapObjVec : _TilesMap[CurrentTileTextureStateKey])
 	{
 		auto& _RenderMapObjVec = _LayerMap_RenderMapObjVec.second;
