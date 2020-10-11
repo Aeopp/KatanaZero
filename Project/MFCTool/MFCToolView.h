@@ -33,6 +33,7 @@ public:
 	bool bLineMode = false;
 	bool bWallRide= false;
 	bool bObjectMode = false;
+	bool bTileCanGoDown = false;
 
 	CollisionLineManager _CollisionLineManager; 
 	CollisionTileManager _CollisionTileManager;

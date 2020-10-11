@@ -76,7 +76,7 @@ void CMFCToolView::TileEditPushEvent(const CPoint point)
 		MousePickPushTile(WorldPoint);
 	if (bCollisionTileMode)
 	{
-		_CollisionTileManager.Push(WorldPoint);
+		_CollisionTileManager.Push(WorldPoint, bTileCanGoDown);
 	}
 
 	if (bLineMode)
@@ -109,7 +109,7 @@ void CMFCToolView::TileEditEraseEvent(const CPoint point)
 	if (bRenderTileMode)
 		MousePickDeleteTile(WorldPoint);
 	if (bCollisionTileMode)
-		_CollisionTileManager.Erase(WorldPoint);
+		_CollisionTileManager.Erase(WorldPoint, bTileCanGoDown);
 	if (bLineMode)
 		_CollisionLineManager.Erase(WorldPoint, bWallRide);
 	if (bObjectMode)
@@ -268,6 +268,8 @@ void CMFCToolView::OnInitialUpdate()
 	}
 
 	_ObjectEdit.Set_View(this);
+
+
 };
 
 void CMFCToolView::OnLButtonDown(UINT nFlags, CPoint point)
@@ -298,7 +300,7 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 			MousePickPushTile(WorldPoint);
 		if (bCollisionTileMode)
 		{
-			_CollisionTileManager.Push(WorldPoint);
+			_CollisionTileManager.Push(WorldPoint, bTileCanGoDown);
 		}
 
 		if (bLineMode)
@@ -322,7 +324,7 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 		if (bRenderTileMode)
 			MousePickDeleteTile(WorldPoint);
 		if (bCollisionTileMode)
-			_CollisionTileManager.Erase(WorldPoint);
+			_CollisionTileManager.Erase(WorldPoint, bTileCanGoDown);
 		if (bLineMode)
 			_CollisionLineManager.Erase(WorldPoint, bWallRide);
 	}

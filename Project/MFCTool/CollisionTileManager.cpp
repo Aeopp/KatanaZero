@@ -99,11 +99,11 @@ void CollisionTileManager::DebugRender()&
 		auto RenderTile = [CameraPos, MJoom, &RenderCount, &TileCount](const _CollisionTileContainerType& _CollisionTileContainer)
 		{
 			static int32_t RenderColorIDX = 0;
-			
+			RenderColorIDX = (RenderColorIDX + 1) % 2;
 			static constexpr std::array<D3DCOLOR, std::tuple_size_v<typename CollisionTileManager::_CollisionTileMapType::mapped_type>> ColorTable
 			{
-				D3DCOLOR_ARGB(255, 255, 0, 0),
-				D3DCOLOR_ARGB(255, 255, 255, 0)
+				D3DCOLOR_ARGB(255, 255, 255, 0),
+				D3DCOLOR_ARGB(255, 255, 0, 0)
 			};
 
 			TileCount += _CollisionTileContainer.size();
@@ -130,7 +130,7 @@ void CollisionTileManager::DebugRender()&
 					++RenderCount;
 
 					GraphicDevice::instance().GetLine()->Draw(CollisionTilePoints2D.data(),
-						CollisionTilePoints2D.size(), (ColorTable[RenderColorIDX++]));
+						CollisionTilePoints2D.size(), (ColorTable[RenderColorIDX]));
 				}
 			}
 		};

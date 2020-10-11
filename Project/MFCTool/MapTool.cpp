@@ -48,6 +48,7 @@ void CMapTool::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK2, CheckBoxLine);
 	DDX_Control(pDX, IDC_CHECK4, CheckBoxObjectMode);
 	DDX_Control(pDX, IDC_CHECK5, CheckBoxWallRide);
+	DDX_Control(pDX, IDC_CHECK6, CheckBoxTileCanGoDown);
 }
 
 
@@ -74,6 +75,7 @@ BEGIN_MESSAGE_MAP(CMapTool, CDialog)
 	ON_BN_CLICKED(IDC_RADIO10, &CMapTool::OnMapLayerRadioBtnClickEvent)
 	ON_BN_CLICKED(IDC_RADIO9, &CMapTool::OnMapLayerRadioBtnClickEvent)
 	ON_BN_CLICKED(IDC_CHECK5, &CMapTool::OnBnClickedCheckWallRide)
+	ON_BN_CLICKED(IDC_CHECK6, &CMapTool::OnBnClickedCheckTileCanGoDown)
 END_MESSAGE_MAP()
 
 // CMapTool 메시지 처리기입니다.
@@ -401,4 +403,27 @@ void CMapTool::OnBnClickedCheckWallRide()
 
 	pView->bWallRide = CheckBoxWallRide.GetCheck();
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CMapTool::OnBnClickedCheckTileCanGoDown()
+{
+	auto*pView = GetView();
+	if (!pView)return;
+
+	pView->bTileCanGoDown = CheckBoxTileCanGoDown.GetCheck();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+BOOL CMapTool::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	MapTexStateKeyRadioBtnMap[L"Prison"s].first.SetCheck(TRUE);
+	MapLayerSelectRadioBtnTable[ELayer_Map::BACK_GROUND].SetCheck(TRUE);
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
