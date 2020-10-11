@@ -89,7 +89,7 @@ void CMFCToolView::TileEditPushEvent(const CPoint point)
 			_LinePointQ.pop();
 			vec3 LineSecond = _LinePointQ.front();
 			_LinePointQ.pop();
-			_CollisionLineManager.Push({ std::move(LineFirst),std::move(LineSecond) });
+			_CollisionLineManager.Push({ std::move(LineFirst),std::move(LineSecond) },bWallRide);
 		}
 	}
 	if (bObjectMode)
@@ -111,7 +111,7 @@ void CMFCToolView::TileEditEraseEvent(const CPoint point)
 	if (bCollisionTileMode)
 		_CollisionTileManager.Erase(WorldPoint);
 	if (bLineMode)
-		_CollisionLineManager.Erase(WorldPoint);
+		_CollisionLineManager.Erase(WorldPoint, bWallRide);
 	if (bObjectMode)
 		_ObjectEdit.DeleteObjAtPointLocation(WorldPoint);
 
@@ -246,7 +246,7 @@ void CMFCToolView::OnInitialUpdate()
 			L"../Resource/Texture/Multiplayer/%d.png", L"Map", L"Multiplayer", 376)))
 			return;
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Mansion/%d.png", L"Map", L"Mansion", 38)))
+			L"../Resource/Texture/Bunkermansion/%d.png", L"Map", L"Bunkermansion", 438)))
 			return;
 
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
@@ -313,7 +313,7 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 				_LinePointQ.pop();
 				vec3 LineSecond = _LinePointQ.front();
 				_LinePointQ.pop();
-				_CollisionLineManager.Push({ std::move(LineFirst),std::move(LineSecond) });
+				_CollisionLineManager.Push({ std::move(LineFirst),std::move(LineSecond) },bWallRide);
 			}
 		}
 	}
@@ -326,7 +326,7 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 		if (bCollisionTileMode)
 			_CollisionTileManager.Erase(WorldPoint);
 		if (bLineMode)
-			_CollisionLineManager.Erase(WorldPoint);
+			_CollisionLineManager.Erase(WorldPoint, bWallRide);
 	}
 
 	InvalidateRect(nullptr, FALSE);

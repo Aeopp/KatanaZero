@@ -15,9 +15,9 @@ public:
 	static bool bDebug;
 };
 
-	#define Sword	0x01		//0000 0001
-	#define Shoes		0x02		//0000 0010
-	#define Shocks		0x04		//0000 0100
+#define Sword	0x01		//0000 0001
+#define Shoes		0x02		//0000 0010
+#define Shocks		0x04		//0000 0100
 
 #ifdef _AFX
 #define  ERR_MSG(MSG) AfxMessageBox(MSG)

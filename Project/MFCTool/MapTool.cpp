@@ -32,7 +32,7 @@ void CMapTool::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_RADIO2, MapTexStateKeyRadioBtnMap[L"Prison"s].first);
 	DDX_Control(pDX, IDC_RADIO3, MapTexStateKeyRadioBtnMap[L"Multiplayer"s].first);
-	DDX_Control(pDX, IDC_RADIO1, MapTexStateKeyRadioBtnMap[L"Mansion"s].first);
+	DDX_Control(pDX, IDC_RADIO1, MapTexStateKeyRadioBtnMap[L"Bunkermansion"s].first);
 	DDX_Control(pDX, IDC_RADIO4, MapTexStateKeyRadioBtnMap[L"Chinatown"s].first);
 	DDX_Control(pDX, IDC_RADIO6, MapTexStateKeyRadioBtnMap[L"Boss"s].first);
 	DDX_Control(pDX, IDC_RADIO5, MapTexStateKeyRadioBtnMap[L"Stage1"s].first);
@@ -47,6 +47,7 @@ void CMapTool::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK1, CheckBoxCollisionTile);
 	DDX_Control(pDX, IDC_CHECK2, CheckBoxLine);
 	DDX_Control(pDX, IDC_CHECK4, CheckBoxObjectMode);
+	DDX_Control(pDX, IDC_CHECK5, CheckBoxWallRide);
 }
 
 
@@ -72,6 +73,7 @@ BEGIN_MESSAGE_MAP(CMapTool, CDialog)
 	ON_BN_CLICKED(IDC_RADIO8, &CMapTool::OnMapLayerRadioBtnClickEvent)
 	ON_BN_CLICKED(IDC_RADIO10, &CMapTool::OnMapLayerRadioBtnClickEvent)
 	ON_BN_CLICKED(IDC_RADIO9, &CMapTool::OnMapLayerRadioBtnClickEvent)
+	ON_BN_CLICKED(IDC_CHECK5, &CMapTool::OnBnClickedCheckWallRide)
 END_MESSAGE_MAP()
 
 // CMapTool 메시지 처리기입니다.
@@ -367,17 +369,13 @@ void CMapTool::OnBnClickedCheckCollisionTile()
 	if (!pView)return;
 
 	pView->bCollisionTileMode = CheckBoxCollisionTile.GetCheck(); 
-	
-
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
 
 void CMapTool::OnBnClickedCheckLine()
 {
-
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
 	auto*pView = GetView();
 	if (!pView)return;
 
@@ -394,3 +392,13 @@ void CMapTool::OnBnClickedCheckObjectToggle()
 	pView->bObjectMode= CheckBoxObjectMode.GetCheck();
 }
 
+
+
+void CMapTool::OnBnClickedCheckWallRide()
+{
+	auto*pView = GetView();
+	if (!pView)return;
+
+	pView->bWallRide = CheckBoxWallRide.GetCheck();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}

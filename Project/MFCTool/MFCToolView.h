@@ -31,6 +31,7 @@ public:
 	bool bRenderTileMode = false;
 	bool bCollisionTileMode = false;
 	bool bLineMode = false;
+	bool bWallRide= false;
 	bool bObjectMode = false;
 
 	CollisionLineManager _CollisionLineManager; 

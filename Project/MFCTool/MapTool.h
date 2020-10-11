@@ -45,9 +45,11 @@ public:
 	CButton CheckBoxRenderTile;
 	CButton CheckBoxCollisionTile;
 	CButton CheckBoxLine;
+	CButton CheckBoxObjectMode;
+	CButton CheckBoxWallRide;
 	afx_msg void OnBnClickedCheckRenderTile();
 	afx_msg void OnBnClickedCheckCollisionTile();
 	afx_msg void OnBnClickedCheckLine();
 	afx_msg void OnBnClickedCheckObjectToggle();
-	CButton CheckBoxObjectMode;
+	afx_msg void OnBnClickedCheckWallRide();
 };
