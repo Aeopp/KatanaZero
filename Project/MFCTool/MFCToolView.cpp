@@ -246,7 +246,7 @@ void CMFCToolView::OnInitialUpdate()
 			L"../Resource/Texture/Multiplayer/%d.png", L"Map", L"Multiplayer", 376)))
 			return;
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Bunkermansion/%d.png", L"Map", L"Bunkermansion", 438)))
+			L"../Resource/Texture/Bunkermansion/%d.png", L"Map", L"Bunkermansion", 439)))
 			return;
 
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
