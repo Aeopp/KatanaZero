@@ -237,16 +237,14 @@ void CMFCToolView::OnInitialUpdate()
 	// 여기서 텍스쳐를 미리 로딩합니다.
 #pragma region TEXTURE_LOAD
 	{
-
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 			L"../Resource/Texture/Prison/%d.png", L"Map", L"Prison", 27)))
 			return;
-
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 			L"../Resource/Texture/Multiplayer/%d.png", L"Map", L"Multiplayer", 376)))
 			return;
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Bunkermansion/%d.png", L"Map", L"Bunkermansion", 439)))
+			L"../Resource/Texture/Bunkermansion/%d.png", L"Map", L"Bunkermansion", 447)))
 			return;
 
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
