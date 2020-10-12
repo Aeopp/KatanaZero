@@ -238,7 +238,7 @@ void CMFCToolView::OnInitialUpdate()
 #pragma region TEXTURE_LOAD
 	{
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Prison/%d.png", L"Map", L"Prison", 27)))
+			L"../Resource/Texture/Prison/%d.png", L"Map", L"Prison", 540)))
 			return;
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 			L"../Resource/Texture/Multiplayer/%d.png", L"Map", L"Multiplayer", 376)))
