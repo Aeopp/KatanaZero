@@ -246,6 +246,11 @@ void CMFCToolView::OnInitialUpdate()
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 			L"../Resource/Texture/Bunkermansion/%d.png", L"Map", L"Bunkermansion", 447)))
 			return;
+			//1013
+		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+			L"../Resource/Texture/ChinaTown/%d.png", L"Map", L"ChinaTown", 1024)))
+			return;
+
 
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 			L"../Resource/Texture/Stage01/%d.png", L"Map", L"Stage1", 2)))

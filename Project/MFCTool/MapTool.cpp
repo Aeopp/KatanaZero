@@ -33,7 +33,7 @@ void CMapTool::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_RADIO2, MapTexStateKeyRadioBtnMap[L"Prison"s].first);
 	DDX_Control(pDX, IDC_RADIO3, MapTexStateKeyRadioBtnMap[L"Multiplayer"s].first);
 	DDX_Control(pDX, IDC_RADIO1, MapTexStateKeyRadioBtnMap[L"Bunkermansion"s].first);
-	DDX_Control(pDX, IDC_RADIO4, MapTexStateKeyRadioBtnMap[L"Chinatown"s].first);
+	DDX_Control(pDX, IDC_RADIO4, MapTexStateKeyRadioBtnMap[L"ChinaTown"s].first);
 	DDX_Control(pDX, IDC_RADIO6, MapTexStateKeyRadioBtnMap[L"Boss"s].first);
 	DDX_Control(pDX, IDC_RADIO5, MapTexStateKeyRadioBtnMap[L"Stage1"s].first);
 	DDX_Control(pDX, IDC_RADIO7, MapTexStateKeyRadioBtnMap[L"Stage2"s].first);
