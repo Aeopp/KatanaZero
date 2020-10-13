@@ -248,9 +248,8 @@ void CMFCToolView::OnInitialUpdate()
 			return;
 			//1013
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/ChinaTown/%d.png", L"Map", L"ChinaTown", 1024)))
+			L"../Resource/Texture/ChinaTown/%d.png", L"Map", L"ChinaTown", 1025)))
 			return;
-
 
 		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 			L"../Resource/Texture/Stage01/%d.png", L"Map", L"Stage1", 2)))
