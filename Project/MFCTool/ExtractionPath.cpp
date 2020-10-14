@@ -105,6 +105,7 @@ void CExtractionPath::OnBnClickedButtonload()
 	UpdateData(TRUE);
 	wifstream FIn;
 	FIn.open("../Data/PathInfo.txt");
+	
 	std::wstringstream wss;
 	if (!FIn.fail())
 	{
@@ -114,9 +115,11 @@ void CExtractionPath::OnBnClickedButtonload()
 		{
 			if (FIn.eof())
 				break;
+
 			TexPath _TexPath;
-			FIn >> _TexPath.RefTuple();
-			if (!_TexPath.Count)break;
+			auto&& DataTuple = _TexPath.RefTuple();
+			FIn >> DataTuple;
+			if (!_TexPath.Count)continue;
 
 			wss << _TexPath.RelativePath << L"|" << _TexPath.ObjectKey << L"|"
 				<< _TexPath.StateKey << L"|" << _TexPath.Count;
