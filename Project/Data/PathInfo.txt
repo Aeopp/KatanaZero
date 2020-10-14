@@ -1,0 +1,16 @@
+..\Resource\Texture\Map\Bunkermansion\%d.png
+Map
+Bunkermansion
+447
+..\Resource\Texture\Map\ChinaTown\%d.png
+Map
+ChinaTown
+1025
+..\Resource\Texture\Map\Multiplayer\%d.png
+Map
+Multiplayer
+376
+..\Resource\Texture\Map\Prison\%d.png
+Map
+Prison
+542

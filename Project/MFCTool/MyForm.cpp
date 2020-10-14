@@ -31,6 +31,7 @@ BEGIN_MESSAGE_MAP(CMyForm, CFormView)
 	ON_BN_CLICKED(IDC_BUTTON6, &CMyForm::OnBnClickedMapTool)
 	ON_BN_CLICKED(IDC_CHECK1, &CMyForm::OnBnClickedCheckDebug)
 	ON_BN_CLICKED(IDC_BUTTON7, &CMyForm::OnBnClickedItemEdit)
+	ON_BN_CLICKED(IDC_BUTTONPATHEDIT, &CMyForm::OnBnClickedButtonpathedit)
 END_MESSAGE_MAP()
 
 
@@ -104,3 +105,11 @@ void CMyForm::OnBnClickedCheckDebug()
 }
 
 
+void CMyForm::OnBnClickedButtonpathedit()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (nullptr == _ExtractionPath.GetSafeHwnd())
+		_ExtractionPath.Create(IDD_EXTRACTIONPATH);
+
+	_ExtractionPath.ShowWindow(SW_SHOW);
+}

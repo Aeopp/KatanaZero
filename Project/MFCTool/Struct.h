@@ -4,6 +4,25 @@
 #include "Typedef.h"
 #include <ostream>
 #include <istream>
+using uint32_t =  unsigned int; 
+
+struct TexPath
+{
+	std::wstring RelativePath{};
+	std::wstring ObjectKey{};
+	std::wstring StateKey{};
+	uint32_t Count{};
+
+	auto RefTuple()&noexcept
+	{
+		return std::make_tuple(
+				std::ref(RelativePath), 
+				std::ref(ObjectKey),
+				std::ref(StateKey)
+				, std::ref(Count));
+	}
+};
+
 // TODO :: ZeroMemory 를 사용해서 초기화 하는 코드가 많다
 // 포인터와 상속을 사용하고 싶어진다면 고민해봐야한다.
 struct TexInfo
@@ -83,8 +102,6 @@ static std::wistream& operator >> (std::wistream& is,
 
 	return is;
 };
-
-
 
 static std::wostream& operator<<(std::wostream& os,
 	const RenderMapObjInfo& _RenderMapObjInfo)

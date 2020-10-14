@@ -2,6 +2,8 @@
 #include "Texture_Manager.h"
 #include "Single_Texture.h"
 #include "Multi_Texture.h"
+#include <fstream>
+#include "TupleGlobalHelper.h"
 
 Texture_Manager::~Texture_Manager()noexcept
 {
@@ -72,6 +74,33 @@ const wstring & StateKey/*=L""*/, const DWORD & Index/*=0*/)
 		}
 	}
 	return S_OK;
+}
+
+void Texture_Manager::LoadTexturesFromTexInfoFile(const std::wstring_view FileNameView) & noexcept
+{
+	using namespace TupleGlobalHelper;
+
+	std::wifstream FileIn;
+	FileIn.open(FileNameView.data());
+
+	if (!FileIn.fail())
+	{
+		while (true)
+		{
+			if (FileIn.eof())
+				break;
+			TexPath _TexPath;
+			FileIn >> _TexPath.RefTuple();
+
+			if (!_TexPath.Count) continue;
+
+			if (FAILED(InsertTexture(Texture_Manager::MULTI_TEX, _TexPath.RelativePath,
+				_TexPath.ObjectKey, _TexPath.StateKey, _TexPath.Count)))
+			{
+				ERR_MSG(__FUNCTIONW__);
+			}
+		}
+	}
 }
 
 void Texture_Manager::Release()

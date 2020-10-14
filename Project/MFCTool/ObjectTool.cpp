@@ -54,7 +54,7 @@ void CObjectTool::OnDropFiles(HDROP hDropInfo)
 	for (int i = 0; i < iSize; ++i)
 	{
 		DragQueryFile(hDropInfo, i, szFilePath, MAX_PATH);
-		strReletivePath = CFileInfo::ConvertReletivePath(szFilePath);
+		strReletivePath = FileHelper::ConvertReletivePath(szFilePath);
 		strFileNameAndExtant = PathFindFileName(strReletivePath);
 		lstrcpy(szFileName, strFileNameAndExtant.GetString());
 		PathRemoveExtension(szFileName);

@@ -6,6 +6,7 @@
 #include "UnitTool.h"
 #include "MapTool.h"
 #include "ObjectTool.h"
+#include "ExtractionPath.h"
 
 class CMyForm : public CFormView
 {
@@ -18,6 +19,7 @@ public:
 	CUnitTool _UnitTool; 
 	CMapTool _MapTool; 
 	CObjectTool _ObjectTool;
+	CExtractionPath _ExtractionPath;
 	CFont _Font; 
 public:
 #ifdef AFX_DESIGN_TIME
@@ -42,6 +44,7 @@ public:
 	CButton ButtonDebug;
 	afx_msg void OnBnClickedCheckDebug();
 	
+	afx_msg void OnBnClickedButtonpathedit();
 };
 
 

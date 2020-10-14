@@ -139,6 +139,10 @@
     <ClInclude Include="ObjectEdit.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="ExtractionPath.h">
+      <Filter>FileInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="TupleGlobalHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCTool.cpp">
@@ -199,6 +203,9 @@
     </ClCompile>
     <ClCompile Include="ObjectEdit.cpp">
       <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="ExtractionPath.cpp">
+      <Filter>FileInfo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

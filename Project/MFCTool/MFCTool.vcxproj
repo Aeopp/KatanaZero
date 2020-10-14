@@ -44,14 +44,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
@@ -214,6 +214,7 @@
     <ClInclude Include="CollisionTileManager.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="Extern.h" />
+    <ClInclude Include="ExtractionPath.h" />
     <ClInclude Include="FileInfo.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="Graphic_Device.h" />
@@ -238,6 +239,7 @@
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Texture_Manager.h" />
+    <ClInclude Include="TupleGlobalHelper.h" />
     <ClInclude Include="Typedef.h" />
     <ClInclude Include="UnitTool.h" />
   </ItemGroup>
@@ -245,6 +247,7 @@
     <ClCompile Include="CollisionLineManager.cpp" />
     <ClCompile Include="CollisionTileManager.cpp" />
     <ClCompile Include="Define.cpp" />
+    <ClCompile Include="ExtractionPath.cpp" />
     <ClCompile Include="FileInfo.cpp" />
     <ClCompile Include="Graphic_Device.cpp" />
     <ClCompile Include="ObjectEdit.cpp" />

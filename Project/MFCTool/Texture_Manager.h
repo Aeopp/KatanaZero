@@ -1,6 +1,6 @@
 #pragma once
 #include "singleton_interface.h"
-
+#include <string_view>
 class Texture_Manager : public singleton_interface<Texture_Manager>
 {
 public:
@@ -15,6 +15,8 @@ public:
 	
 	HRESULT InsertTexture(const TEX_ID ETexID, const wstring& FilePath, const wstring& ObjectKey,
 	const wstring& StateKey = L"", const DWORD& Index = 0);
+
+	void LoadTexturesFromTexInfoFile(const std::wstring_view FileNameView)&noexcept;
 
 	void Release(); 
 	// 여기서의 wstring은 오브젝트키 - 객체 - 플레이어, npc, 보스 1, 보스2 보스3, 잡몹 23~

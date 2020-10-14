@@ -237,30 +237,32 @@ void CMFCToolView::OnInitialUpdate()
 	// 여기서 텍스쳐를 미리 로딩합니다.
 #pragma region TEXTURE_LOAD
 	{
-		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Prison/%d.png", L"Map", L"Prison", 542)))
-			return;
-		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Multiplayer/%d.png", L"Map", L"Multiplayer", 376)))
-			return;
-		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Bunkermansion/%d.png", L"Map", L"Bunkermansion", 447)))
-			return;
-			//1013
-		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/ChinaTown/%d.png", L"Map", L"ChinaTown", 1025)))
-			return;
+		Texture_Manager::instance().LoadTexturesFromTexInfoFile(L"..\\Data\\PathInfo.txt"sv);
 
-		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Stage01/%d.png", L"Map", L"Stage1", 2)))
-			return;
-		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/Stage02/%d.png", L"Map", L"Stage2", 2)))
-			return;
-																		
-		if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
-			L"../Resource/Texture/EditObject/Object%d.png", L"ObjectPicture", L"ObjectPicture1", 9)))
-			return;
+		//if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+		//	L"../Resource/Texture/Map/Prison/%d.png", L"Map", L"Prison", 542)))
+		//	return;
+		//if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+		//	L"../Resource/Texture/Map/Multiplayer/%d.png", L"Map", L"Multiplayer", 376)))
+		//	return;
+		//if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+		//	L"../Resource/Texture/Map/Bunkermansion/%d.png", L"Map", L"Bunkermansion", 447)))
+		//	return;
+		//	//1013
+		//if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+		//	L"../Resource/Texture/Map/ChinaTown/%d.png", L"Map", L"ChinaTown", 1025)))
+		//	return;
+
+		//if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+		//	L"../Resource/Texture/Stage01/%d.png", L"Map", L"Stage1", 2)))
+		//	return;
+		//if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+		//	L"../Resource/Texture/Stage02/%d.png", L"Map", L"Stage2", 2)))
+		//	return;
+		//																
+		//if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
+		//	L"../Resource/Texture/EditObject/Object%d.png", L"ObjectPicture", L"ObjectPicture1", 9)))
+		//	return;
 	}
 #pragma endregion _TEXTURE_LOAD_END
 	
