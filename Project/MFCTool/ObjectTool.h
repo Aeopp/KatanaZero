@@ -25,7 +25,7 @@ protected:
 	//DECLARE_DISPATCH_MAP()
 	//DECLARE_INTERFACE_MAP()
 public:
-	afx_msg void OnLbnSelchangeItemList1();
+	afx_msg void OnLbnSelchangeItemList();
 	CListBox _ListBox;
 	CStatic _Picture;
 	int _DrawID{ 0 };

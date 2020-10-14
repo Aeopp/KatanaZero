@@ -35,7 +35,7 @@ void CObjectTool::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CObjectTool, CDialog)
 	ON_WM_DROPFILES()
-	ON_LBN_SELCHANGE(IDC_LIST1, &CObjectTool::OnLbnSelchangeItemList1)
+	ON_LBN_SELCHANGE(IDC_LIST1, &CObjectTool::OnLbnSelchangeItemList)
 END_MESSAGE_MAP()
 
 
@@ -92,7 +92,7 @@ void CObjectTool::HorizontalScroll()
 }
 
 
-void CObjectTool::OnLbnSelchangeItemList1()
+void CObjectTool::OnLbnSelchangeItemList()
 {
 
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -130,7 +130,7 @@ void CObjectTool::OnLbnSelchangeItemList1()
 
 	matrix MScale, MTranslation, MWorld;
 	auto sp_TexInfo = Texture_Manager::instance().
-		Get_TexInfo(L"ObjectPicture",L"ObjectPicture1", _DrawID);
+		Get_TexInfo(L"EditObject",L"PlacePicture", _DrawID);
 
 	if (nullptr == sp_TexInfo)
 		return;

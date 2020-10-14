@@ -57,7 +57,7 @@ void ObjectEdit::Render()
 	for (auto& CurrentObjInfo : _ObjectInfoMap[CurrentEditStage])
 	{
 		matrix MTrans;
-		auto sp_TexInfo = Texture_Manager::instance().Get_TexInfo(L"ObjectPicture", L"ObjectPicture1", CurrentObjInfo._ObjectID);
+		auto sp_TexInfo = Texture_Manager::instance().Get_TexInfo(L"EditObject", L"PlacePicture", CurrentObjInfo._ObjectID);
 
 		if (!sp_TexInfo)continue;
 
