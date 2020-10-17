@@ -7,7 +7,7 @@ GraphicDevice::~GraphicDevice()
 	Release(); 
 }
 
-HRESULT GraphicDevice::Ready()
+HRESULT GraphicDevice::Initialize()
 {
 	// 장치를 생성하는 과정. 
 	// 1.장치를 조사할 컴객체(m_pSDK) 생성. 

@@ -11,7 +11,7 @@ public:
 	LPD3DXFONT GetFont() { return pFont; }
 	LPD3DXLINE GetLine() { return pLine;  }
 public:
-	HRESULT Ready();
+	HRESULT Initialize();
 	void Release();
 	void RenderBegin();
 	void RenderEnd(HWND hWND = nullptr);

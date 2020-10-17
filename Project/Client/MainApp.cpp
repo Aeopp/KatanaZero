@@ -1,58 +1,84 @@
 #include "stdafx.h"
 #include "MainApp.h"
 #include "Player.h"
+#include "GraphicDevice.h"
+#include "SceneManager.h"
+#include "Time.h"
+#include "RenderManager.h"
+#include "CollisionManager.h"
+#include "ObjectManager.h"
+#include "InputManager.h"
 
-CMainApp::CMainApp()
+HRESULT App::Initialize()
 {
-}
+#pragma region Application Initialize
+	static constexpr bool bAppWindowScreenMode = TRUE;
+	static constexpr uint32_t AppFrameLimit = 144ul;
 
+	GraphicDevice& GraphicDeviceRef = GraphicDevice::instance();
+	GraphicDeviceRef.Initialize(bAppWindowScreenMode);
 
+	RenderManager& RenderManagerRef = RenderManager::instance();
+	RenderManagerRef.Initialize();
 
-HRESULT CMainApp::Ready_MainApp()
-{
-	m_hDC = GetDC(g_hWND);
-	m_pPlayer = CPlayer::Create();
-	if (m_pPlayer == nullptr)
-		return E_FAIL; 
+	Time& TimeRef = Time::instance();
+	TimeRef.Initialize(AppFrameLimit,global::DeltaMax);
+
+	CollisionManager& CollisionManagerRef = CollisionManager::instance();
+	CollisionManagerRef.Initialize();
+
+	ObjectManager& ObjectManagerRef = ObjectManager::instance();
+	ObjectManagerRef.Initialize();
+
+	InputManager& InputManagerRef = InputManager::instance();
+	InputManagerRef.Initialize();
+
+	SceneManager& SceneMgrRef = SceneManager::instance();
+	SceneMgrRef.Initialize();
+	
+	SceneMgrRef.Scene_Change(ESceneID::EStart);
+#pragma endregion Application Initialize
 
 	return S_OK; 
-
 }
 
-void CMainApp::Update_MainApp()
+void App::Update()
 {
-	m_pPlayer->Update_GameObject(); 
+
+	Time::instance().NotificationCheck();
+	InputManager::instance().Update();
+	ObjectManager::instance().Update();
+	SceneManager::instance().Update();
+	CollisionManager::instance().Update();
 }
 
-void CMainApp::LateUpdate_MainApp()
+void App::LateUpdate()
 {
-	m_pPlayer->LateUpdate_GameObject();
+
+	ObjectManager::instance().LateUpdate();
+
+	SceneManager::instance().LateUpdate();
+
+	CollisionManager::instance().LateUpdate();
 }
 
-void CMainApp::Render_MainApp()
-{
-	Rectangle(m_hDC, 0, 0, g_iWinCX, g_iWinCY);
-	m_pPlayer->Render_GameObject(m_hDC);
-}
-
-void CMainApp::Release_MainApp()
+void App::Render()
 {
 
-}
+	GraphicDevice::instance().RenderBegin();
 
-CMainApp * CMainApp::Create()
-{
-	CMainApp* pInstance = new CMainApp; 
-	if (FAILED(pInstance->Ready_MainApp()))
 	{
-		delete pInstance; 
-		return nullptr;
+		RenderManager::instance().Render();
+		SceneManager::instance().Render();
+		CollisionManager::instance().Render();
+		Time::instance().Render();
 	}
-	return pInstance;
+
+	GraphicDevice::instance().RenderEnd();
 }
 
-void CMainApp::Free()
+void App::Release()
 {
-	ReleaseDC(g_hWND, m_hDC); 
-	SAFE_DELETE(m_pPlayer);
+	
 }
+

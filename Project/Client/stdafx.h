@@ -16,7 +16,33 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
-
+#include <cassert>
+#include <forward_list>
+#include <deque>
+#include <set>
+#include <map>
+#include <queue>
+#include <list>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+#include <functional>
+#include <type_traits>
+#include <fstream>
+#include <istream>
+#include <ostream>
+#include <string>
+#include <memory>
+#include <utility>
+#include <mutex>
+#include <thread>
+#include <future>
+#include <utility>
+#include <tuple>
+#include <typeindex>
+#include <typeinfo>
+#include <unordered_map>
+#include <unordered_set>
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 #include <d3d9.h>
@@ -25,4 +51,11 @@
 #include <d3dx9.h>
 #pragma comment(lib, "d3dx9.lib")
 
-#include "Total.h"
+#include "Function.h"
+#include "Typedef.h"
+#include "global.h"
+#include "Struct.h"
+
+using namespace std::string_view_literals;
+using namespace std::chrono_literals;
+using namespace std::string_literals;

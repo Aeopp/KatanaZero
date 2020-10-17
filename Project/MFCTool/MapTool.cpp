@@ -185,7 +185,7 @@ void CMapTool::OnLbnSelchangePicture()
 	GraphicDevice::instance().RenderBegin();
 
 	matrix MScale, MTranslation, MWorld;
-	auto sp_TexInfo = Texture_Manager::instance().
+	auto sp_TexInfo = TextureManager::instance().
 		Get_TexInfo(L"Map", pView->up_Terrain->CurrentTileTextureStateKey, _DrawID);
 
 	if (nullptr == sp_TexInfo)

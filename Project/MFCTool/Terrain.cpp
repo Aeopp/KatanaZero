@@ -205,7 +205,7 @@ void Terrain::Render()
 			// TODO :: 개선할 여지가 있는 코드 => DrawID 로 MapObj 를 한번더 
 			//그룹으로 묶어준다면 호출횟수가 많이 줄어든다
 			// 프로파일링 이후 수정 요망
-			auto sp_TexInfo = Texture_Manager::instance().Get_TexInfo(L"Map",
+			auto sp_TexInfo = TextureManager::instance().Get_TexInfo(L"Map",
 				CurrentTileTextureStateKey, MapObj.DrawID);
 
 			if (!sp_TexInfo)continue;
@@ -281,7 +281,7 @@ void Terrain::MiniRender()
 			// TODO :: 개선할 여지가 있는 코드 => DrawID 로 MapObj 를 한번더 
 			//그룹으로 묶어준다면 호출횟수가 많이 줄어든다
 			// 프로파일링 이후 수정 요망
-			auto sp_TexInfo = Texture_Manager::instance().Get_TexInfo(L"Map",
+			auto sp_TexInfo = TextureManager::instance().Get_TexInfo(L"Map",
 				CurrentTileTextureStateKey, MapObj.DrawID);
 
 			if (!sp_TexInfo)continue;

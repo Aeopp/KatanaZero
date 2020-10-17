@@ -208,7 +208,7 @@ void CMFCToolView::OnInitialUpdate()
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 	global::hWND = m_hWnd;
 
-	GraphicDevice::instance().Ready();
+	GraphicDevice::instance().Initialize();
 	
 	SetScrollSizes(MM_TEXT,
 
@@ -237,7 +237,7 @@ void CMFCToolView::OnInitialUpdate()
 	// 여기서 텍스쳐를 미리 로딩합니다.
 #pragma region TEXTURE_LOAD
 	{
-		Texture_Manager::instance().LoadTexturesFromTexInfoFile(L"..\\Data\\PathInfo.txt"sv);
+		TextureManager::instance().LoadTexturesFromTexInfoFile(L"..\\Data\\PathInfo.txt"sv);
 
 		//if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 		//	L"../Resource/Texture/Map/Prison/%d.png", L"Map", L"Prison", 542)))

@@ -41,13 +41,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -109,6 +109,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,6 +142,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -153,24 +155,87 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="CollisionLineManager.h" />
+    <ClInclude Include="CollisionManager.h" />
+    <ClInclude Include="CollisionTileManager.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="ComponentManager.h" />
+    <ClInclude Include="DELEGATE.h" />
+    <ClInclude Include="Function.h" />
+    <ClInclude Include="global.h" />
+    <ClInclude Include="GraphicDevice.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="MainApp.h" />
+    <ClInclude Include="math.h" />
+    <ClInclude Include="Multi_Texture.h" />
+    <ClInclude Include="object.h" />
+    <ClInclude Include="RenderManager.h" />
+    <ClInclude Include="Tags.h" />
+    <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneBoss.h" />
+    <ClInclude Include="SceneID.h" />
+    <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="SceneStage1.h" />
+    <ClInclude Include="SceneStage2.h" />
+    <ClInclude Include="SceneStart.h" />
+    <ClInclude Include="singleton_interface.h" />
+    <ClInclude Include="Single_Texture.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Struct.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Total.h" />
+    <ClInclude Include="Terrain.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Texture_Manager.h" />
+    <ClInclude Include="Time.h" />
+    <ClInclude Include="PhysicTransformComponent.h" />
+    <ClInclude Include="TransformComponent.h" />
+    <ClInclude Include="TupleHelper.h" />
+    <ClInclude Include="Typedef.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="CollisionLineManager.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="CollisionTileManager.cpp" />
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="ComponentManager.cpp" />
+    <ClCompile Include="DELEGATE.cpp" />
+    <ClCompile Include="global.cpp" />
+    <ClCompile Include="GraphicDevice.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="MainApp.cpp" />
+    <ClCompile Include="math.cpp" />
+    <ClCompile Include="Multi_Texture.cpp" />
+    <ClCompile Include="object.cpp" />
+    <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="RenderManager.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneBoss.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SceneStage1.cpp" />
+    <ClCompile Include="SceneStage2.cpp" />
+    <ClCompile Include="SceneStart.cpp" />
+    <ClCompile Include="singleton_interface.cpp" />
+    <ClCompile Include="Single_Texture.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Texture_Manager.cpp" />
+    <ClCompile Include="Time.cpp" />
+    <ClCompile Include="PhysicTransformComponent.cpp" />
+    <ClCompile Include="TransformComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc" />

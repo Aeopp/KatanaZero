@@ -19,7 +19,7 @@ struct TexPath
 				std::ref(RelativePath), 
 				std::ref(ObjectKey),
 				std::ref(StateKey)
-				, std::ref(Count));
+			,   std::ref(Count));
 	}
 };
 

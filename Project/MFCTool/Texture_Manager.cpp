@@ -5,12 +5,12 @@
 #include <fstream>
 #include "TupleGlobalHelper.h"
 
-Texture_Manager::~Texture_Manager()noexcept
+TextureManager::~TextureManager()noexcept
 {
 
 }
 
-std::shared_ptr<class TexInfo> Texture_Manager::Get_TexInfo(const wstring & ObjectKey,
+std::shared_ptr<class TexInfo> TextureManager::Get_TexInfo(const wstring & ObjectKey,
 const wstring & StateKey /*=L""*/, const DWORD & Index /*= 0*/)
 {
 	auto iter_find = TextureMap.find(ObjectKey);
@@ -20,7 +20,7 @@ const wstring & StateKey /*=L""*/, const DWORD & Index /*= 0*/)
 	return iter_find->second->Get_TexInfo(StateKey, Index);
 }
 
-HRESULT Texture_Manager::InsertTexture(const TEX_ID ETexID, 
+HRESULT TextureManager::InsertTexture(const TEX_ID ETexID, 
 const wstring & FilePath, const wstring & ObjectKey, 
 const wstring & StateKey/*=L""*/, const DWORD & Index/*=0*/)
 {
@@ -76,7 +76,7 @@ const wstring & StateKey/*=L""*/, const DWORD & Index/*=0*/)
 	return S_OK;
 }
 
-void Texture_Manager::LoadTexturesFromTexInfoFile(const std::wstring_view FileNameView) & noexcept
+void TextureManager::LoadTexturesFromTexInfoFile(const std::wstring_view FileNameView) & noexcept
 {
 	using namespace TupleGlobalHelper;
 
@@ -94,7 +94,7 @@ void Texture_Manager::LoadTexturesFromTexInfoFile(const std::wstring_view FileNa
 
 			if (!_TexPath.Count) continue;
 
-			if (FAILED(InsertTexture(Texture_Manager::MULTI_TEX, _TexPath.RelativePath,
+			if (FAILED(InsertTexture(TextureManager::MULTI_TEX, _TexPath.RelativePath,
 				_TexPath.ObjectKey, _TexPath.StateKey, _TexPath.Count)))
 			{
 				ERR_MSG(__FUNCTIONW__);
@@ -103,7 +103,7 @@ void Texture_Manager::LoadTexturesFromTexInfoFile(const std::wstring_view FileNa
 	}
 }
 
-void Texture_Manager::Release()
+void TextureManager::Release()
 {
 	TextureMap.clear(); 
 }

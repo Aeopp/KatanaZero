@@ -1,23 +1,13 @@
 #pragma once
-class CPlayer; 
-class CMainApp
+#include "singleton_interface.h"
+
+class App :public  singleton_interface<App >
 {
-private:
-	explicit CMainApp();
-	virtual ~CMainApp() = default; //== virtual ~CMainApp() = default; 
-
 public :
-	HRESULT Ready_MainApp();
-	void Update_MainApp(); 
-	void LateUpdate_MainApp(); 
-	void Render_MainApp(); 
-	void Release_MainApp(); 
-
-public :
-	static CMainApp* Create(); 
-	void Free(); 
-private:
-	HDC m_hDC; 
-	CPlayer* m_pPlayer; 
+	HRESULT Initialize();
+	void Update(); 
+	void LateUpdate(); 
+	void Render(); 
+	void Release(); 
 };
 

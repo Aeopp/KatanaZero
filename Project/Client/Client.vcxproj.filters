@@ -13,6 +13,45 @@
     <Filter Include="01.Player">
       <UniqueIdentifier>{b8f8a2e8-4617-4f1e-b1bc-2d10adda3b3c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Time">
+      <UniqueIdentifier>{73a60045-382b-4fdd-9839-6d31e64f9ea3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="singleton_interface">
+      <UniqueIdentifier>{fbc5fbea-b930-4422-81e0-7ee1c2d0b142}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="98.Headers\global">
+      <UniqueIdentifier>{73d235cf-6b0d-49f8-a070-8fe81d9ec4bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{14acc9ea-3972-41ca-9127-603c18a1b8b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{be109ca2-02ab-400b-bd6d-2a9256ef896d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DELEGATE">
+      <UniqueIdentifier>{d01cc2b1-fe18-4118-97aa-d53847aadd85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\SceneBaseTypes">
+      <UniqueIdentifier>{3bf6f447-2fae-4b68-8007-4e72cf1ba98f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render">
+      <UniqueIdentifier>{b6e40cc7-847e-47d4-a5a4-9ee4a8c704ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\GraphicDevice">
+      <UniqueIdentifier>{aa061a55-22f8-46dd-b86f-7cfbc81adc4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Texture">
+      <UniqueIdentifier>{00ad3db9-916c-4f18-8022-2af2860f160a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision">
+      <UniqueIdentifier>{39b8fd8c-23ae-4ea5-bdf4-4893d7e2dfa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{df50a42f-4eb1-4c7d-8d55-9d31e84fbad0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transform">
+      <UniqueIdentifier>{d0edbf95-52c9-4e3d-889e-7045805e5107}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -27,14 +66,104 @@
     <ClInclude Include="targetver.h">
       <Filter>99.Default</Filter>
     </ClInclude>
-    <ClInclude Include="Total.h">
-      <Filter>98.Headers</Filter>
-    </ClInclude>
     <ClInclude Include="MainApp.h">
       <Filter>00.MainApp</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>01.Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Time.h">
+      <Filter>Time</Filter>
+    </ClInclude>
+    <ClInclude Include="singleton_interface.h">
+      <Filter>singleton_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="global.h">
+      <Filter>98.Headers\global</Filter>
+    </ClInclude>
+    <ClInclude Include="Function.h">
+      <Filter>98.Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Typedef.h">
+      <Filter>98.Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="object.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneID.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicDevice.h">
+      <Filter>Render\GraphicDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="DELEGATE.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture_Manager.h">
+      <Filter>Render\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Render\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Single_Texture.h">
+      <Filter>Render\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Multi_Texture.h">
+      <Filter>Render\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="TupleHelper.h">
+      <Filter>98.Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneBoss.h">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneStage1.h">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneStage2.h">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneStart.h">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Struct.h">
+      <Filter>98.Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tags.h" />
+    <ClInclude Include="Terrain.h" />
+    <ClInclude Include="CollisionTileManager.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionLineManager.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="math.h" />
+    <ClInclude Include="RenderManager.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectManager.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="ComponentManager.h" />
+    <ClInclude Include="TransformComponent.h">
+      <Filter>Transform</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicTransformComponent.h">
+      <Filter>Transform</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +178,83 @@
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>01.Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Time.cpp">
+      <Filter>Time</Filter>
+    </ClCompile>
+    <ClCompile Include="singleton_interface.cpp">
+      <Filter>singleton_interface</Filter>
+    </ClCompile>
+    <ClCompile Include="global.cpp">
+      <Filter>98.Headers\global</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="object.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicDevice.cpp">
+      <Filter>Render\GraphicDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="DELEGATE.cpp">
+      <Filter>DELEGATE</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Render\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture_Manager.cpp">
+      <Filter>Render\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Single_Texture.cpp">
+      <Filter>Render\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Multi_Texture.cpp">
+      <Filter>Render\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneBoss.cpp">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneStage1.cpp">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneStage2.cpp">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneStart.cpp">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="CollisionLineManager.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionTileManager.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="math.cpp" />
+    <ClCompile Include="RenderManager.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectManager.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ComponentManager.cpp" />
+    <ClCompile Include="PhysicTransformComponent.cpp">
+      <Filter>Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformComponent.cpp">
+      <Filter>Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

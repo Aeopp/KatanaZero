@@ -4,13 +4,18 @@
 #include "stdafx.h"
 #include "Client.h"
 #include "MainApp.h"
+#include "Time.h"
+#include "global.h"
+#include "SceneManager.h"
+#include "GraphicDevice.h"
+
+
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
-HWND g_hWND; 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -41,10 +46,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENT));
 
 	MSG msg;
-	CMainApp* pMainApp = CMainApp::Create();
+
+	App& MainAppRef = App::instance();
+	MainAppRef.Initialize();
+
 	// 기본 메시지 루프입니다.
 	msg.message = WM_NULL; 
-	DWORD dwOldTime = GetTickCount(); 
+
 	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -55,17 +63,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				DispatchMessage(&msg);
 			}
 		}
-		if (dwOldTime + 10 < GetTickCount())
+
+		if (!global::bActive)
 		{
-			pMainApp->Update_MainApp();
-			pMainApp->LateUpdate_MainApp();
-			pMainApp->Render_MainApp();
-			dwOldTime = GetTickCount(); 
-		}
+			using namespace std::chrono_literals;
+			std::this_thread::sleep_for(50ms);
+		};
 
+		Time::instance().Update();
 	}
-
-	SAFE_DELETE(pMainApp);
 	return (int)msg.wParam;
 }
 
@@ -90,7 +96,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CLIENT));
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_CLIENT);
+	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -110,16 +116,19 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
-	RECT rc = { 0, 0, g_iWinCX, g_iWinCY }; 
+	RECT rc = { 0, 0, global::ClientSize.first, global::ClientSize.second }; 
+
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE); 
+
 	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
+		CW_USEDEFAULT, 0, rc.right - rc.left, rc.bottom - rc.top, 
+	nullptr, nullptr, hInstance, nullptr);
 
 	if (!hWnd)
 	{
 		return FALSE;
 	}
-	g_hWND = hWnd;
+	global::hWND = hWnd;
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
@@ -149,7 +158,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break; 
 		}
 	}
-	break;
+	case WM_ACTIVATE:
+	{
+		global::bActive = LOWORD(wParam);
+		Time::instance().PrevTime = std::chrono::high_resolution_clock::now();
+		break;
+	}
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;

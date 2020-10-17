@@ -1,10 +1,10 @@
 #pragma once
 #include "singleton_interface.h"
 #include <string_view>
-class Texture_Manager : public singleton_interface<Texture_Manager>
+class TextureManager : public singleton_interface<TextureManager>
 {
 public:
-	virtual ~Texture_Manager()noexcept;
+	virtual ~TextureManager()noexcept;
 public:
 	enum TEX_ID {SINGLE_TEX, MULTI_TEX};
 public:
