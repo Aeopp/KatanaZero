@@ -1,5 +1,6 @@
 #pragma once
 #include "object.h"
+#include "TransformComponent.h"
 
 class Camera :
     public object

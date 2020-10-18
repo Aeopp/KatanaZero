@@ -4,6 +4,8 @@
 #include "ComponentManager.h"
 #include "TransformComponent.h"
 #include "PhysicTransformComponent.h"
+#include "Test.h"
+
 
 void ComponentManager::Update()
 {
@@ -12,10 +14,10 @@ void ComponentManager::Update()
 	for (auto iter =  std::begin( _TransformContainer) ;std::end(_TransformContainer)!=iter;++iter)
 	{
 		auto _TransformComp = *iter;
-		_TransformComp=std::static_pointer_cast<TransformComponent>(_TransformComp);
+
 		if (!_TransformComp||_TransformComp->_Owner.expired())
 		{
-			_TransformComp=_TransformContainer.back();
+			*iter =_TransformContainer.back();
 			_TransformContainer.pop_back();
 			continue;
 		}
@@ -28,7 +30,7 @@ void ComponentManager::Update()
 	for (auto iter = std::begin(_PhysicTransformContainer); std::end(_PhysicTransformContainer) != iter; ++iter)
 	{
 		auto _PhysicTransformComp = *iter;
-		_PhysicTransformComp = std::static_pointer_cast<PhysicTransformComponent>(_PhysicTransformComp);
+
 		if (!_PhysicTransformComp || _PhysicTransformComp->_Owner.expired())
 		{
 			_PhysicTransformComp = _PhysicTransformContainer.back();
@@ -47,10 +49,10 @@ void ComponentManager::LateUpdate()
 	for (auto iter = std::begin(_TransformContainer); std::end(_TransformContainer) != iter; ++iter)
 	{
 		auto _TransformComp = *iter;
-		_TransformComp = std::static_pointer_cast<TransformComponent>(_TransformComp);
+
 		if (!_TransformComp || _TransformComp->_Owner.expired())
 		{
-			_TransformComp = _TransformContainer.back();
+			*iter = _TransformContainer.back();
 			_TransformContainer.pop_back();
 			continue;
 		}
@@ -58,13 +60,12 @@ void ComponentManager::LateUpdate()
 			_TransformComp->LateUpdate();
 	}
 
-
 	auto& _PhysicTransformContainer = Find<PhysicTransformComponent>();
 
 	for (auto iter = std::begin(_PhysicTransformContainer); std::end(_PhysicTransformContainer) != iter; ++iter)
 	{
 		auto _PhysicTransformComp = *iter;
-		_PhysicTransformComp = std::static_pointer_cast<PhysicTransformComponent>(_PhysicTransformComp);
+
 		if (!_PhysicTransformComp || _PhysicTransformComp->_Owner.expired())
 		{
 			_PhysicTransformComp = _PhysicTransformContainer.back();
@@ -74,5 +75,5 @@ void ComponentManager::LateUpdate()
 		else
 			_PhysicTransformComp->LateUpdate();
 	}
-}
+};
 

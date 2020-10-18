@@ -31,7 +31,7 @@ END_MESSAGE_MAP()
 void CMiniView::OnDraw(CDC* pDC)
 {
 	CDocument* pDoc = GetDocument();
-	// TODO:: 여기에 그리기 코드를 추가합니다.
+	// 여기에 그리기 코드를 추가합니다.
 	CMainFrame* pMain = (CMainFrame*)AfxGetApp()->GetMainWnd();
 	CMFCToolView* pView = (CMFCToolView*)pMain->_MainSplitter.GetPane(0, 1);
 

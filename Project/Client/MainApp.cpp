@@ -8,6 +8,8 @@
 #include "CollisionManager.h"
 #include "ObjectManager.h"
 #include "InputManager.h"
+#include "ComponentManager.h"
+
 
 HRESULT App::Initialize()
 {
@@ -48,17 +50,16 @@ void App::Update()
 	Time::instance().NotificationCheck();
 	InputManager::instance().Update();
 	ObjectManager::instance().Update();
+	ComponentManager::instance().Update();
 	SceneManager::instance().Update();
 	CollisionManager::instance().Update();
 }
 
 void App::LateUpdate()
 {
-
 	ObjectManager::instance().LateUpdate();
-
+	ComponentManager::instance().LateUpdate();
 	SceneManager::instance().LateUpdate();
-
 	CollisionManager::instance().LateUpdate();
 }
 

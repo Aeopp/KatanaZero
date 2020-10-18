@@ -124,6 +124,10 @@ void Terrain::DebugRender()
 	JoomScale = pView->JoomScale;
 #endif
 
+	CameraPos.x  = global::CameraPos.x;
+	CameraPos.y = global::CameraPos.y;
+
+
 	matrix MJoom = math::GetCameraJoomMatrix
 	(JoomScale, vec3{ global::ClientSize.first,
 		global::ClientSize.second,0.f });

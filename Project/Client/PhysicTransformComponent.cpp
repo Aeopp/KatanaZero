@@ -7,6 +7,7 @@ void PhysicTransformComponent::Push(vec3 Vec, vec3 RotationVec, const float Coef
 	Forces.emplace_back(SimplePhysics{ Vec,RotationVec,Coefficient,Exponent } );
 }
 
+
 void PhysicTransformComponent::Update()
 {
 	TransformComponent::Update();

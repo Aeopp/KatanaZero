@@ -4,16 +4,23 @@
 
 void ObjectManager::Update()
 {
+
 	for (auto& [Tag, ID_ObjVec] : _ObjectMap)
 	{
 		for (auto& [ID, ObjVec] : ID_ObjVec)
 		{
-			for (auto obj_iter = std::begin(ObjVec); obj_iter != std::end(ObjVec);
-				++obj_iter)
+			for (size_t Idx = 0; Idx < ObjVec.size(); ++Idx)
 			{
-				auto sp_Obj = *obj_iter;
-				if (!sp_Obj)continue;
-				sp_Obj->Update();
+				auto& sp_Obj = ObjVec[Idx];
+
+				if (sp_Obj->bDie || !sp_Obj)
+				{
+
+					sp_Obj = std::move(ObjVec.back());
+					ObjVec.pop_back();
+				}
+				else 
+					sp_Obj->Update();
 			}
 		}
 	}
@@ -24,19 +31,18 @@ void ObjectManager::LateUpdate()
 	for (auto& [Tag, ID_ObjVec] : _ObjectMap)
 	{
 		for (auto& [ID, ObjVec] : ID_ObjVec)
-		{
-			for (auto obj_iter = std::begin(ObjVec); obj_iter != std::end(ObjVec);)
+		{ 
+			for (size_t Idx = 0; Idx < ObjVec.size(); ++Idx)
 			{
-				auto sp_Obj = *obj_iter;
-				if (!sp_Obj)continue;
-				sp_Obj->LateUpdate();
-				if (sp_Obj->bDie)
+				auto& sp_Obj = ObjVec[Idx];
+
+				if (sp_Obj->bDie || !sp_Obj)
 				{
 					sp_Obj = std::move(ObjVec.back());
 					ObjVec.pop_back();
 				}
-
-				++obj_iter;
+				else 
+					sp_Obj->LateUpdate();
 			}
 		}
 	}

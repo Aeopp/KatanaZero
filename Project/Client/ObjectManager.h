@@ -26,7 +26,7 @@ inline auto ObjectManager::InsertObject(InitParams&&... _Params)
 {
 	static_assert(std::is_base_of_v<object, ObjectType>,"Type is not a subtype of base");
 
-	auto sp_Object = std::shared_ptr<ObjectType>();
+	auto sp_Object = std::make_shared<ObjectType>();
 
 	sp_Object->_This = sp_Object;
 

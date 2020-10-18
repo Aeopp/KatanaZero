@@ -156,15 +156,14 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ComponentManager.h" />
-    <ClInclude Include="TransformComponent.h">
-      <Filter>Transform</Filter>
-    </ClInclude>
     <ClInclude Include="PhysicTransformComponent.h">
       <Filter>Transform</Filter>
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Input</Filter>
     </ClInclude>
+    <ClInclude Include="Test.h" />
+    <ClInclude Include="TransformComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -250,12 +249,11 @@
     <ClCompile Include="PhysicTransformComponent.cpp">
       <Filter>Transform</Filter>
     </ClCompile>
-    <ClCompile Include="TransformComponent.cpp">
-      <Filter>Transform</Filter>
-    </ClCompile>
     <ClCompile Include="InputManager.cpp">
       <Filter>Input</Filter>
     </ClCompile>
+    <ClCompile Include="Test.cpp" />
+    <ClCompile Include="TransformComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
