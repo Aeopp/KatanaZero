@@ -13,6 +13,5 @@ public:
 	virtual OBJECT_TAG::ETAG GetTag()override;
 	virtual std::wstring_view GetName()const& override;
 private:
-	std::shared_ptr<class TransformComponent> _TransformComp;
 };
 

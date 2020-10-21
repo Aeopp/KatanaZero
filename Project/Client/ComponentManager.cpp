@@ -1,79 +1,63 @@
 #include "stdafx.h"
 #include "Component.h"
-
 #include "ComponentManager.h"
 #include "TransformComponent.h"
 #include "PhysicTransformComponent.h"
 #include "Test.h"
 
+void ComponentManager::Initialize() & noexcept
+{
+
+}
 
 void ComponentManager::Update()
 {
-	auto& _TransformContainer = Find<TransformComponent>();
-
-	for (auto iter =  std::begin( _TransformContainer) ;std::end(_TransformContainer)!=iter;++iter)
+	for (auto OuterIter = std::begin(ComponentMap); OuterIter != std::end(ComponentMap);++OuterIter)
 	{
-		auto _TransformComp = *iter;
+		if (DoesNotUpdateType.contains(OuterIter->first))continue;
 
-		if (!_TransformComp||_TransformComp->_Owner.expired())
+		for (auto spCompIter = std::begin(OuterIter->second); spCompIter != std::end(OuterIter->second); ++spCompIter)
 		{
-			*iter =_TransformContainer.back();
-			_TransformContainer.pop_back();
-			continue;
+			auto spComp = *spCompIter;
+			if (!spComp)continue;
+
+			spComp->Update();
 		}
-		else 
-			_TransformComp->Update();
-	}
-
-	auto& _PhysicTransformContainer = Find<PhysicTransformComponent>();
-
-	for (auto iter = std::begin(_PhysicTransformContainer); std::end(_PhysicTransformContainer) != iter; ++iter)
-	{
-		auto _PhysicTransformComp = *iter;
-
-		if (!_PhysicTransformComp || _PhysicTransformComp->_Owner.expired())
-		{
-			_PhysicTransformComp = _PhysicTransformContainer.back();
-			_PhysicTransformContainer.pop_back();
-			continue;
-		}
-		else
-			_PhysicTransformComp->Update();
 	}
 }
 
 void ComponentManager::LateUpdate()
 {
-	auto& _TransformContainer = Find<TransformComponent>();
-
-	for (auto iter = std::begin(_TransformContainer); std::end(_TransformContainer) != iter; ++iter)
+	for (auto OuterIter = std::begin(ComponentMap); OuterIter != std::end(ComponentMap); ++OuterIter)
 	{
-		auto _TransformComp = *iter;
+		if (DoesNotUpdateType.contains(OuterIter->first))continue;
 
-		if (!_TransformComp || _TransformComp->_Owner.expired())
+		for (auto spCompIter = std::begin(OuterIter->second); spCompIter != std::end(OuterIter->second); ++spCompIter)
 		{
-			*iter = _TransformContainer.back();
-			_TransformContainer.pop_back();
-			continue;
+			auto spComp = *spCompIter;
+
+			if (!spComp || spComp->bDie)
+			{
+				*spCompIter = OuterIter->second.back();
+				OuterIter->second.pop_back();
+			}
+			else 
+				spComp->LateUpdate();
 		}
-		else
-			_TransformComp->LateUpdate();
 	}
-
-	auto& _PhysicTransformContainer = Find<PhysicTransformComponent>();
-
-	for (auto iter = std::begin(_PhysicTransformContainer); std::end(_PhysicTransformContainer) != iter; ++iter)
+}
+void ComponentManager::Render()
+{
+	for (auto OuterIter = std::begin(ComponentMap); OuterIter != std::end(ComponentMap); ++OuterIter)
 	{
-		auto _PhysicTransformComp = *iter;
+		if (DoesNotUpdateType.contains(OuterIter->first))continue;
 
-		if (!_PhysicTransformComp || _PhysicTransformComp->_Owner.expired())
+		for (auto spCompIter = std::begin(OuterIter->second); spCompIter != std::end(OuterIter->second); ++spCompIter)
 		{
-			_PhysicTransformComp = _PhysicTransformContainer.back();
-			_PhysicTransformContainer.pop_back();
-			continue;
+			auto spComp = *spCompIter;
+
+			spComp->Render();
 		}
-		else
-			_PhysicTransformComp->LateUpdate();
 	}
 };
 

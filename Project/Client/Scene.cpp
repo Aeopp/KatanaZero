@@ -32,6 +32,7 @@ void Scene::LateUpdate()
 void Scene::Initialize()
 {
 	TextureManager::instance().LoadTexturesFromTexInfoFile(LoadTextureFilePath);
+	RenderManager::instance()._Terrain.CurrentTileTextureStateKey = L"Bunkermansion";
 	RenderManager::instance()._Terrain.LoadTilesCurrentStateKeyOnly(LoadMapTexInfoFilePath);
 	CollisionTileManager::instance().LoadCollisionTile(LoadCollisionTileInfoFilePath);
 	CollisionLineManager::instance().LoadCollisionLine(LoadLineInfoFilePath);

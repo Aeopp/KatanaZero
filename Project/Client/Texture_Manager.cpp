@@ -14,6 +14,7 @@ std::shared_ptr<class TexInfo> TextureManager::Get_TexInfo(const std::wstring & 
 const std::wstring & StateKey /*=L""*/, const DWORD & Index /*= 0*/)
 {
 	auto iter_find = TextureMap.find(ObjectKey);
+
 	if (TextureMap.end() == iter_find)
 		return nullptr; 
 

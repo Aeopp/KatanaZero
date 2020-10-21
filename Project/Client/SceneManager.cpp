@@ -15,7 +15,6 @@
 		{
 			sp_scene.reset();
 		}
-
 		sp_scene = MakeSceneTypeMap[_ESceneID]();
 
 		sp_scene->Initialize();

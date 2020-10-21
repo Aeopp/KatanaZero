@@ -9,7 +9,6 @@
 #include "SceneManager.h"
 #include "GraphicDevice.h"
 
-
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
@@ -53,6 +52,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// 기본 메시지 루프입니다.
 	msg.message = WM_NULL; 
 
+	
 	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -64,11 +64,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			}
 		}
 
-		if (!global::bActive)
+		/*if (!global::bActive)
 		{
 			using namespace std::chrono_literals;
 			std::this_thread::sleep_for(50ms);
-		};
+		};*/
 
 		Time::instance().Update();
 	}
@@ -147,6 +147,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	constexpr float MouseWheelResponsiVeness = 1.f;
+	float zDelta = 300.f;
+
 	switch (message)
 	{
 	case WM_KEYDOWN:
@@ -157,6 +160,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DestroyWindow(hWnd);
 			break; 
 		}
+	}
+	case WM_MOUSEWHEEL :
+	{
+		// UP 
+		if ((SHORT)HIWORD(wParam) > 0)
+		{
+			global::JoomScale = max(1.f, ((zDelta / 1200.f) * MouseWheelResponsiVeness) + global::JoomScale);
+		}
+		//DOWN 
+		else  if ((SHORT)HIWORD(wParam) <0)
+		{
+			zDelta *= -1.f;
+			global::JoomScale = max(1.f, ((zDelta / 1200.f) * MouseWheelResponsiVeness) + global::JoomScale);
+		}
+		break;
 	}
 	case WM_ACTIVATE:
 	{

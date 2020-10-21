@@ -50,16 +50,17 @@ float_t math::GetPointDistance(const std::pair<vec3, vec3>& TargetPoints)
 	return D3DXVec3Length(&(TargetPoints.first - TargetPoints.second));
 }
 
-std::array<vec3, 4ul> math::GetLocalRect(const vec2 & Size)
+std::array<vec3, 5ul> math::GetLocalRect(const vec2 & Size)
 {
 	const float halfX = Size.x / 2.f;
 	const float halfY = Size.y / 2.f;
 
-	std::array<vec3, 4ul> LocalRect;
+	std::array<vec3, 5ul> LocalRect;
 	LocalRect[0] = vec3{ -halfX,+halfY,0.f };
 	LocalRect[1] = vec3{ +halfX,+halfY,0.f };
 	LocalRect[2] = vec3{ +halfX,-halfY,0.f };
 	LocalRect[3] = vec3{ -halfX,-halfY,0.f };
+	LocalRect[4] = vec3{ halfX  , halfY,0.f };
 
 	return LocalRect;
 }

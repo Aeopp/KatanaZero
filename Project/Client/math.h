@@ -29,7 +29,8 @@ public:
 	static float_t GetPointDistance(const std::pair<vec3,vec3>& TargetPoints);
 
 	// 데카르트 좌표계
-	static std::array<vec3, 4ul> GetLocalRect(const vec2 & Size/*전체사이즈 입력 (절반이 아님)*/);
+	// 마지막 포인트는 로컬좌표의 정중앙을 의미
+	static std::array<vec3, 5ul> GetLocalRect(const vec2 & Size/*전체사이즈 입력 (절반이 아님)*/);
 
 	static matrix GetCameraJoomMatrix(const float JoomScale,
 		/*전체 사이즈 입력(절반아님)*/const vec3& ScreenSize);

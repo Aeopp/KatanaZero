@@ -70,8 +70,11 @@ void CollisionTileManager::DebugRender()&
 	static constexpr float DebugLineWidth = 2.f;
 
 	std::pair<float, float > CameraPos{ 0.f,0.f }; 
-	float JoomScale = 1.f;
+	float JoomScale = global::JoomScale;
+
 	matrix MJoom;
+	CameraPos.first = global::CameraPos.x;
+	CameraPos.second = global::CameraPos.y;
 
 	#ifdef _AFX
 		CMainFrame*pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
@@ -182,6 +185,7 @@ void CollisionTileManager::LoadCollisionTile(const std::wstring & FilePath) &
 
 		(FileLoad(_CollisionTileContainers), ...);
 	}, _CollisionTilePointsMap[CurrentStateKey]);
+
 
 }
 

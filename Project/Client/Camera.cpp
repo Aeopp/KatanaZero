@@ -8,36 +8,33 @@
 
 void Camera::Initialize() & noexcept
 {
-	_TransformComp=ComponentManager::instance().Insert<TransformComponent>(_This);
 
-	InputManager::instance().EventRegist([this]() 
-	{ /*if (!_TransformComp)return; */_TransformComp->Position += vec3{ 5.f,0.f,0.f }; MessageBox(global::hWND, L"호출", L"호출", MB_OK);  }, VK_UP, InputManager::EKEY_STATE::PRESSING)->bFree = true;
-
-	InputManager::instance().EventRegist([this]()
-	{/*if (!_TransformComp)return;*/ _TransformComp->Position += vec3{ -5.f,0.f,0.f }; }, VK_DOWN, InputManager::EKEY_STATE::PRESSING)->bFree=true ;
-
-	//Time::instance().TimerRegist(5.f, 0.f, 5.f, [this]() {this->bDie = true; return true;  });
-
-}
+};
 
 void Camera::Update()
 {
-	if (!_TransformComp)return;
+	// 여기서 널임
+	auto spObj = _Owner.lock();
+	if (!spObj)return;
 
-	global::CameraPos = _TransformComp->Position;
-}
+	global::CameraPos = spObj->_TransformComp->Position;
+	global::CameraPos.x -= global::ClientSize.first / 2.f;
+	global::CameraPos.y -= global::ClientSize.second / 2.f;
+
+	int i = 0;
+};
 
 OBJECT_ID::EID Camera::GetID()
 {
 	return OBJECT_ID::EID::CAMERA;
-}
+};
 
 OBJECT_TAG::ETAG Camera::GetTag()
 {
 	return OBJECT_TAG::ETAG::EOBJECT;
-}
+};
 
 std::wstring_view Camera::GetName() const&
 {
 	return L"Camera"sv;
-}
+};

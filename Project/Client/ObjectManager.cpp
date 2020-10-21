@@ -15,7 +15,6 @@ void ObjectManager::Update()
 
 				if (sp_Obj->bDie || !sp_Obj)
 				{
-
 					sp_Obj = std::move(ObjVec.back());
 					ObjVec.pop_back();
 				}

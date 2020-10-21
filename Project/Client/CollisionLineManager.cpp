@@ -39,7 +39,11 @@ void CollisionLineManager::DebugRender()  &
 	static constexpr float DebugLineWidth = 3.f;
 	
 	std::pair<float, float > CameraPos{ 0.f,0.f };
-	float JoomScale = 1.f;
+	CameraPos.first = global::CameraPos.x;
+	CameraPos.second = global::CameraPos.y;
+
+	float JoomScale = global::JoomScale;
+
 	matrix MJoom;
 #ifdef _AFX
 	CMainFrame*pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());

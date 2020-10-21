@@ -237,7 +237,7 @@ void CMFCToolView::OnInitialUpdate()
 	// 여기서 텍스쳐를 미리 로딩합니다.
 #pragma region TEXTURE_LOAD
 	{
-		TextureManager::instance().LoadTexturesFromTexInfoFile(L"..\\Data\\PathInfo.txt"sv);
+		TextureManager::instance().LoadTexturesFromTexInfoFile(L"..\\Data\\PathInfo.txt"s);
 
 		//if (FAILED(Texture_Manager::instance().InsertTexture(Texture_Manager::MULTI_TEX,
 		//	L"../Resource/Texture/Map/Prison/%d.png", L"Map", L"Prison", 542)))

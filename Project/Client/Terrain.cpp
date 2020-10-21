@@ -110,23 +110,21 @@ void Terrain::DebugRender()
 	constexpr float ScreenCenterX = global::ClientSize.first / 2.f;
 	constexpr float ScreenCenterY = global::ClientSize.second / 2.f;
 
-	float JoomScale = 1.f;
+	float JoomScale = global::JoomScale;
+
 	
 	vec2 CameraPos{ 0.f,0.f };
 	matrix MScale, MTranslation, MWorld;
 
 	const float SizeX_half = global::TileSize.first / 2.f;
 	const float SizeY_half = global::TileSize.second / 2.f;
-
 #ifdef _AFX
 	assert(pView&&__FUNCTIONW__);
 	CameraPos = { (float)pView->GetScrollPos(0) ,(float)pView->GetScrollPos(1) };
 	JoomScale = pView->JoomScale;
 #endif
-
 	CameraPos.x  = global::CameraPos.x;
 	CameraPos.y = global::CameraPos.y;
-
 
 	matrix MJoom = math::GetCameraJoomMatrix
 	(JoomScale, vec3{ global::ClientSize.first,
@@ -139,7 +137,7 @@ void Terrain::DebugRender()
 	uint32_t RenderCount = 0;
 
 	// 로컬 사각형 좌표 구하기
-	const std::array<vec3, 4ul> LocalPoints =
+	const std::array<vec3, 5ul> LocalPoints =
 		math::GetLocalRect(vec2{ global::TileSize.first, global::TileSize.second });
 
 	for (const auto& DebugTilePos : _DebugTiles)
@@ -195,8 +193,9 @@ void Terrain::Render()
 #endif // _AFX
 	DebugRender();
 
-	const float JoomScale = 1.f;
+	const float JoomScale = global::JoomScale;
 	vec3 CameraPos{ 0.f ,0.f , 0.f };
+	CameraPos = global::CameraPos;
 
 	matrix MScale, MWorld;
 	D3DXMatrixScaling(&MScale, 1.f, 1.f, 0.f);

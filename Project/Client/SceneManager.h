@@ -35,7 +35,7 @@ void SceneManager::SceneRegist(Params&&... _Params)
 
 	MakeSceneTypeMap[TargetID] = [&]() {
 
-		return std::make_shared<TargetSceneType>(std::forward<Params>(_Params)...); };
+	return std::make_shared<TargetSceneType>(std::forward<Params>(_Params)...); };
 }
 
 

@@ -11,5 +11,7 @@ public :
 	void Initialize() & noexcept;
 public:
 	Terrain _Terrain;
+private:
+	void DebugMouseInfoRender()&noexcept;
 };
 

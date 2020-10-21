@@ -76,12 +76,12 @@ const wstring & StateKey/*=L""*/, const DWORD & Index/*=0*/)
 	return S_OK;
 }
 
-void TextureManager::LoadTexturesFromTexInfoFile(const std::wstring_view FileNameView) & noexcept
+void TextureManager::LoadTexturesFromTexInfoFile(const std::wstring& FileNameView) & noexcept
 {
 	using namespace TupleGlobalHelper;
 
 	std::wifstream FileIn;
-	FileIn.open(FileNameView.data());
+	FileIn.open(FileNameView);
 
 	if (!FileIn.fail())
 	{

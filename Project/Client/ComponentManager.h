@@ -8,9 +8,11 @@ class ComponentManager :
 public singleton_interface<ComponentManager>
 {
 public :
+    void Initialize()&noexcept;
     void Update();
     void LateUpdate();
-    
+    void Render();
+
     // object 가 사용하고 싶은 컴포넌트를 명시해준다고 가정하므로 Self 포인터를 넘겨주세요.
     template<typename ComponentType, typename...InitParams>
     auto Insert(std::weak_ptr<class object> _Owner ,InitParams&&... _Params);
@@ -18,6 +20,9 @@ public :
     // 관리하는 컨테이너의 참조를 반환하므로 유의할 것
     template<typename ComponentType>
     auto& Find();
+
+    // 루프를 따로 통제하고 싶은 타입 집합
+    std::set<std::type_index> DoesNotUpdateType;
 private:
     std::unordered_map<std::type_index, std::vector<std::shared_ptr<Component>>> ComponentMap;
 };

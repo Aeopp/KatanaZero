@@ -9,10 +9,13 @@
 #include "ObjectManager.h"
 #include "InputManager.h"
 #include "ComponentManager.h"
+#include "Texture_Manager.h"
 
 
 HRESULT App::Initialize()
 {
+	ShowCursor(false);
+
 #pragma region Application Initialize
 	static constexpr bool bAppWindowScreenMode = TRUE;
 	static constexpr uint32_t AppFrameLimit = 144ul;
@@ -26,14 +29,16 @@ HRESULT App::Initialize()
 	Time& TimeRef = Time::instance();
 	TimeRef.Initialize(AppFrameLimit,global::DeltaMax);
 
+	InputManager& InputManagerRef = InputManager::instance();
+	InputManagerRef.Initialize();
+
+	ComponentManager::instance().Initialize();
+
 	CollisionManager& CollisionManagerRef = CollisionManager::instance();
 	CollisionManagerRef.Initialize();
 
 	ObjectManager& ObjectManagerRef = ObjectManager::instance();
 	ObjectManagerRef.Initialize();
-
-	InputManager& InputManagerRef = InputManager::instance();
-	InputManagerRef.Initialize();
 
 	SceneManager& SceneMgrRef = SceneManager::instance();
 	SceneMgrRef.Initialize();
@@ -46,7 +51,6 @@ HRESULT App::Initialize()
 
 void App::Update()
 {
-
 	Time::instance().NotificationCheck();
 	InputManager::instance().Update();
 	ObjectManager::instance().Update();
@@ -65,11 +69,11 @@ void App::LateUpdate()
 
 void App::Render()
 {
-
 	GraphicDevice::instance().RenderBegin();
 
 	{
 		RenderManager::instance().Render();
+		ComponentManager::instance().Render();
 		SceneManager::instance().Render();
 		CollisionManager::instance().Render();
 		Time::instance().Render();

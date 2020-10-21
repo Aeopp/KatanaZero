@@ -1,6 +1,8 @@
 #pragma once
 #include "singleton_interface.h"
 #include "Tags.h"
+#include "object.h"
+
 #include <map>
 
 class ObjectManager : public singleton_interface<ObjectManager>

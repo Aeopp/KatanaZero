@@ -13,7 +13,11 @@ public:
 	static constexpr int32_t ClientViewMinLeftTop = (int32_t(((ClientSize.first + ClientSize.second) / 3.7f) / 36)) *TileSize.first;
 	static std::array<vec3, 4ul> GetScreenRect();
 
+	static inline float JoomScale = 1.f;
 	static inline vec3 CameraPos{ 0.f,0.f,0.f };
+	static inline vec3 MousePosScreen{ 0.f,0.f,0.f };
+	static inline vec3 MousePosWorld{ 0.f,0.f,0.f };
+
 	static inline std::chrono::milliseconds DeltaMax = std::chrono::milliseconds(40ul);
 	static inline bool bActive{ true }; 
 	static inline HWND hWND{ nullptr };
