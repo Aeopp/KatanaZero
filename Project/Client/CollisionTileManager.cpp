@@ -6,6 +6,13 @@
 #include <fstream>
 #include <ostream>
 #include <istream>
+#include "CollisionComponent.h"
+#include "ComponentManager.h"
+
+void CollisionTileManager::Collision()&
+{
+
+}
 
 void CollisionTileManager::Push(const vec3 & Position, const bool bCanGoDown) &
 {
@@ -113,7 +120,7 @@ void CollisionTileManager::DebugRender()&
 			for (const auto& CollisionTilePoints : _CollisionTileContainer)
 			{
 				bool IsRenderable = false;
-				std::array < vec2, 5ul> CollisionTilePoints2D;
+				std::array <vec2,5ul> CollisionTilePoints2D;
 				// Convert 3D->2D
 				for (size_t i = 0; i < 4ul; ++i)
 				{
@@ -154,6 +161,24 @@ void CollisionTileManager::DebugRender()&
 
 void CollisionTileManager::Update()&
 {
+	auto & _CollisionCompVec = ComponentManager::instance().Find<CollisionComponent>();
+
+	auto& _CollisionTileVec =GetCollisionTileContainerRef(false);
+
+	for (auto& _spCollision : _CollisionCompVec)
+	{
+		for (auto& _CollisionTile : _CollisionTileVec)
+		{
+			auto WorldRectPt = _spCollision->GetWorldRectPt();
+
+			auto opDir = math::Collision::RectAndRect({ WorldRectPt, _CollisionTile },false);
+			if (opDir)
+			{
+				auto spOwner =_spCollision->_Owner.lock();
+				spOwner->_TransformComp->Position += *opDir;
+			}
+		}
+	}
 }
 
 void CollisionTileManager::LateUpdate()&
@@ -185,8 +210,6 @@ void CollisionTileManager::LoadCollisionTile(const std::wstring & FilePath) &
 
 		(FileLoad(_CollisionTileContainers), ...);
 	}, _CollisionTilePointsMap[CurrentStateKey]);
-
-
 }
 
 void CollisionTileManager::SaveCollisionTile(const std::wstring & FilePath) &

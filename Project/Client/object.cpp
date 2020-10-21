@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "object.h"
+#include "ComponentManager.h"
 
 void object::SetOwner(std::weak_ptr<class object> _Owner)
 {
@@ -9,7 +10,7 @@ void object::SetOwner(std::weak_ptr<class object> _Owner)
 
 void object::Initialize() & noexcept
 {
-
+	_TransformComp = ComponentManager::instance().Insert<TransformComponent>(_This);
 }
 
 void object::LateInitialize() & noexcept

@@ -1,8 +1,10 @@
 #pragma once
-#include "object.h"
+#include "Character.h"
 
-class Player  : public object
+class Player  : public Character
 {
+public :
+	using Super = Character;
 public :
 	virtual OBJECT_ID::EID   GetID();
 	virtual OBJECT_TAG::ETAG GetTag();
@@ -15,9 +17,12 @@ public:
 	virtual void LateUpdate();
 	
 	void Move(const vec3 Dir);
+	void KeyBinding()&noexcept;
 
-	float Speed = 2000.f;
-
-	std::shared_ptr<class RenderComponent> _RenderComp;
+	float Speed = 700.f;
+private:
+	std::shared_ptr<class Camera> _SpCamera{};
+	std::shared_ptr<class Battery> _SpBattery{};
+	std::shared_ptr<class UIItemIcon > _SpUIItemIcon{};
 };
 

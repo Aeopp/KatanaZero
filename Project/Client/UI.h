@@ -13,6 +13,8 @@ public :
 	virtual void Update();
 	virtual void LateUpdate();
 
-	std::shared_ptr<class RenderComponent> _RenderComp;
+	std::shared_ptr<class UIRenderComponent> _RenderComp;
+	// 스크린에서의 위치 세팅
+	vec3 ScreenPos{ 0.f,0.f,0.f };
 };
 

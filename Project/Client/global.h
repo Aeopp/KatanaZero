@@ -24,6 +24,7 @@ public:
 	static inline bool bDebug{ true };
 };
 
+
 #define Sword	0x01		//0000 0001
 #define Shoes		0x02		//0000 0010
 #define Shocks		0x04		//0000 0100

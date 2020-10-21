@@ -6,6 +6,9 @@
 #include "Camera.h"
 #include "Mouse.h"
 #include "HUD.h"
+#include "Battery.h"
+#include "UITimer.h"
+
 #include <string_view>
 
 void SceneStart::Initialize()
@@ -18,9 +21,11 @@ void SceneStart::Initialize()
 	LoadCollisionTileInfoFilePath = L"..\\Data\\Bunkermansion\\BunkermansionCollision.txt"s;
 	LoadLineInfoFilePath = L"..\\Data\\Bunkermansion\\BunkermansionLine.txt"s;
 
-	manage_objs.push_back(ObjectManager::instance().InsertObject<Player>());
-	manage_objs.push_back(ObjectManager::instance().InsertObject<Mouse>());
-	manage_objs.push_back(ObjectManager::instance().InsertObject<HUD>());
+	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Player>());
+	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Mouse>());
+	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<HUD>());
+
+	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<UITimer>());
 
 	Scene::Initialize();
 }

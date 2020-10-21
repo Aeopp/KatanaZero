@@ -155,8 +155,11 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Battery.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Character.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="CollisionComponent.h" />
     <ClInclude Include="CollisionLineManager.h" />
     <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="CollisionTileManager.h" />
@@ -192,7 +195,6 @@
     <ClInclude Include="Struct.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Terrain.h" />
-    <ClInclude Include="Test.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Texture_Manager.h" />
     <ClInclude Include="Time.h" />
@@ -201,10 +203,16 @@
     <ClInclude Include="TupleHelper.h" />
     <ClInclude Include="Typedef.h" />
     <ClInclude Include="UI.h" />
+    <ClInclude Include="UIItemIcon.h" />
+    <ClInclude Include="UIRenderComponent.h" />
+    <ClInclude Include="UITimer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Battery.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Character.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="CollisionComponent.cpp" />
     <ClCompile Include="CollisionLineManager.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="CollisionTileManager.cpp" />
@@ -239,13 +247,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Terrain.cpp" />
-    <ClCompile Include="Test.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Texture_Manager.cpp" />
     <ClCompile Include="Time.cpp" />
     <ClCompile Include="PhysicTransformComponent.cpp" />
     <ClCompile Include="TransformComponent.cpp" />
     <ClCompile Include="UI.cpp" />
+    <ClCompile Include="UIItemIcon.cpp" />
+    <ClCompile Include="UIRenderComponent.cpp" />
+    <ClCompile Include="UITimer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc" />

@@ -39,7 +39,7 @@ private:
 	uint32_t _FPSCount{ 0 };
 	float DeltaTime{ 0.f };
 	float _T{ 0.f };
-	std::chrono::milliseconds DeltaMax;
+	std::chrono::milliseconds DeltaMax = 25ms;
 	// 이벤트 시작여부 , 시작 시간 , 반복 주기 , 종료 시간 , 현재 측정 시간
 	std::list<std::tuple<bool,float, float, float, float, NotifyEventType>> _NotifyEvents;
 private:

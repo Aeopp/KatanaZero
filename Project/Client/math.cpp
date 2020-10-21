@@ -27,6 +27,15 @@ float math::lerp(float start, float goal, float goal_time, float dt)
 	return start + ((f * dt) / goal_time);
 }
 
+vec3 math::lerp(const vec3 start, const vec3 goal, float goal_time, float dt)
+{
+	vec3 returnVec;
+	returnVec.x = lerp(start.x, goal.x, goal_time, dt);
+	returnVec.y = lerp(start.y, goal.y, goal_time, dt);
+	returnVec.z = 0.f;
+	return returnVec;
+}
+
 bool math::IsPointInnerRect(const std::array<vec3, 4>& RectPoint, const vec3& Point)
 {
 	for (int32_t i = 0; i < 4; ++i)
@@ -36,7 +45,6 @@ bool math::IsPointInnerRect(const std::array<vec3, 4>& RectPoint, const vec3& Po
 		vRhombusDir = RectPoint[(i + 1) % 4] - RectPoint[i];
 		vRhombusNormal = { -vRhombusDir.y, vRhombusDir.x, 0.f };
 		vMouseDir = Point - RectPoint[i];
-
 		
 		if (0 > D3DXVec3Dot(&vRhombusNormal, &vMouseDir))
 			return false;
@@ -45,9 +53,35 @@ bool math::IsPointInnerRect(const std::array<vec3, 4>& RectPoint, const vec3& Po
 	return true;
 }
 
+
+
 float_t math::GetPointDistance(const std::pair<vec3, vec3>& TargetPoints)
 {
 	return D3DXVec3Length(&(TargetPoints.first - TargetPoints.second));
+}
+
+RECT math::ConvertLocalPtToRECT(const std::array<vec3, 4ul>& LocalPt)
+{
+	RECT _Rt;
+
+	_Rt.left = LocalPt[0].x;
+	_Rt.top = LocalPt[0].y;
+	_Rt.right = LocalPt[2].x;
+	_Rt.bottom = LocalPt[2].y;
+
+	return _Rt;
+}
+
+RECT math::ConvertLocalPtToRECT(const std::pair<vec3, vec3>& LocalPt)
+{
+	RECT _Rt;
+
+	_Rt.left = LocalPt.first.x;
+	_Rt.top = LocalPt.first.y;
+	_Rt.right = LocalPt.second.x;
+	_Rt.bottom = LocalPt.second.y;
+
+	return _Rt;
 }
 
 std::array<vec3, 5ul> math::GetLocalRect(const vec2 & Size)
@@ -80,11 +114,8 @@ std::array<vec3, 5ul> math::GetLocalRect(const vec2 & Size)
 
 typename math::Collision::IsCollision_Dir 
 math::Collision::RectAndCircle
-(const std::pair<std::array<vec3, 4>, std::pair<vec3, float>>& RectAndCircle)
-
+(const std::pair<std::array<vec3, 4>, std::pair<vec3, float>>& RectAndCircle, const bool bDirNormal)
 {
-	vec3 OutDir{ 0.f,0.f,0.f };
-
 	for (const auto& RectPoint : RectAndCircle.first)
 	{
 		const float CurrentDistance = math::GetPointDistance({ RectPoint,RectAndCircle.second.first});
@@ -95,18 +126,45 @@ math::Collision::RectAndCircle
 
 			vec3 RectCenter = { x,y,0.f };
 			vec3 DistanceVec = RectCenter - RectAndCircle.second.first;
-			D3DXVec3Normalize(&OutDir, &DistanceVec);
+			
+			if(bDirNormal)
+				D3DXVec3Normalize(&DistanceVec, &DistanceVec);
 
-			return{ true ,OutDir };
+			return DistanceVec;
 		}
 	}
-	return{ false ,OutDir };
+	return std::nullopt;
+}
+
+typename math::Collision::IsCollision_Dir 
+math::Collision::RectAndRect(
+	const std::pair<std::array<vec3, 4>, 
+	std::array<vec3, 4>>& RectAndRect,const bool bDirNormal)
+{
+	typename math::Collision::IsCollision_Dir opOutDir;
+	
+	RECT _LhsRt,_RhsRt,_DirRt;
+	_LhsRt  = ConvertLocalPtToRECT(RectAndRect.first); 
+	_RhsRt   = ConvertLocalPtToRECT(RectAndRect.second);
+ 
+	if (IntersectRect(&_DirRt, &_LhsRt, &_RhsRt))
+	{
+		vec3 Dir;
+		Dir.x = _DirRt.right - _DirRt.left;
+		Dir.y = _DirRt.bottom - _DirRt.top;
+
+		if(bDirNormal)
+			D3DXVec3Normalize(&Dir, &Dir);
+
+		return Dir;
+	}
+
+	return  std::nullopt;
 }
 
 typename math::Collision::IsCollision_Dir 
 math::Collision::CircleAndCircle
-(const std::pair<std::pair<vec3, float>, std::pair<vec3, float>> CircleAndCircle)
-
+(const std::pair<std::pair<vec3, float>, std::pair<vec3, float>> CircleAndCircle, const bool bDirNormal)
 {
 	vec3 DistanceVec = CircleAndCircle.first.first - CircleAndCircle.second.first;
 	const float Distance =  D3DXVec3Length(&DistanceVec);
@@ -114,7 +172,12 @@ math::Collision::CircleAndCircle
 	vec3 OutNormalDir{0.f,0.f,0.f};
 
 	if (IsCollision)
-		D3DXVec3Normalize(&OutNormalDir, &DistanceVec);
+	{
+		if(bDirNormal)
+			D3DXVec3Normalize(&DistanceVec, &DistanceVec);
+		
+		return DistanceVec;
+	}
 	
-	return IsCollision_Dir{ IsCollision,OutNormalDir };
+	return std::nullopt;
 }

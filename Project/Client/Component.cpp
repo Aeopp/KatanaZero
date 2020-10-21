@@ -8,7 +8,6 @@ void Component::Initialize() & noexcept
 
 void Component::Update()
 {
-
 }
 
 void Component::LateUpdate()

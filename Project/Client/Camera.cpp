@@ -5,6 +5,7 @@
 #include "PhysicTransformComponent.h"
 #include "InputManager.h"
 #include "Time.h"
+#include "math.h"
 
 void Camera::Initialize() & noexcept
 {
@@ -17,11 +18,18 @@ void Camera::Update()
 	auto spObj = _Owner.lock();
 	if (!spObj)return;
 
-	global::CameraPos = spObj->_TransformComp->Position;
-	global::CameraPos.x -= global::ClientSize.first / 2.f;
-	global::CameraPos.y -= global::ClientSize.second / 2.f;
+	const vec3 OwnerPosition = spObj->_TransformComp->Position; 
 
-	int i = 0;
+	CurrentCameraPos = OwnerPosition;
+	CurrentCameraPos.x -= global::ClientSize.first / 2.f;
+	CurrentCameraPos.y -= global::ClientSize.second / 2.f;
+
+	vec3 Goal = global::MousePosScreen;
+	Goal.x -= global::ClientSize.first / 2.f;
+	Goal.y -= global::ClientSize.second / 2.f;
+	Goal = CurrentCameraPos + Goal * 0.5f;
+
+	global::CameraPos = math::lerp(global::CameraPos, Goal, 0.5f, Time::instance().Delta());
 };
 
 OBJECT_ID::EID Camera::GetID()

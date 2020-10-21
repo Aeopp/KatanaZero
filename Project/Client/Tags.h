@@ -8,8 +8,12 @@ namespace OBJECT_ID
 	enum EID : uint8_t
 	{
 		EPLAYER,
+		CHARACTER,
 		CAMERA,
+		UI_TIMER,
+		UI_ITEMICONS,
 		HUD,
+		BATTERY,
 		MOUSE,
 		EENEMY1,
 		EENEMY2,
@@ -26,6 +30,7 @@ namespace OBJECT_TAG
 	enum ETAG : uint8_t
 	{
 		ETERRAIN,
+		CHARCTER,
 		EOBJECT,
 		EENEMY,
 		EPLAYER,

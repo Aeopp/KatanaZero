@@ -3,6 +3,8 @@
 #include <random>
 #include <array>
 #include <forward_list>
+#include <optional>
+
 using float_t = float;
 
 class math
@@ -22,11 +24,15 @@ public:
 	static Ty Rand(std::pair<Ty, Ty> range);
 
 	static float lerp(float start, float goal, float goal_time, float dt);
+	static vec3 lerp(const vec3 start, const vec3 goal, float goal_time, float dt);
 	static float Angle360conversion(float degree);
 
 	// 사각형의 회전여부는 상관 없습니다.
 	static bool IsPointInnerRect(const std::array<vec3, 4>& RectPoint, const vec3& Point);
 	static float_t GetPointDistance(const std::pair<vec3,vec3>& TargetPoints);
+
+	static RECT ConvertLocalPtToRECT(const std::array<vec3, 4ul>& LocalPt);
+	static RECT ConvertLocalPtToRECT(const std::pair<vec3, vec3>& LocalPt);
 
 	// 데카르트 좌표계
 	// 마지막 포인트는 로컬좌표의 정중앙을 의미
@@ -40,17 +46,24 @@ public:
 		// 원과 원
 	public : 
 		// 충돌 여부와 중점간의 방향 (Lhs<-Rhs)
-		using IsCollision_Dir = std::pair<bool, vec3>;
+		using IsCollision_Dir = std::optional<vec3>;
 		// 회전한 사각형 끼리 충돌
 		/*static IsCollision_Dir RectAndRect(
 		const std::pair<std::array<vec3,4>,std::array<vec3,4>>& Rects);*/
 		
+		// 렉트 원소 순서 : LT , RT , RB , LB 
+
 		static IsCollision_Dir RectAndCircle(
-			      //           렉트                 // 서클 (중점 반지름)
-		const std::pair<std::array<vec3, 4>, std::pair<vec3, float>>& RectAndCircle);
+		const std::pair<std::array<vec3, 4>, std::pair<vec3, float>>& RectAndCircle,
+			const bool bDirNormal);
+
+		static IsCollision_Dir RectAndRect(
+			const std::pair<std::array<vec3, 4>, std::array<vec3, 4>>& RectAndRect,
+			const bool bDirNormal);
 
 		static IsCollision_Dir CircleAndCircle(
-			const std::pair<std::pair<vec3, float>, std::pair<vec3, float>> CircleAndCircle);
+			const std::pair<std::pair<vec3, float>, std::pair<vec3, float>> CircleAndCircle,
+			const bool bDirNormal);
 	};
 };
 

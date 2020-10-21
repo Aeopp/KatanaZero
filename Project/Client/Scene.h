@@ -13,7 +13,7 @@ public:
 	virtual void Initialize();
 	virtual void Release();
 public:
-	std::vector<std::shared_ptr<class object>>manage_objs;
+	std::vector<std::shared_ptr<class object>>SceneManageObjs;
 
 	std::wstring LoadTextureFilePath{};
 	std::wstring LoadMapTexInfoFilePath{}; 

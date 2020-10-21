@@ -1,26 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="99.Default">
-      <UniqueIdentifier>{9356f2b8-16ce-459c-b041-d90814711db5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="98.Headers">
-      <UniqueIdentifier>{380f7ddd-b526-4f5c-bb6f-2224e7ed0d00}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="00.MainApp">
-      <UniqueIdentifier>{44fdca3e-b063-4eb0-8f5c-e648931cd4b0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01.Player">
-      <UniqueIdentifier>{b8f8a2e8-4617-4f1e-b1bc-2d10adda3b3c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Time">
       <UniqueIdentifier>{73a60045-382b-4fdd-9839-6d31e64f9ea3}</UniqueIdentifier>
     </Filter>
     <Filter Include="singleton_interface">
       <UniqueIdentifier>{fbc5fbea-b930-4422-81e0-7ee1c2d0b142}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="98.Headers\global">
-      <UniqueIdentifier>{73d235cf-6b0d-49f8-a070-8fe81d9ec4bf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{14acc9ea-3972-41ca-9127-603c18a1b8b4}</UniqueIdentifier>
@@ -49,28 +34,52 @@
     <Filter Include="Input">
       <UniqueIdentifier>{df50a42f-4eb1-4c7d-8d55-9d31e84fbad0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Transform">
+    <Filter Include="Component">
+      <UniqueIdentifier>{b945fcc5-0530-42e8-aa1b-daf9ee2f1065}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{fb0d899b-67d1-4a28-9c44-829682da0166}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{19c5c42a-bec7-4e31-9e53-fc8a4026e78f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Player">
+      <UniqueIdentifier>{b8f8a2e8-4617-4f1e-b1bc-2d10adda3b3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="App">
+      <UniqueIdentifier>{44fdca3e-b063-4eb0-8f5c-e648931cd4b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{380f7ddd-b526-4f5c-bb6f-2224e7ed0d00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\global">
+      <UniqueIdentifier>{73d235cf-6b0d-49f8-a070-8fe81d9ec4bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Default">
+      <UniqueIdentifier>{9356f2b8-16ce-459c-b041-d90814711db5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component\Transform">
       <UniqueIdentifier>{d0edbf95-52c9-4e3d-889e-7045805e5107}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </ClInclude>
     <ClInclude Include="MainApp.h">
-      <Filter>00.MainApp</Filter>
+      <Filter>App</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>01.Player</Filter>
+      <Filter>Player</Filter>
     </ClInclude>
     <ClInclude Include="Time.h">
       <Filter>Time</Filter>
@@ -79,13 +88,13 @@
       <Filter>singleton_interface</Filter>
     </ClInclude>
     <ClInclude Include="global.h">
-      <Filter>98.Headers\global</Filter>
+      <Filter>Headers\global</Filter>
     </ClInclude>
     <ClInclude Include="Function.h">
-      <Filter>98.Headers</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Typedef.h">
-      <Filter>98.Headers</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="SceneManager.h">
       <Filter>Scene</Filter>
@@ -118,7 +127,7 @@
       <Filter>Render\Texture</Filter>
     </ClInclude>
     <ClInclude Include="TupleHelper.h">
-      <Filter>98.Headers</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="SceneBoss.h">
       <Filter>Scene\SceneBaseTypes</Filter>
@@ -133,9 +142,8 @@
       <Filter>Scene\SceneBaseTypes</Filter>
     </ClInclude>
     <ClInclude Include="Struct.h">
-      <Filter>98.Headers</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Tags.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="CollisionTileManager.h">
       <Filter>Collision</Filter>
@@ -153,34 +161,66 @@
     <ClInclude Include="ObjectManager.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="Component.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="ComponentManager.h" />
     <ClInclude Include="PhysicTransformComponent.h">
-      <Filter>Transform</Filter>
+      <Filter>Component\Transform</Filter>
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="Test.h" />
-    <ClInclude Include="TransformComponent.h" />
-    <ClInclude Include="RenderComponent.h" />
-    <ClInclude Include="Mouse.h" />
-    <ClInclude Include="UI.h" />
-    <ClInclude Include="HUD.h" />
+    <ClInclude Include="CollisionComponent.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentManager.h">
+      <Filter>Component</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderComponent.h">
+      <Filter>Component</Filter>
+    </ClInclude>
+    <ClInclude Include="UIRenderComponent.h">
+      <Filter>Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Battery.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Mouse.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Character.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformComponent.h">
+      <Filter>Component\Transform</Filter>
+    </ClInclude>
+    <ClInclude Include="Tags.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="UITimer.h" />
+    <ClInclude Include="UIItemIcon.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </ClCompile>
     <ClCompile Include="MainApp.cpp">
-      <Filter>00.MainApp</Filter>
+      <Filter>App</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>01.Player</Filter>
+      <Filter>Player</Filter>
     </ClCompile>
     <ClCompile Include="Time.cpp">
       <Filter>Time</Filter>
@@ -189,7 +229,7 @@
       <Filter>singleton_interface</Filter>
     </ClCompile>
     <ClCompile Include="global.cpp">
-      <Filter>98.Headers\global</Filter>
+      <Filter>Headers\global</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Scene</Filter>
@@ -247,38 +287,67 @@
     <ClCompile Include="ObjectManager.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="Component.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ComponentManager.cpp" />
     <ClCompile Include="PhysicTransformComponent.cpp">
-      <Filter>Transform</Filter>
+      <Filter>Component\Transform</Filter>
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
       <Filter>Input</Filter>
     </ClCompile>
-    <ClCompile Include="Test.cpp" />
-    <ClCompile Include="TransformComponent.cpp" />
-    <ClCompile Include="RenderComponent.cpp" />
-    <ClCompile Include="Mouse.cpp" />
-    <ClCompile Include="UI.cpp" />
-    <ClCompile Include="HUD.cpp" />
+    <ClCompile Include="CollisionComponent.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentManager.cpp">
+      <Filter>Component</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderComponent.cpp">
+      <Filter>Component</Filter>
+    </ClCompile>
+    <ClCompile Include="UIRenderComponent.cpp">
+      <Filter>Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Battery.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="HUD.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Mouse.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Character.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformComponent.cpp">
+      <Filter>Component\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="UITimer.cpp" />
+    <ClCompile Include="UIItemIcon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </Image>
     <Image Include="small.ico">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">
-      <Filter>99.Default</Filter>
+      <Filter>Default</Filter>
     </Text>
   </ItemGroup>
 </Project>

@@ -23,6 +23,8 @@ public :
 
     // 루프를 따로 통제하고 싶은 타입 집합
     std::set<std::type_index> DoesNotUpdateType;
+    std::set<std::type_index> DoesNotRenderType;
+    std::set<std::type_index> DoesNotLateUpdateType;
 private:
     std::unordered_map<std::type_index, std::vector<std::shared_ptr<Component>>> ComponentMap;
 };
@@ -46,8 +48,9 @@ template<typename ComponentType>
 inline auto& ComponentManager::Find()
 {
     static_assert(std::is_base_of_v<Component, ComponentType>, "Type is not a subtype of base");
-    static_assert(!std::is_same_v< Component, ComponentType>, __FUNCTION__);
+    static_assert(!std::is_same_v<Component, ComponentType>, __FUNCTION__);
     
                                                            // 해석 방식을 해당 타입의 컴포넌트로 변경
     return reinterpret_cast<std::vector<std::shared_ptr<ComponentType>>&> (ComponentMap[typeid(ComponentType)]);
 }
+

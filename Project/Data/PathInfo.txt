@@ -121,7 +121,7 @@ spr_dragon_wallslide
 ..\Resource\Texture\Dragon\spr_hud_battery_part_dragon\%d.png
 Dragon
 spr_hud_battery_part_dragon
-1
+2
 ..\Resource\Texture\Dragon\spr_hud_dragon\%d.png
 Dragon
 spr_hud_dragon
@@ -129,8 +129,12 @@ spr_hud_dragon
 ..\Resource\Texture\Dragon\spr_hud_dragon_timer\%d.png
 Dragon
 spr_hud_dragon_timer
-1
+2
 ..\Resource\Texture\Cursor\Cursor\%d.png
 Cursor
 Cursor
 1
+..\Resource\Texture\Itemicons\Itemicons\%d.png
+Itemicons
+Itemicons
+5

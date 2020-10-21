@@ -12,5 +12,17 @@ public:
 	std::weak_ptr<class object> _Owner{};
 	bool bDie = false;
 private:
+	struct Control
+	{
+		bool bRender = false;
+		bool bUpdate = false;
+		bool bLateUpdate = false;
+
+		std::function<void(Component& _Comp)> _Render;
+		std::function<void(Component& _Comp)> _Update;
+		std::function<void(Component& _Comp)> _LateUpdate;
+	};
+public:
+	Control _Control;
 };
 

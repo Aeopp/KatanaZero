@@ -32,7 +32,7 @@ matrix TransformComponent::CalcWorldMatrix(const bool bRender)
 	if (!spOwner || !spOwner->_TransformComp)return MWorld;
 
 	auto spOwnerOwner  =spOwner->_Owner.lock();
-	if (!spOwnerOwner)	MWorld = CalcSRTRMatrix(bRender);
+	if (!spOwnerOwner || !bFollowOwner)	MWorld = CalcSRTRMatrix(bRender);
 	else 
 		MWorld= CalcSRTRMatrix()* spOwnerOwner->_TransformComp->CalcWorldMatrix(bRender);
 

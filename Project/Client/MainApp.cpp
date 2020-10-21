@@ -11,7 +11,6 @@
 #include "ComponentManager.h"
 #include "Texture_Manager.h"
 
-
 HRESULT App::Initialize()
 {
 	ShowCursor(false);
@@ -55,16 +54,16 @@ void App::Update()
 	InputManager::instance().Update();
 	ObjectManager::instance().Update();
 	ComponentManager::instance().Update();
-	SceneManager::instance().Update();
 	CollisionManager::instance().Update();
+	SceneManager::instance().Update();
 }
 
 void App::LateUpdate()
 {
 	ObjectManager::instance().LateUpdate();
 	ComponentManager::instance().LateUpdate();
-	SceneManager::instance().LateUpdate();
 	CollisionManager::instance().LateUpdate();
+	SceneManager::instance().LateUpdate();
 }
 
 void App::Render()
@@ -72,10 +71,10 @@ void App::Render()
 	GraphicDevice::instance().RenderBegin();
 
 	{
-		RenderManager::instance().Render();
 		ComponentManager::instance().Render();
-		SceneManager::instance().Render();
+		RenderManager::instance().Render();
 		CollisionManager::instance().Render();
+		SceneManager::instance().Render();
 		Time::instance().Render();
 	}
 

@@ -38,11 +38,26 @@ void RenderComponent::Render()
 	//////////////////
 	if (IsRenderable)
 	{
-		RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width,spTexInfo->ImageInfo.Height };
+		RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width *_RenderInfo.SrcScale.x,
+							  spTexInfo->ImageInfo.Height * _RenderInfo.SrcScale.y };
 		vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
 		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 		GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
-			D3DCOLOR_ARGB(255, 255, 255, 255));
+			_RenderInfo._Color);
 	}
+}
 
+std::optional<float>RenderComponent::CalcY()
+{
+	std::optional<float> opY = std::nullopt;
+
+	auto spOwner =_Owner.lock();
+	if (!spOwner)return opY;
+	if (!spOwner->_TransformComp)return opY;
+
+	auto spTexInfo = TextureManager::instance().Get_TexInfo(_RenderInfo.ObjectKey, _RenderInfo.StateKey, _RenderInfo.Number);
+	if (!spTexInfo)return opY;
+
+	opY=spOwner->_TransformComp->Position.y + ((float)spTexInfo->ImageInfo.Height / 2.f);
+	return opY;
 }

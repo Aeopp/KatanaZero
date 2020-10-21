@@ -1,5 +1,6 @@
 #pragma once
 #include "object.h"
+
 class Mouse :
     public object
 {
@@ -11,6 +12,6 @@ public:
 	void Initialize() & noexcept override;
 	void Update()override;
 
-	std::shared_ptr<class RenderComponent> _RenderComp;
+	std::shared_ptr<class UIRenderComponent> _RenderComp;
 };
 

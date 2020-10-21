@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "UI.h"
 #include "ComponentManager.h"
-#include "RenderComponent.h"
+#include "UIRenderComponent.h"
 #include "ObjectManager.h"
 
 OBJECT_TAG::ETAG UI::GetTag()
@@ -12,6 +12,8 @@ OBJECT_TAG::ETAG UI::GetTag()
 void UI::Initialize() & noexcept
 {
     object::Initialize();
+    _RenderComp = ComponentManager::instance().Insert<UIRenderComponent>(_This);
+    _RenderComp->Depth = 0;
 }
 
 void UI::LateInitialize() & noexcept
@@ -27,6 +29,12 @@ void UI::Release() & noexcept
 void UI::Update()
 {
     object::Update();
+
+    if (!_TransformComp)return;
+
+    _TransformComp->Position = global::CameraPos;
+    _TransformComp->Position.x += ScreenPos.x;
+    _TransformComp->Position.y += ScreenPos.y;
 }
 
 void UI::LateUpdate()
