@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "math.h"
 #include "CollisionComponent.h"
-#include "TransformComponent.h"
+#include "PhysicTransformComponent.h"
 #include "GraphicDevice.h"
 
 void CollisionComponent::Render()
@@ -74,6 +74,10 @@ std::array<vec3, 4ul> CollisionComponent::GetWorldRectPt() & noexcept
 			D3DXVec3TransformCoord(&LocalPt, &LocalPt, &MWorld);
 			return LocalPt;
 		});
+
+	// 이후에 바텀과 탑을 뒤집기
+	std::swap(_WorldRectPt[0].y, _WorldRectPt[2].y);
+	std::swap(_WorldRectPt[1].y, _WorldRectPt[3].y);
 
 	return _WorldRectPt;
 }

@@ -11,7 +11,7 @@ matrix TransformComponent::CalcSRTMatrix(const bool bRender)
 		D3DXMatrixTranslation(&MTrans, Position.x-global::CameraPos.x, 
 										Position.y-global::CameraPos.y, Position.z);
 	else 
-		D3DXMatrixTranslation(&MTrans, Position.x - global::CameraPos.x, Position.y, Position.z);
+		D3DXMatrixTranslation(&MTrans, Position.x , Position.y, Position.z);
 
 	return MScale * MRotation * MTrans;
 }

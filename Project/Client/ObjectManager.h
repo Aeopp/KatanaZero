@@ -14,7 +14,7 @@ public :
 	void Release() & noexcept;
 
 	template<typename ObjectType,typename...InitParams>
-	auto InsertObject(InitParams&&... _Params);
+	auto InsertObject(const vec3 InitPos = { 0.f,0.f,0.f },InitParams&&... _Params);
 	
 	template<typename ObjectType=object>
 	auto& FindObject(OBJECT_TAG::ETAG _Tag,OBJECT_ID::EID _ID = OBJECT_ID::EID::ENONE);
@@ -24,7 +24,7 @@ private:
 };
 
 template<typename ObjectType, typename ...InitParams>
-inline auto ObjectManager::InsertObject(InitParams&&... _Params)
+inline auto ObjectManager::InsertObject(const vec3 InitPos,InitParams&&... _Params)
 {
 	static_assert(std::is_base_of_v<object, ObjectType>,"Type is not a subtype of base");
 
@@ -32,7 +32,10 @@ inline auto ObjectManager::InsertObject(InitParams&&... _Params)
 
 	sp_Object->_This = sp_Object;
 
-	sp_Object->Initialize(std::forward< InitParams>(_Params)...);
+	sp_Object->Initialize(std::forward<InitParams>(_Params)...);
+
+	if (InitPos.x || InitPos.y)
+		sp_Object->_TransformComp->Position = InitPos;
 
 	_ObjectMap[sp_Object->GetTag()][sp_Object->GetID()].emplace_back(sp_Object);
 

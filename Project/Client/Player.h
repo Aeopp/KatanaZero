@@ -18,8 +18,9 @@ public:
 	
 	void Move(const vec3 Dir);
 	void KeyBinding()&noexcept;
-
-	float Speed = 700.f;
+	
+	float MoveInitDelta = 0.2f;
+	float Speed = 500.f;
 private:
 	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};

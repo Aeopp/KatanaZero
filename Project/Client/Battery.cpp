@@ -49,6 +49,10 @@ void Battery::Initialize() & noexcept
 {
 	UI::Initialize();
 
+	_RenderComp = ComponentManager::instance().Insert<UIRenderComponent>(_This);
+	_TransformComp  = ComponentManager::instance().Insert<TransformComponent>(_This);
+	_RenderComp->Depth = 0;
+
 	_TransformComp->Scale*= 3.f;
 	_TransformComp->bFollowOwner = false;
 

@@ -16,15 +16,11 @@ OBJECT_TAG::ETAG Character::GetTag()
 }
 
 std::wstring_view Character::GetName() const&
-{
+{ 
     return L"Character";
 }
-
 
 void Character::Initialize() & noexcept
 {
     Super::Initialize();
-
-    _RenderComp = ComponentManager::instance().Insert<RenderComponent>(_This);
-    _CollisionComp = ComponentManager::instance().Insert<CollisionComponent>(_This);
 }

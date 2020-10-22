@@ -12,8 +12,7 @@ OBJECT_TAG::ETAG UI::GetTag()
 void UI::Initialize() & noexcept
 {
     object::Initialize();
-    _RenderComp = ComponentManager::instance().Insert<UIRenderComponent>(_This);
-    _RenderComp->Depth = 0;
+
 }
 
 void UI::LateInitialize() & noexcept

@@ -2,6 +2,7 @@
 #include "GraphicDevice.h"
 #include "CollisionTileManager.h"
 #include "math.h"
+#include "PhysicTransformComponent.h"
 
 #include <fstream>
 #include <ostream>
@@ -167,15 +168,45 @@ void CollisionTileManager::Update()&
 
 	for (auto& _spCollision : _CollisionCompVec)
 	{
+		bool bCollision = false;
+		bool bLand = false;
+
 		for (auto& _CollisionTile : _CollisionTileVec)
 		{
 			auto WorldRectPt = _spCollision->GetWorldRectPt();
-
+			
 			auto opDir = math::Collision::RectAndRect({ WorldRectPt, _CollisionTile },false);
+
 			if (opDir)
 			{
+				bCollision = true;
+			
 				auto spOwner =_spCollision->_Owner.lock();
+
+				if ( std::abs(opDir->x) < std::abs(opDir->y))
+					opDir->y = 0;
+				else
+					opDir->x = 0;
+
 				spOwner->_TransformComp->Position += *opDir;
+
+				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
+				if (WorldRectPt[2].y > _CollisionTile[0].y)
+				{
+					bLand = true;
+					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+					spPhysicTransform->Landing();
+			    }
+			}
+		}
+
+		if(bLand==false)
+		{
+			auto spOwner = _spCollision->_Owner.lock();
+			if (spOwner->GetTag() == OBJECT_TAG::CHARCTER)
+			{
+				auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+				spPhysicTransform->Flying();
 			}
 		}
 	}

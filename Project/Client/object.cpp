@@ -10,7 +10,7 @@ void object::SetOwner(std::weak_ptr<class object> _Owner)
 
 void object::Initialize() & noexcept
 {
-	_TransformComp = ComponentManager::instance().Insert<TransformComponent>(_This);
+
 }
 
 void object::LateInitialize() & noexcept

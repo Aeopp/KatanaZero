@@ -21,10 +21,9 @@ void SceneStart::Initialize()
 	LoadCollisionTileInfoFilePath = L"..\\Data\\Bunkermansion\\BunkermansionCollision.txt"s;
 	LoadLineInfoFilePath = L"..\\Data\\Bunkermansion\\BunkermansionLine.txt"s;
 
-	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Player>());
+	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Player>(vec3{1000,2000,0.f}));
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Mouse>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<HUD>());
-
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<UITimer>());
 
 	Scene::Initialize();

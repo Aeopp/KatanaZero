@@ -22,7 +22,7 @@ std::wstring_view Mouse::GetName() const&
 void Mouse::Initialize() & noexcept
 {
     object::Initialize();
-
+    _TransformComp = ComponentManager::instance().Insert<TransformComponent>(_This);
     _TransformComp->Scale *= 2.f;
 
     _RenderComp = ComponentManager::instance().Insert<UIRenderComponent>(_This);

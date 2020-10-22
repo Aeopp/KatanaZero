@@ -8,13 +8,18 @@ void HUD::Initialize() & noexcept
 {
 	UI::Initialize();
 
+    _RenderComp = ComponentManager::instance().Insert<UIRenderComponent>(_This);
+    _TransformComp = ComponentManager::instance().Insert<TransformComponent>(_This);
+
+    _RenderComp->Depth = 0;
+
     _TransformComp->Scale  *=3.f;
     
     _RenderComp->_RenderInfo.Number = 0;
     _RenderComp->_RenderInfo.ObjectKey = L"Dragon";
     _RenderComp->_RenderInfo.StateKey = L"spr_hud_dragon";
     _RenderComp->_RenderInfo._Layer = LAYER::EUI;
-    _RenderComp->Depth = 0;
+  
 
     ScreenPos.x = 1920.f / 2.f;
     ScreenPos.y = 69.f / 2.f;

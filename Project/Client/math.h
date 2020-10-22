@@ -12,6 +12,7 @@ class math
 private:
 	static const std::random_device rd;
 public:
+	static constexpr float GRAVITY = 200.f;
 	static constexpr float PI = 3.14159265f;
 
 	template<typename Type>

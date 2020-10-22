@@ -9,6 +9,7 @@
 #include "CollisionComponent.h"
 #include "Battery.h"
 #include "UIItemIcon.h"
+#include "PhysicTransformComponent.h"
 
 OBJECT_ID::EID Player::GetID()
 {
@@ -29,7 +30,13 @@ void Player::Initialize() & noexcept
 {
 	Super::Initialize();
 
+	_TransformComp=ComponentManager::instance().Insert< PhysicTransformComponent>(_This);
+	_RenderComp = ComponentManager::instance().Insert< RenderComponent>(_This);
+	_CollisionComp = ComponentManager::instance().Insert< CollisionComponent>(_This);
+
 	_TransformComp->Scale *= 3.f;
+	auto _PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
+	_PhysicComp->Mass = 100.f;
 
 	_RenderComp->_RenderInfo.Number = 0;
 	_RenderComp->_RenderInfo.ObjectKey = L"Dragon";
@@ -70,13 +77,17 @@ void Player::Update()
 void Player::LateUpdate()
 {
 	Super::LateUpdate();
+
+	MoveInitDelta += Time::instance().Delta();
 }
 
 void Player::Move(const vec3 Dir)
 {
 	const float DeltaTime = Time::instance().Delta();
+	MoveInitDelta -= DeltaTime*2.f;
 
-	_TransformComp->Position += Dir * Speed * DeltaTime;
+	if(MoveInitDelta<0.f)
+		_TransformComp->Position += Dir * DeltaTime * Speed;
 }
 
 void Player::KeyBinding() & noexcept
@@ -112,6 +123,25 @@ void Player::KeyBinding() & noexcept
 		auto spPlayer = spObj->GetThis<Player>();
 		spPlayer->Move(Dir);  },
 		VK_DOWN, InputManager::EKEY_STATE::PRESSING));
+
+	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
+	{ const vec3 Dir{ 0.f,+1.f,0.f };
+	auto spObj = wpThis.lock();
+	auto spPlayer = spObj->GetThis<Player>();
+	auto PTransformComp = std::dynamic_pointer_cast<PhysicTransformComponent>(spPlayer->_TransformComp);
+//	if (!PTransformComp->bLand)return;
+
+	SimplePhysics _Physics;
+	_Physics.Acceleration = 200.f;
+	_Physics.Dir = { 0.f,-1.f,0.f };
+	_Physics.Friction = 0.97f;
+	_Physics.Speed = { 0.f,-1000.f,0.f };
+	_Physics.Resistance = 0.4f;
+	_Physics.MaxT = 9999999999.f ;
+	_Physics.T = 0.f;
+	
+	PTransformComp->Move(std::move(_Physics));
+	},'W', InputManager::EKEY_STATE::DOWN));
 
 	//TODO:: TEST CODE
 	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()

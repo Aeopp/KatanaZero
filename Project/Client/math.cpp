@@ -69,6 +69,10 @@ RECT math::ConvertLocalPtToRECT(const std::array<vec3, 4ul>& LocalPt)
 	_Rt.right = LocalPt[2].x;
 	_Rt.bottom = LocalPt[2].y;
 
+	// Screen Coord System Calc
+	/*_Rt.top *= -1.f;
+	_Rt.bottom *= -1.f;*/
+
 	return _Rt;
 }
 
@@ -81,9 +85,13 @@ RECT math::ConvertLocalPtToRECT(const std::pair<vec3, vec3>& LocalPt)
 	_Rt.right = LocalPt.second.x;
 	_Rt.bottom = LocalPt.second.y;
 
+	//// Screen Coord System Calc
+	//_Rt.top *= -1.f;
+	//_Rt.bottom *= -1.f;
+	
 	return _Rt;
 }
-
+// 화면 좌표가 아님 !! Y 축이 뒤집힘에 유의
 std::array<vec3, 5ul> math::GetLocalRect(const vec2 & Size)
 {
 	const float halfX = Size.x / 2.f;
@@ -94,7 +102,7 @@ std::array<vec3, 5ul> math::GetLocalRect(const vec2 & Size)
 	LocalRect[1] = vec3{ +halfX,+halfY,0.f };
 	LocalRect[2] = vec3{ +halfX,-halfY,0.f };
 	LocalRect[3] = vec3{ -halfX,-halfY,0.f };
-	LocalRect[4] = vec3{ halfX  , halfY,0.f };
+	LocalRect[4] = vec3{  0.f  , 0.f,0.f };
 
 	return LocalRect;
 }
@@ -145,13 +153,22 @@ math::Collision::RectAndRect(
 	
 	RECT _LhsRt,_RhsRt,_DirRt;
 	_LhsRt  = ConvertLocalPtToRECT(RectAndRect.first); 
-	_RhsRt   = ConvertLocalPtToRECT(RectAndRect.second);
- 
+	_RhsRt  = ConvertLocalPtToRECT(RectAndRect.second);
+
 	if (IntersectRect(&_DirRt, &_LhsRt, &_RhsRt))
 	{
 		vec3 Dir;
 		Dir.x = _DirRt.right - _DirRt.left;
 		Dir.y = _DirRt.bottom - _DirRt.top;
+
+		if (((_LhsRt.right - _RhsRt.right) < 0))
+		{
+			Dir.x *= -1.f;
+		}
+		if ((_LhsRt.bottom - _RhsRt.bottom) < 0)
+		{
+			Dir.y *= -1.f;
+		}
 
 		if(bDirNormal)
 			D3DXVec3Normalize(&Dir, &Dir);

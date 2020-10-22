@@ -5,6 +5,7 @@
 #include "Texture_Manager.h"
 #include "GraphicDevice.h"
 #include "Time.h"
+#include "ComponentManager.h"
 
 static auto ItemIconRenderMake = [](int8_t& LeftItem, int8_t& RightItem)
 {
@@ -48,6 +49,9 @@ static auto ItemIconRenderMake = [](int8_t& LeftItem, int8_t& RightItem)
 void UIItemIcon::Initialize() & noexcept
 {
 	UI::Initialize();
+
+	_RenderComp = ComponentManager::instance().Insert<UIRenderComponent>(_This);
+	_TransformComp = ComponentManager::instance().Insert<TransformComponent>(_This);
 
 	_TransformComp->Scale *= 3.f;
 	_TransformComp->bFollowOwner = false;

@@ -2,11 +2,15 @@
 #include "UITimer.h"
 #include "TransformComponent.h"
 #include "UIRenderComponent.h"
+#include "ComponentManager.h"
+
 #include "Time.h"
 
 void UITimer::Initialize() & noexcept
 {
 	UI::Initialize();
+	_RenderComp = ComponentManager::instance().Insert<UIRenderComponent>(_This);
+	_TransformComp = ComponentManager::instance().Insert<TransformComponent>(_This);
 
 	_TransformComp->Scale *= 3.f;
 
