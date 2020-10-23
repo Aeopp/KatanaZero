@@ -24,19 +24,21 @@ void UITimer::Initialize() & noexcept
 	ScreenPos.y = 25.f;
 
 	std::weak_ptr<object> wpThis = _This;
+
 	std::weak_ptr<UIRenderComponent> wpRender = _RenderComp;
+	
+	//TODO::
+	//Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
+	//	[wpRender, this]() {
 
-	Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
-		[wpRender, this]() {
+	//	auto spRender = wpRender.lock();
+	//	if (!spRender)return true;
 
-		auto spRender = wpRender.lock();
-		if (!spRender)return true;
+	//	spRender->_RenderInfo.SrcScale.x = (std::max)
+	//		(spRender->_RenderInfo.SrcScale.x - 0.01f,0.f);
 
-		spRender->_RenderInfo.SrcScale.x = (std::max)
-			(spRender->_RenderInfo.SrcScale.x - 0.01f,0.f);
-
-		return false;
-	});
+	//	return false;
+	//});
 }
 
 void UITimer::Update()

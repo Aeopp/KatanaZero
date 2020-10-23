@@ -16,10 +16,11 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 	
-	void Move(const vec3 Dir);
+	void Move(const vec3 Dir,const float AddSpeed=0.f);
 	void KeyBinding()&noexcept;
+	void Jump();
+	void DownJump();
 	
-	float MoveInitDelta = 0.2f;
 	float Speed = 500.f;
 private:
 	std::shared_ptr<class Camera> _SpCamera{};

@@ -72,19 +72,20 @@ void UIItemIcon::Initialize() & noexcept
 	std::weak_ptr<object> wpThis = _This;
 	std::weak_ptr<UIRenderComponent> wpRender = _RenderComp;
 
-	Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
-		[wpRender, this]() {
+	//TODO::
+	//Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
+	//	[wpRender, this]() {
 
-		auto spRender = wpRender.lock();
-		if (!spRender)return true;
+	//	auto spRender = wpRender.lock();
+	//	if (!spRender)return true;
 
-		ItemIcons.first++;
-		ItemIcons.first %= EItem::End;
-		ItemIcons.second++;
-		ItemIcons.second %=EItem::End;
+	//	ItemIcons.first++;
+	//	ItemIcons.first %= EItem::End;
+	//	ItemIcons.second++;
+	//	ItemIcons.second %=EItem::End;
 
-		return false;
-	});
+	//	return false;
+	//});
 }
 
 void UIItemIcon::Update()

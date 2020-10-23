@@ -25,6 +25,7 @@ void PhysicTransformComponent::Flying()
 {
 	bFly = true;
 	bLand = false;
+	bDownLand = false;
 };
 
 void PhysicTransformComponent::Landing()

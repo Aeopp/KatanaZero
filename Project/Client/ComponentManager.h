@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "TransformComponent.h"
 #include "PhysicTransformComponent.h"
+#include "CollisionComponent.h"
 
 class ComponentManager :
 public singleton_interface<ComponentManager>

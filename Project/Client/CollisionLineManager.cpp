@@ -7,6 +7,10 @@
 #include <istream>
 #include <tuple>
 #include <utility>
+#include "ComponentManager.h"
+#include "CollisionComponent.h"
+
+
 
 void CollisionLineManager::Push(std::pair<vec3, vec3> Line, const bool bWallride) &
 {
@@ -123,10 +127,30 @@ void CollisionLineManager::DebugRender()  &
 
 void CollisionLineManager::Update()&
 {
+	auto& _CollisionCompVec = ComponentManager::instance().Find<CollisionComponent>();
+
+	_CollisionLineMap;
+
+	for (auto& _spCollision : _CollisionCompVec)
+	{
+		bool bCollision = false;
+		bool bLand = false;
+
+		if (!_spCollision->bCollision)continue;
+
+		// 일반 선분 (벽타기 불가능)
+		for (auto& _Line : GetLineContainer(false))
+		{
+			auto WorldRectPt = _spCollision->GetWorldRectPt();
+			math::Collision::SegmentAndRect({ _Line,WorldRectPt }, true);
+
+		}
+	}
 }
 
 void CollisionLineManager::LateUpdate()&
 {
+
 }
 
 void CollisionLineManager::LoadCollisionLine(const std::wstring & FilePath) &

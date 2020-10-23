@@ -70,17 +70,17 @@ void Battery::Initialize() & noexcept
 
 	std::weak_ptr<object> wpThis = _This;
 
-	// TEST CODE 
-	Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
-		[wpThis,this](){
-			auto spThis =wpThis.lock();
-			if (!spThis)return true;
-			
-			this->Count++;
-			this->Count %= 12;
+	// TODO :: 
+	//Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
+	//	[wpThis,this](){
+	//		auto spThis =wpThis.lock();
+	//		if (!spThis)return true;
+	//		
+	//		this->Count++;
+	//		this->Count %= 12;
 
-			return false;
-		});
+	//		return false;
+	//	});
 	//
 }
 

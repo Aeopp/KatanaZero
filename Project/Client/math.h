@@ -12,7 +12,7 @@ class math
 private:
 	static const std::random_device rd;
 public:
-	static constexpr float GRAVITY = 200.f;
+	static constexpr float GRAVITY = 800.f;
 	static constexpr float PI = 3.14159265f;
 
 	template<typename Type>
@@ -65,6 +65,16 @@ public:
 		static IsCollision_Dir CircleAndCircle(
 			const std::pair<std::pair<vec3, float>, std::pair<vec3, float>> CircleAndCircle,
 			const bool bDirNormal);
+
+		// 반환값은 기울기를 나타냅니다.
+		static IsCollision_Dir SegmentAndRect(
+			const std::pair<    std::pair<vec3, vec3>, std::array<vec3, 4ul>  > SegmentAndRect,
+			const bool bDirNormal);
+
+		struct HitInfo
+		{
+
+		};
 	};
 };
 

@@ -19,12 +19,13 @@ public:
 	float TimeScale{ 1.f };
 	uint32_t FPS{0};
 
+	float a, b, c;
 	bool bTimeInfoRender=true;
 public:
 	// 시작 시간 , 반복 주기 , 종료 시간 , 이벤트
 	// 반환값 true 시 종료 시간 상관 없이 이벤트 삭제
 	// false 시 계속 유지
-	void TimerRegist(const float initial, const float Repeat, const float End,
+	void TimerRegist(float initial, float Repeat, float End,
 		NotifyEventType _NotifyEvent/*람다표현식 or std::bind use*/);
 public:
 	// 등록된 콜백 함수들에게 통지하고싶은 타이밍에 호출하여주세요.
@@ -41,7 +42,7 @@ private:
 	float _T{ 0.f };
 	std::chrono::milliseconds DeltaMax = 25ms;
 	// 이벤트 시작여부 , 시작 시간 , 반복 주기 , 종료 시간 , 현재 측정 시간
-	std::list<std::tuple<bool,float, float, float, float, NotifyEventType>> _NotifyEvents;
+	std::list<std::tuple<bool,float, float, float, float, float,NotifyEventType>> _NotifyEvents;
 private:
 	void RenderFPS()const&noexcept;
 };

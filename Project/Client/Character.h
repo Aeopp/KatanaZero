@@ -13,6 +13,8 @@ public :
 public :
 	virtual void Initialize() & noexcept;
 
+	
+
 	std::shared_ptr<class RenderComponent> _RenderComp;
 	std::shared_ptr<class CollisionComponent> _CollisionComp;
 };

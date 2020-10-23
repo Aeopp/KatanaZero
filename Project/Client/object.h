@@ -2,6 +2,7 @@
 #include "Tags.h"
 #include <string_view>
 #include <any>
+#include "math.h"
 
 class object
 {
@@ -22,12 +23,16 @@ public:
 	std::vector<std::any> _Anys;
 
 	void SetOwner(std::weak_ptr<class object> _Owner);
+	static bool IsValid(const std::weak_ptr<class object>& _Check);
 public:
 	virtual void Initialize()&noexcept;
 	virtual void LateInitialize() & noexcept;
 	virtual void Release() & noexcept;
 	virtual void Update();
 	virtual void LateUpdate();
+
+	virtual void Hit(std::weak_ptr<class object>_Target,math::Collision::HitInfo _CollisionInfo);
+	virtual void MapHit(math::Collision::HitInfo _CollisionInfo);
 };
 
 // 컴파일 타임 캐스팅이니 타입에 매우 유의

@@ -26,6 +26,8 @@ public:
         ////////////////////////////////
     };
 
+    bool bDownJump = false;
+    bool bCollision = true;
     CollisionInfo _CollisionInfo{};
 };
 

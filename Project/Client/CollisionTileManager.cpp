@@ -3,7 +3,6 @@
 #include "CollisionTileManager.h"
 #include "math.h"
 #include "PhysicTransformComponent.h"
-
 #include <fstream>
 #include <ostream>
 #include <istream>
@@ -164,12 +163,15 @@ void CollisionTileManager::Update()&
 {
 	auto & _CollisionCompVec = ComponentManager::instance().Find<CollisionComponent>();
 
+	// 아래방향 점프가 불가능한 타일
 	auto& _CollisionTileVec =GetCollisionTileContainerRef(false);
 
 	for (auto& _spCollision : _CollisionCompVec)
 	{
 		bool bCollision = false;
 		bool bLand = false;
+
+		if (!_spCollision->bCollision)continue;
 
 		for (auto& _CollisionTile : _CollisionTileVec)
 		{
@@ -180,7 +182,7 @@ void CollisionTileManager::Update()&
 			if (opDir)
 			{
 				bCollision = true;
-			
+
 				auto spOwner =_spCollision->_Owner.lock();
 
 				if ( std::abs(opDir->x) < std::abs(opDir->y))
@@ -188,10 +190,15 @@ void CollisionTileManager::Update()&
 				else
 					opDir->x = 0;
 
-				spOwner->_TransformComp->Position += *opDir;
+				if(spOwner->_TransformComp->bMapSlide)
+					spOwner->_TransformComp->Position += *opDir;
+
+				math::Collision::HitInfo _HitInfo{};
+
+				spOwner->MapHit(std::move( _HitInfo ) );
 
 				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
-				if (WorldRectPt[2].y > _CollisionTile[0].y)
+				if (     std::abs ( WorldRectPt[2].y -  _CollisionTile[0].y )  < LandCheckDistance)
 				{
 					bLand = true;
 					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
@@ -200,15 +207,85 @@ void CollisionTileManager::Update()&
 			}
 		}
 
-		if(bLand==false)
+		//if(bLand==false)
+		//{
+		//	auto spOwner = _spCollision->_Owner.lock();
+		//	if (spOwner->GetTag() == OBJECT_TAG::CHARCTER)
+		//	{
+		//		auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+		//		spPhysicTransform->Flying();
+		//	}
+		//}
+	}
+
+	// 아래방향 점프가 가능한 타일
+	auto& _CollisionDownJumpTileVec = GetCollisionTileContainerRef(true);
+
+	for (auto& _spCollision : _CollisionCompVec)
+	{
+		bool bCollision = false;
+		bool bLand = false;
+
+		if (!_spCollision->bCollision)continue;
+		if (_spCollision->bDownJump)continue;
+
+		for (auto& _CollisionTile : _CollisionDownJumpTileVec)
 		{
-			auto spOwner = _spCollision->_Owner.lock();
-			if (spOwner->GetTag() == OBJECT_TAG::CHARCTER)
+			auto WorldRectPt = _spCollision->GetWorldRectPt();
+
+			auto opDir = math::Collision::RectAndRect({ WorldRectPt, _CollisionTile }, false);
+
+			if (opDir)
 			{
-				auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
-				spPhysicTransform->Flying();
+				bCollision = true;
+
+				auto spOwner = _spCollision->_Owner.lock();
+
+				if (std::abs(opDir->x) < std::abs(opDir->y))
+					opDir->y = 0;
+				else
+					opDir->x = 0;
+
+				// 대상의 바닥 콜리전과 타일 상단의 거리로 판단
+				const bool Check = (std::abs(_CollisionTile[0].y - WorldRectPt[3].y) < LandCheckDistance);
+
+				if (spOwner->_TransformComp->bMapSlide && opDir->y < 0.0f && Check)
+				{
+					spOwner->_TransformComp->Position += *opDir;
+				}
+				math::Collision::HitInfo _HitInfo{};
+
+				spOwner->MapHit(std::move(_HitInfo));
+
+				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
+				if (std::abs(WorldRectPt[2].y - _CollisionTile[0].y) < LandCheckDistance)
+				{
+					bLand = true;
+					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+					if (!spPhysicTransform)continue;
+					spPhysicTransform->Landing();
+					spPhysicTransform->bDownLand = true;
+				}
 			}
+
+			/*if (bLand == false)
+			{
+				auto spOwner = _spCollision->_Owner.lock();
+				auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+				if (!spPhysicTransform)continue;
+				spPhysicTransform->bDownLand = false;
+			}*/
 		}
+
+		//if(bLand==false)
+		//{
+		//	auto spOwner = _spCollision->_Owner.lock();
+		//	if (spOwner->GetTag() == OBJECT_TAG::CHARCTER)
+		//	{
+		//		auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+		//		spPhysicTransform->Flying();
+		//	}
+		//}
 	}
 }
 

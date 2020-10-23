@@ -70,27 +70,32 @@ void Time::SetDelta(const float DeltaTime)&
 	this->DeltaTime = DeltaTime * TimeScale;
 }
 
-void Time::TimerRegist(const float initial, const float Repeat, const float End, 
+void Time::TimerRegist(float initial, float Repeat,float End, 
 NotifyEventType _NotifyEvent)
 {
-	_NotifyEvents.emplace_back(false,initial,Repeat,End, initial,std::move(_NotifyEvent));
+	End = (std::max)(End, initial);
+	_NotifyEvents.emplace_back(false,initial,Repeat,End,0.f,initial,std::move(_NotifyEvent));
 }
 
 void Time::NotificationCheck()&
 {
+	
 	// 시작 시간 , 반복 주기 , 종료 시간 , 현재 측정 시간
 	for(auto iter = std::begin(_NotifyEvents);
 	iter!=std::end(_NotifyEvents);)
 	{
-		auto& [bInit,Init, Repeat, End, CurrentDelta, Event] = *iter;
-
+		auto& [bInit,Init, Repeat, End, CurrentDelta, initial,Event] = *iter;
+		a = Init;
+		b = End;
+		c = CurrentDelta;
 		Init -= DeltaTime;
 		if (Init > 0.f)continue;
 		
 		if(Init<0.f && !bInit)
 		{
 			bInit = true;
-			CurrentDelta = -0.1f;
+			CurrentDelta = initial;
+			continue;
 		}
 		
 		CurrentDelta -= DeltaTime;
@@ -121,10 +126,10 @@ void Time::RenderFPS() const& noexcept
 
 	std::wstringstream StrInfo;
 	StrInfo << L"FPS : " << FPS << L"DeltaTime : " << DeltaTime <<
-	L"TimeScale : " << TimeScale;
+		L"TimeScale : " << TimeScale << L"Init : " << a << L" End : " << b << L"Current : " << c;
 
 	matrix MTranslation;
-	D3DXMatrixTranslation(&MTranslation, 00.f, 200.f, 0.f);
+	D3DXMatrixTranslation(&MTranslation, 00.f, 300.f, 0.f);
 	GraphicDevice::instance().GetSprite()->SetTransform(&MTranslation);
 	GraphicDevice::instance().GetFont()->DrawTextW(GraphicDevice::instance().GetSprite(),
 		StrInfo.str().c_str(), StrInfo.str().size(), nullptr, 0, D3DCOLOR_ARGB(255, 255, 255, 255));

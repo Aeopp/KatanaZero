@@ -198,3 +198,49 @@ math::Collision::CircleAndCircle
 	
 	return std::nullopt;
 }
+
+typename math::Collision::IsCollision_Dir math::Collision::SegmentAndRect(
+	const std::pair<std::pair<vec3, vec3>, std::array<vec3, 4ul>>
+	SegmentAndRect, const bool bDirNormal)
+{
+	auto& [Segment,Rect ]= SegmentAndRect;
+
+	// 선분의 시작점을  a라 한다 끝점은 b라 한다.
+	// a에서 b로 향하는 단위화된 벡터를 r 이라 한다.
+	// a와 사각형의 아래 꼭짓점 두 점을 빼서 벡터를 만든다. 이 벡터를 v w 라 한다.
+	// r 과 v 를 내적해 선분에 투영된 길이를 구한다. 이 길이를 d 라 한다. 
+	// a + (r*d) 를 한다 해당 위치를 y 라 한다.
+	// y가 사각형과 내접한다면 사각형과 선분은 충돌상태이다.
+
+	// 상단의 연산을 사각형의 아래 꼭짓점 두개에 동시에 적용해 하나라도 내접한다면 충돌이다.
+
+	/*const vec3 RectCenter{ (Rect[0].x + Rect[2].x) / 2.f,
+							(Rect[0].y + Rect[2].y) / 2.f,0.f };*/
+
+	vec3 Line= Segment.second - Segment.first;
+	D3DXVec3Normalize(&Line, &Line);
+	vec3 ToLB = Rect[3] - Segment.first;
+	vec3 ToRB = Rect[2] - Segment.first;
+
+	{
+		float dot = D3DXVec3Dot(&Line, &ToLB);
+		vec3 SegmentPoint = Segment.first + (Line * dot);
+
+		if (math::IsPointInnerRect(Rect, SegmentPoint))
+		{
+			MessageBox(global::hWND, L"충돌!", L"충돌!", 1);
+		}
+	}
+
+	{
+		float dot = D3DXVec3Dot(&Line, &ToRB);
+		vec3 SegmentPoint = Segment.first + (Line * dot);
+
+		if (math::IsPointInnerRect(Rect, SegmentPoint))
+		{
+			MessageBox(global::hWND, L"충돌!", L"충돌!", 1);
+		}
+	}
+
+	return std::nullopt;
+}

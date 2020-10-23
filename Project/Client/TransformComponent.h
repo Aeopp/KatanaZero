@@ -10,6 +10,7 @@ public:
 	vec3 Position   = { 0.f,0.f,0.f };
 	vec3 Revolution = { 0.f,0.f,0.f };
 	bool bFollowOwner = true;
+	bool bMapSlide = true;
 	matrix CalcSRTMatrix(const bool bRender=false);
 	matrix CalcSRTRMatrix(const bool bRender = false);
 	matrix CalcWorldMatrix(const bool bRender = false);

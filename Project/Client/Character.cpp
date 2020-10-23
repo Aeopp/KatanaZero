@@ -3,6 +3,7 @@
 #include "ComponentManager.h"
 #include "RenderComponent.h"
 #include "ObjectManager.h"
+#include "PhysicTransformComponent.h"
 #include "CollisionComponent.h"
 
 OBJECT_ID::EID Character::GetID()
@@ -23,4 +24,8 @@ std::wstring_view Character::GetName() const&
 void Character::Initialize() & noexcept
 {
     Super::Initialize();
+
+    _TransformComp = ComponentManager::instance().Insert< PhysicTransformComponent>(_This);
+    _CollisionComp = ComponentManager::instance().Insert<CollisionComponent>(_This);
+    _RenderComp = ComponentManager::instance().Insert<RenderComponent>(_This);
 }

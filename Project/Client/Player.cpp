@@ -10,6 +10,7 @@
 #include "Battery.h"
 #include "UIItemIcon.h"
 #include "PhysicTransformComponent.h"
+#include "math.h"
 
 OBJECT_ID::EID Player::GetID()
 {
@@ -31,8 +32,6 @@ void Player::Initialize() & noexcept
 	Super::Initialize();
 
 	_TransformComp=ComponentManager::instance().Insert< PhysicTransformComponent>(_This);
-	_RenderComp = ComponentManager::instance().Insert< RenderComponent>(_This);
-	_CollisionComp = ComponentManager::instance().Insert< CollisionComponent>(_This);
 
 	_TransformComp->Scale *= 3.f;
 	auto _PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
@@ -44,8 +43,8 @@ void Player::Initialize() & noexcept
 	_RenderComp->_RenderInfo._Layer = LAYER::EOBJECT;
 
 	_CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
-	_CollisionComp->_CollisionInfo.Height = 35;
-	_CollisionComp->_CollisionInfo.Width = 35;
+	_CollisionComp->_CollisionInfo.Height = 20;
+	_CollisionComp->_CollisionInfo.Width = 15;
 
 	KeyBinding();
 
@@ -57,6 +56,9 @@ void Player::Initialize() & noexcept
 
 	_SpUIItemIcon = ObjectManager::instance().InsertObject<UIItemIcon>();
 	_SpUIItemIcon->SetOwner(_This);
+
+
+
 }
 
 void Player::LateInitialize() & noexcept
@@ -77,107 +79,123 @@ void Player::Update()
 void Player::LateUpdate()
 {
 	Super::LateUpdate();
-
-	MoveInitDelta += Time::instance().Delta();
 }
 
-void Player::Move(const vec3 Dir)
+void Player::Move(const vec3 Dir,const float AddSpeed)
 {
 	const float DeltaTime = Time::instance().Delta();
-	MoveInitDelta -= DeltaTime*2.f;
-
-	if(MoveInitDelta<0.f)
-		_TransformComp->Position += Dir * DeltaTime * Speed;
+	const vec3 CurrentPos = _TransformComp->Position;
+	const vec3 GoalPos = _TransformComp->Position + (Dir * Speed); 
+	_TransformComp->Position = math::lerp(CurrentPos, GoalPos, 1.f, DeltaTime);
 }
 
 void Player::KeyBinding() & noexcept
 {
 	auto wpThis = _This;
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
-	{
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, wpThis]()
+	{		
+		if (!object::IsValid(wpThis))return;
 		const vec3 Dir{ 1.f,0.f,0.f };
-		auto spObj = wpThis.lock();
-		auto spPlayer = spObj->GetThis<Player>();
-		spPlayer->Move(Dir);
+		Move(Dir);
 	},
-		VK_RIGHT, InputManager::EKEY_STATE::PRESSING));
+		'D', InputManager::EKEY_STATE::PRESSING));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
-	{ const vec3 Dir{ -1.f,0.f,0.f };
-	auto spObj = wpThis.lock();
-	auto spPlayer = spObj->GetThis<Player>();
-	spPlayer->Move(Dir);  },
-		VK_LEFT, InputManager::EKEY_STATE::PRESSING));
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, wpThis]()
+	{ 	
+		if (!object::IsValid(wpThis))return;
+		const vec3 Dir{ -1.f,0.f,0.f };
+		Move(Dir); 
+	},	'A', InputManager::EKEY_STATE::PRESSING));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
-	{ const vec3 Dir{ 0.f,-1.f,0.f };
-	auto spObj = wpThis.lock();
-	auto spPlayer = spObj->GetThis<Player>();
-	spPlayer->Move(Dir);  },
-		VK_UP, InputManager::EKEY_STATE::PRESSING));
+	_Anys.emplace_back(InputManager::instance().EventRegist([this,  wpThis]()
+	{		
+		if (!object::IsValid(wpThis))return;
+		DownJump();
+	}, 'S', InputManager::EKEY_STATE::DOWN));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
-	{ const vec3 Dir{ 0.f,+1.f,0.f };
-		auto spObj = wpThis.lock();
-		auto spPlayer = spObj->GetThis<Player>();
-		spPlayer->Move(Dir);  },
-		VK_DOWN, InputManager::EKEY_STATE::PRESSING));
+	_Anys.emplace_back(InputManager::instance().EventRegist([this,  wpThis]()
+	{ 		if (!object::IsValid(wpThis))return;
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
-	{ const vec3 Dir{ 0.f,+1.f,0.f };
-	auto spObj = wpThis.lock();
-	auto spPlayer = spObj->GetThis<Player>();
-	auto PTransformComp = std::dynamic_pointer_cast<PhysicTransformComponent>(spPlayer->_TransformComp);
-//	if (!PTransformComp->bLand)return;
-
-	SimplePhysics _Physics;
-	_Physics.Acceleration = 200.f;
-	_Physics.Dir = { 0.f,-1.f,0.f };
-	_Physics.Friction = 0.97f;
-	_Physics.Speed = { 0.f,-1000.f,0.f };
-	_Physics.Resistance = 0.4f;
-	_Physics.MaxT = 9999999999.f ;
-	_Physics.T = 0.f;
-	
-	PTransformComp->Move(std::move(_Physics));
+		Jump();
 	},'W', InputManager::EKEY_STATE::DOWN));
 
 	//TODO:: TEST CODE
-	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, wpThis]()
 	{ 
-		auto spObj = wpThis.lock();
-		auto spPlayer = spObj->GetThis<Player>();
-		spPlayer->_RenderComp->_RenderInfo.StateKey = L"spr_dragon_idle";
+		if (!object::IsValid(wpThis))return;
+		_RenderComp->_RenderInfo.StateKey = L"spr_dragon_idle";
 	},
 		'2', InputManager::EKEY_STATE::DOWN));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this,wpThis]()
 	{
-		auto spObj = wpThis.lock();
-		auto spPlayer = spObj->GetThis<Player>();
-		spPlayer->_RenderComp->_RenderInfo.StateKey = L"spr_dragon_attack";
+		if (!object::IsValid(wpThis))return;
+		_RenderComp->_RenderInfo.StateKey = L"spr_dragon_attack";
 	},
 		'1', InputManager::EKEY_STATE::DOWN));
-
-	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
+	
+	_Anys.emplace_back(InputManager::instance().EventRegist([this,wpThis]()
 	{
-		auto spObj = wpThis.lock();
-		auto spPlayer = spObj->GetThis<Player>();
-		if (!spPlayer)return;
-
+		if (!object::IsValid(wpThis))return;
 		Time::instance().TimeScale = 0.1f;
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::PRESSING));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this ,wpThis]()
 	{
-		auto spObj = wpThis.lock();
-		auto spPlayer = spObj->GetThis<Player>();
-		if (!spPlayer)return;
-
+		if (!object::IsValid(wpThis))return;
 		Time::instance().TimeScale = 1.f;
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::UP));
 	//////////
+}
+
+void Player::Jump()
+{
+	auto PhysicComp =std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
+	if (!PhysicComp->bLand)return;
+
+	PhysicComp->Flying();
+
+	const vec3 Dir{ 0.f,+1.f,0.f };
+	SimplePhysics _Physics;
+	_Physics.Acceleration = 500.f;
+	_Physics.Dir = Dir;
+	_Physics.Friction = 0.97f;
+	_Physics.Speed = { 0.f,-1300.f,0.f };
+	_Physics.Resistance = 0.4f;
+	_Physics.MaxT = 9999999999.f;
+	_Physics.T = 0.f;
+
+	PhysicComp->Move(std::move(_Physics));
+}
+
+void Player::DownJump()
+{
+	auto PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
+	if (!PhysicComp->bDownLand)return;
+
+	PhysicComp->Flying();
+	_CollisionComp->bDownJump = true;
+
+	Time::instance().TimerRegist(0.5f, 0.f, 0.5f,
+		[wpThis = _This, this]()
+	{
+		if (!object::IsValid(wpThis))return true;
+		_CollisionComp->bDownJump = false;
+		return false;
+	});
+
+	const vec3 Dir{ 0.f,-1.f,0.f };
+	SimplePhysics _Physics;
+	_Physics.Acceleration = 500.f;
+	_Physics.Dir = Dir;
+	_Physics.Friction = 0.97f;
+	_Physics.Speed = { 0.f,+2000.f,0.f };
+	_Physics.Resistance = 0.4f;
+	_Physics.MaxT = 9999999999.f;
+	_Physics.T = 0.f;
+
+	PhysicComp->Move(std::move(_Physics));
 }

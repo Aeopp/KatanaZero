@@ -64,11 +64,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			}
 		}
 
-		if (!global::bActive)
-		{
-			using namespace std::chrono_literals;
-			std::this_thread::sleep_for(50ms);
-		};
+		//if (!global::bActive)
+		//{
+		//	using namespace std::chrono_literals;
+		//	std::this_thread::sleep_for(50ms);
+		//};
 
 		Time::instance().Update();
 	}

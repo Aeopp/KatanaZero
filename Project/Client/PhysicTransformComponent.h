@@ -43,6 +43,7 @@ public:
 	float Mass = 100.f;
 	bool bLand = false;
 	bool bFly = false;
+	bool bDownLand = false;
 	std::vector<SimplePhysics> Forces;
 	virtual void Update()override;;
 	virtual void LateUpdate()override;;
