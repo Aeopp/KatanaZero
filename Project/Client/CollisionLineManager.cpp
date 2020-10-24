@@ -196,7 +196,8 @@ void CollisionLineManager::Update()&
 			if (_Owner->GetID() != OBJECT_ID::EPLAYER)continue;
 			auto _Player = std::dynamic_pointer_cast<Player>(_Owner);
 			auto _PhysicComp =std::dynamic_pointer_cast<PhysicTransformComponent>(_Player->_TransformComp);
-		//	if (_PhysicComp->bLand)continue;
+			//if (_PhysicComp->bLand)continue;
+			//if (!_PhysicComp->bFly)continue;
 
 			for (auto& _Line : GetLineContainer(true))
 			{
@@ -206,13 +207,17 @@ void CollisionLineManager::Update()&
 				vec3 Dir{};
 				auto ODir = math::Collision::SegmentAndRect({ _Line,WorldRectPt }, true,
 					Distance, Dir, Position);
+
 				if (ODir)
 				{
 					bCollision = true;
 
-					if (!_Owner)continue;
-					_Player->WallRide();
+				/*	if (   (std::abs(WorldRectPt[0].x - _Line.first.x ) > WallLineCheckXMin)  &&  (std::abs( WorldRectPt[1].x - _Line.first.x ) > WallLineCheckXMin))
+					{
+						continue;
+					}*/
 
+					_Player->WallRide();
 					math::Collision::HitInfo _HitInfo{};
 					_HitInfo.Distance = Distance;
 					_HitInfo.Dir = Dir;
@@ -233,11 +238,11 @@ void CollisionLineManager::Update()&
 
 					_HitInfo._Variable = WallRideLineNormal;
 					_Player->MapHit(std::move(_HitInfo));
-					continue;
+					break;
 				}
 			}
 
-			if (!bCollision)
+			if (!bCollision || _PhysicComp->bLand)
 			{
 				_Player->WallRideEnd(); 
 			}

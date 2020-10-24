@@ -8,6 +8,8 @@
 #include <istream>
 #include "CollisionComponent.h"
 #include "ComponentManager.h"
+#include "Player.h"
+
 
 void CollisionTileManager::Collision()&
 {
@@ -216,6 +218,13 @@ void CollisionTileManager::Update()&
 					bLand = true;
 					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
 					spPhysicTransform->Landing();
+
+
+				/*	if (spOwner->GetID() == OBJECT_ID::EPLAYER)
+					{
+						auto _Player = std::dynamic_pointer_cast<Player>(spOwner);
+						_Player->WallRideEnd();
+					}*/
 			    }
 			}
 		}
@@ -278,7 +287,6 @@ void CollisionTileManager::Update()&
 				_HitInfo.Position = math::GetCenter(_CollisionTile);
 				_HitInfo._Target = { };
 				_HitInfo._ID = OBJECT_ID::EDOWNJUMPTILE;
-				_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
 
 
 				spOwner->MapHit(std::move(_HitInfo));
@@ -289,7 +297,14 @@ void CollisionTileManager::Update()&
 					bLand = true;
 					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
 					if (!spPhysicTransform)continue;
+
 					spPhysicTransform->DownLanding();
+
+					//if (spOwner->GetID() == OBJECT_ID::EPLAYER)
+					//{
+					//	auto _Player =std::dynamic_pointer_cast<Player>(spOwner);
+					//	_Player->WallRideEnd();
+					//}
 				}
 			}
 		}
@@ -299,8 +314,8 @@ void CollisionTileManager::Update()&
 			auto spOwner = _spCollision->_Owner.lock();
 			auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
 			if (!spPhysicTransform)continue;
-			if (spPhysicTransform->bLand)continue;
-			spPhysicTransform->Flying();
+			if (!spPhysicTransform->bLand)continue;
+			//spPhysicTransform->Flying();
 		}
 		//if(bLand==false)
 		//{

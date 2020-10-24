@@ -96,7 +96,7 @@ void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 	if (_CollisionInfo._ID == OBJECT_ID::EWALLRIDELINE)
 	{
 		WallRideDir =  *_CollisionInfo._Variable._Cast<vec3>();
-		D3DXVec3Lerp(&WallRideDir, &WallRideDir, &UpVec, 0.3f);
+		D3DXVec3Lerp(&WallRideDir, &WallRideDir, &UpVec, 0.4f);
 	}
 }
 
@@ -232,11 +232,13 @@ void Player::WallRide()
 	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
 	if (!_Physic_TransformComp) return;
 	// 점프중이 아니라면 벽타기 불가능
-//	if (!_Physic_TransformComp->bFly)return;
+	if (!_Physic_TransformComp->bFly)return;
+	if (_Physic_TransformComp->bLand)return;
+
 	// 벽에 매달리는 중이라면 가속도가 감소
 	_Physic_TransformComp->GravityCoefficient = 0.2f;
 	_Physic_TransformComp->Flying();
-
+	
 	bWallRide = true;
 }
 

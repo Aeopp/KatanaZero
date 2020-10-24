@@ -4,6 +4,12 @@
 #include "TransformComponent.h"
 #include "Texture_Manager.h"
 #include "GraphicDevice.h"
+#include "Player.h"
+#include "PhysicTransformComponent.h"
+#include <sstream>
+
+
+
 
 void RenderComponent::Render()
 {
@@ -44,6 +50,21 @@ void RenderComponent::Render()
 		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 		GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
 			_RenderInfo._Color);
+	}
+
+	
+	if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
+	{
+		auto _Player = std::dynamic_pointer_cast<Player>(spOwner);
+		_Player->bWallRide;
+		auto _PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_Player->_TransformComp);
+		_PhysicComp->bLand;
+		_PhysicComp->bFly;
+		std::wstringstream wss;
+		wss << L"WALL_RIDE : " << _Player->bWallRide << L" LANDING : " << _PhysicComp->bLand << L" Flying : " << _PhysicComp->bFly << std::endl;
+		RECT rectRender{ 1400,200,2000,850 };
+		GraphicDevice::instance().GetFont()->DrawTextW(nullptr, wss.str().c_str(), wss.str().size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
+
 	}
 }
 

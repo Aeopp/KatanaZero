@@ -22,5 +22,7 @@ public:
 	void Clear()&;
 	// 일반 선분과 벽타기가 가능한 선분을 구분합니다.
 	LineContainerType& GetLineContainer(const bool bWallRide)&;
+
+;
 };
 
