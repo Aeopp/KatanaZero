@@ -19,7 +19,6 @@ public:
 		PRESSING,
 		END,
 
-
 		NONE,
 	};
 private:
@@ -34,11 +33,24 @@ public:
 		EventRegist(typename DelegateType::EventType NotifyEvent,
 					typename InputManager::VirtualTableKeyDataType VKKey , 
 					typename InputManager::EKEY_STATE _KeyState) & noexcept;
+
+	
 private:
+	struct Record
+	{
+		typename InputManager::VirtualTableKeyDataType _Key;
+		typename InputManager::EKEY_STATE _State;
+		float T{ 0.f };
+	};
+	// 리플레이 상황 재현을 위해 플레이어의 입력 저장   마지막 매개변수는 입력한 당시의 시간 T
+	std::queue<Record> _InputTable;
+
 	std::bitset<KeyMappingTableSize> EventRegistCheckTable{};
 					// 매핑 상태 , 이벤트 목록
-	std::unordered_map<VirtualTableKeyDataType,std::pair <EKEY_STATE,std::array<DelegateType,
+	std::unordered_map<VirtualTableKeyDataType,std::pair<EKEY_STATE,std::array<DelegateType,
 	(typename std::underlying_type_t<typename InputManager::EKEY_STATE>)EKEY_STATE::END>>>_ActionTable;
+
+	
 };
 
 // 이벤트 등록할때 KeyPressTable 값을 켜주기

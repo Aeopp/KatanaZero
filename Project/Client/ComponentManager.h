@@ -14,6 +14,8 @@ public :
     void LateUpdate();
     void Render();
 
+    void Clear();
+
     // object 가 사용하고 싶은 컴포넌트를 명시해준다고 가정하므로 Self 포인터를 넘겨주세요.
     template<typename ComponentType, typename...InitParams>
     auto Insert(std::weak_ptr<class object> _Owner ,InitParams&&... _Params);

@@ -343,6 +343,8 @@ void CollisionTileManager::LateUpdate()&
 
 void CollisionTileManager::LoadCollisionTile(const std::wstring & FilePath) &
 {
+	Clear();
+
 	std::wifstream file_output(FilePath);
 
 	std::apply([&file_output](auto&... _CollisionTileContainers) {
@@ -398,10 +400,7 @@ void CollisionTileManager::Clear() &
 	_CollisionTilePointsMap.clear();
 }
 
-void CollisionTileManager::SetUpWallRideTile()
-{
 
-}
 
 typename CollisionTileManager::_CollisionTileContainerType & CollisionTileManager::GetCollisionTileContainerRef(const bool bCanGoDown) &
 {

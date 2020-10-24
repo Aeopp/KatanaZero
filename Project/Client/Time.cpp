@@ -70,6 +70,11 @@ void Time::SetDelta(const float DeltaTime)&
 	this->DeltaTime = DeltaTime * TimeScale;
 }
 
+void Time::SetT(const float T)
+{
+	this->_T = T;
+}
+
 void Time::TimerRegist(float initial, float Repeat,float End, 
 NotifyEventType _NotifyEvent)
 {
@@ -85,9 +90,7 @@ void Time::NotificationCheck()&
 	iter!=std::end(_NotifyEvents);)
 	{
 		auto& [bInit,Init, Repeat, End, CurrentDelta, initial,Event] = *iter;
-		a = Init;
-		b = End;
-		c = CurrentDelta;
+		
 		Init -= DeltaTime;
 		if (Init > 0.f)continue;
 		
@@ -125,8 +128,8 @@ void Time::RenderFPS() const& noexcept
 	if (!bTimeInfoRender)return;
 
 	std::wstringstream StrInfo;
-	StrInfo << L"FPS : " << FPS << L"DeltaTime : " << DeltaTime <<
-		L"TimeScale : " << TimeScale << L"Init : " << a << L" End : " << b << L"Current : " << c;
+	StrInfo << L"FPS : " << FPS << L"DeltaTime : " << DeltaTime << L"TimeScale : " << TimeScale <<
+		L"플레이 시간 : " << _T;
 
 	matrix MTranslation;
 	D3DXMatrixTranslation(&MTranslation, 00.f, 300.f, 0.f);

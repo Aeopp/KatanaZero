@@ -26,7 +26,7 @@ public:
 	void SaveCollisionTile(const std::wstring& FilePath) &; 
 	void Clear()&;
 
-	void SetUpWallRideTile();
+	
 
 	const float LandCheckDistance = 10.f;
 	_CollisionTileContainerType& GetCollisionTileContainerRef(const bool bCanGoDown)&;

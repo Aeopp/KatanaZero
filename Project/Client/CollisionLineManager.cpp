@@ -258,6 +258,8 @@ void CollisionLineManager::LateUpdate()&
 
 void CollisionLineManager::LoadCollisionLine(const std::wstring & FilePath) &
 {
+	Clear();
+
 	std::wifstream file_output(FilePath);
 	
 	std::apply([&file_output](auto&... _LineContainers) {

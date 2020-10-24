@@ -376,7 +376,7 @@ void Terrain::LoadTilesCurrentStateKeyOnly(const std::wstring& FilePath)
 	std::wifstream file_output(FilePath);
 	size_t _InfoSize{};
 	file_output >> _InfoSize;
-
+	Release();
 	for (size_t i = 0; i < _InfoSize; ++i)
 	{
 		RenderMapObjInfo _RenderMapObjInfo;

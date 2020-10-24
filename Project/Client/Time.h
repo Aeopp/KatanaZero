@@ -19,6 +19,8 @@ public:
 	float TimeScale{ 1.f };
 	uint32_t FPS{0};
 
+	void SetT(const float T);
+
 	float a, b, c;
 	bool bTimeInfoRender=true;
 public:

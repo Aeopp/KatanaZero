@@ -13,7 +13,6 @@ void ComponentManager::Initialize() & noexcept
 	DoesNotRenderType.insert(typeid(UIRenderComponent));
 	DoesNotRenderType.insert(typeid(CollisionComponent));
 
-
 	DoesNotUpdateType.insert(typeid(CollisionComponent));
 }
 
@@ -84,5 +83,10 @@ void ComponentManager::Render()
 				spComp->Render();
 		}
 	}
-};
+}
+void ComponentManager::Clear()
+{
+	ComponentMap.clear();
+}
+;
 

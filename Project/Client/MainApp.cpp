@@ -39,10 +39,29 @@ HRESULT App::Initialize()
 	ObjectManager& ObjectManagerRef = ObjectManager::instance();
 	ObjectManagerRef.Initialize();
 
+	TextureManager::instance().LoadTexturesFromTexInfoFile(L"..\\Data\\PathInfo.txt"s);
+
 	SceneManager& SceneMgrRef = SceneManager::instance();
 	SceneMgrRef.Initialize();
 	
 	SceneMgrRef.Scene_Change(ESceneID::EStart);
+
+	//TimeRef.TimerRegist(10.f, 10.f, 10.f, [&]()
+	//{
+	//	TimeRef.SetT(0.f);
+	//	global::bRePlay = true;
+	//	SceneMgrRef.Scene_Change(ESceneID::EStart);
+	//	return true;
+	//});
+	//
+	//TimeRef.TimerRegist(21.f, 21.f, 21.f, [&]()
+	//{
+	//	TimeRef.SetT(0.f);
+	//	global::bRePlay = false;
+	//	SceneMgrRef.Scene_Change(ESceneID::EStart);
+	//	return true;
+	//});
+
 #pragma endregion Application Initialize
 
 	return S_OK; 

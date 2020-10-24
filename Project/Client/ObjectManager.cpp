@@ -56,6 +56,11 @@ void ObjectManager::Release() & noexcept
 {
 }
 
+void ObjectManager::Clear() & noexcept
+{
+	_ObjectMap.clear();
+}
+
 
 
 

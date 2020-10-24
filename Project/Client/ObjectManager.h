@@ -13,6 +13,8 @@ public :
 	void Initialize() & noexcept;
 	void Release() & noexcept;
 
+	void Clear() & noexcept;
+
 	template<typename ObjectType,typename...InitParams>
 	auto InsertObject(const vec3 InitPos = { 0.f,0.f,0.f },InitParams&&... _Params);
 	

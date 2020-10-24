@@ -22,6 +22,7 @@ public:
 	static inline bool bActive{ true }; 
 	static inline HWND hWND{ nullptr };
 	static inline bool bDebug{ false };
+	static inline bool bRePlay{ false };
 };
 
 
