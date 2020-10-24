@@ -117,6 +117,13 @@ vec3 math::GetCenter(const std::array<vec3, 4ul> _Points)
 		  0.f 
 	};
 }
+
+float math::OnlyDecimal(float floating_point)
+{
+	int32_t Number = floating_point;
+	return floating_point - (float)Number;
+}
+
 // 화면 좌표가 아님 !! Y 축이 뒤집힘에 유의
 std::array<vec3, 5ul> math::GetLocalRect(const vec2 & Size)
 {

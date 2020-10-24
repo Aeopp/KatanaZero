@@ -45,6 +45,7 @@ public:
 	static vec3 GetCenter(const RECT& _Rt);
 	static vec3 GetCenter(const std::array<vec3, 4ul > _Points);
 
+	static float OnlyDecimal(float floating_point);
 	// 데카르트 좌표계
 	// 마지막 포인트는 로컬좌표의 정중앙을 의미
 	static std::array<vec3, 5ul> GetLocalRect(const vec2 & Size/*전체사이즈 입력 (절반이 아님)*/);

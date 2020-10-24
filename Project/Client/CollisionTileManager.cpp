@@ -10,7 +10,6 @@
 #include "ComponentManager.h"
 #include "Player.h"
 
-
 void CollisionTileManager::Collision()&
 {
 
@@ -218,8 +217,11 @@ void CollisionTileManager::Update()&
 					bLand = true;
 					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
 					spPhysicTransform->Landing();
-
-
+					if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
+					{
+						auto _Player =std::dynamic_pointer_cast<Player>(spOwner);
+						_Player->bWallJump = false;
+					}
 				/*	if (spOwner->GetID() == OBJECT_ID::EPLAYER)
 					{
 						auto _Player = std::dynamic_pointer_cast<Player>(spOwner);
@@ -298,8 +300,14 @@ void CollisionTileManager::Update()&
 					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
 					if (!spPhysicTransform)continue;
 
-					spPhysicTransform->DownLanding();
-
+					if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
+					{
+						auto _Player = std::dynamic_pointer_cast<Player>(spOwner);
+						if (!_Player->bWallJump)
+						{
+							spPhysicTransform->DownLanding();
+						}
+					}
 					//if (spOwner->GetID() == OBJECT_ID::EPLAYER)
 					//{
 					//	auto _Player =std::dynamic_pointer_cast<Player>(spOwner);
@@ -315,7 +323,7 @@ void CollisionTileManager::Update()&
 			auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
 			if (!spPhysicTransform)continue;
 			if (!spPhysicTransform->bLand)continue;
-			//spPhysicTransform->Flying();
+			/*spPhysicTransform->Flying();*/
 		}
 		//if(bLand==false)
 		//{
@@ -388,6 +396,11 @@ void CollisionTileManager::SaveCollisionTile(const std::wstring & FilePath) &
 void CollisionTileManager::Clear() &
 {
 	_CollisionTilePointsMap.clear();
+}
+
+void CollisionTileManager::SetUpWallRideTile()
+{
+
 }
 
 typename CollisionTileManager::_CollisionTileContainerType & CollisionTileManager::GetCollisionTileContainerRef(const bool bCanGoDown) &

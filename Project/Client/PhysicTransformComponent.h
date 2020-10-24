@@ -20,10 +20,7 @@ struct SimplePhysics
 {
 	vec3 Speed{ 0.f,0.f,0.f };
 	float Acceleration{ 0.f };
-	float Friction{ 0.f };
 	vec3 Dir{ 0.f,0.f,0.f };
-	// 저항계수
-	float Resistance = 0.f;
 	float T = 0.f;
 	float MaxT = 0.f;
 };

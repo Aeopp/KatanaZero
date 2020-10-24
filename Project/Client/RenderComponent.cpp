@@ -8,9 +8,6 @@
 #include "PhysicTransformComponent.h"
 #include <sstream>
 
-
-
-
 void RenderComponent::Render()
 {
 	Component::Render();

@@ -60,7 +60,9 @@ void Player::Initialize() & noexcept
 
 	_PhysicComp->bGravity = true;
 
-	Speed = 1000.f;
+	Speed = PlayerSpeed;
+
+	TimeRegist();
 }
 
 void Player::LateInitialize() & noexcept
@@ -96,13 +98,25 @@ void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 	if (_CollisionInfo._ID == OBJECT_ID::EWALLRIDELINE)
 	{
 		WallRideDir =  *_CollisionInfo._Variable._Cast<vec3>();
-		D3DXVec3Lerp(&WallRideDir, &WallRideDir, &UpVec, 0.4f);
+		D3DXVec3Lerp(&WallRideDir, &WallRideDir, &UpVec, 0.5f);
 	}
 }
 
 void Player::Move( vec3 Dir,const float AddSpeed)
 {
-	Super::Move(Dir, AddSpeed);
+	if (!bWallRide)
+	{
+		auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
+		if (_Physic_TransformComp->bFly)
+		{
+			Speed = PlayerSpeed*0.6f;
+		}
+		else
+		{
+			Speed = PlayerSpeed;
+		}
+		Super::Move(Dir, AddSpeed );
+	}
 }
 
 void Player::KeyBinding() & noexcept
@@ -173,18 +187,18 @@ void Player::Jump()
 {
 	auto PhysicComp =std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
 	if (!PhysicComp->bLand)return;
+	if (CurrentJumpCoolTime > 0)return;
+
+	CurrentJumpCoolTime = JumpCoolTime;
 
 	PhysicComp->Flying();
 
-	const vec3 Dir{ 0.f,+1.f,0.f };
+	const vec3 Dir{ 0.f,-1.f,0.f };
 	SimplePhysics _Physics;
-	_Physics.Acceleration = 1000.f;
+	_Physics.Acceleration = 100.f;
 	_Physics.Dir = Dir;
-	_Physics.Friction = 0.97f;
-	_Physics.Speed = { 0.f,-2500.f,0.f };
-	_Physics.Resistance = 0.4f;
-	_Physics.MaxT = 9999999999.f;
-	_Physics.T = 0.f;
+	_Physics.Speed = { 0.f,-800.f,0.f };
+	_Physics.MaxT = JumpCoolTime;
 
 	PhysicComp->Move(std::move(_Physics));
 }
@@ -207,15 +221,26 @@ void Player::DownJump()
 
 	const vec3 Dir{ 0.f,-1.f,0.f };
 	SimplePhysics _Physics;
-	_Physics.Acceleration = 500.f;
+	_Physics.Acceleration = 100.f;
 	_Physics.Dir = Dir;
-	_Physics.Friction = 0.97f;
-	_Physics.Speed = { 0.f,+2000.f,0.f };
-	_Physics.Resistance = 0.4f;
-	_Physics.MaxT = 9999999999.f;
-	_Physics.T = 0.f;
+	_Physics.Speed = { 0.f,+400.f,0.f };
+	_Physics.MaxT = 0.3f;
 
 	PhysicComp->Move(std::move(_Physics));
+}
+
+void Player::TimeRegist()
+{
+	auto Obsever = _This;
+
+	Time::instance().TimerRegist(0.f, 0.f, FLT_MAX,[this,Obsever]() 
+	{
+		if (Obsever.expired())return true;
+		const float Dt =Time::instance().Delta();
+		CurrentJumpCoolTime -= Dt;
+		CurrentWallJumpCoolTime -= Dt;
+		return false;
+	});
 }
 
 void Player::WallRideEnd()
@@ -246,17 +271,18 @@ void Player::JumpWallRide()
 {
 	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
 	if (!_Physic_TransformComp) return;
+	if (CurrentWallJumpCoolTime > 0)return;
 
+	CurrentWallJumpCoolTime = WallJumpCoolTime;
 	_Physic_TransformComp->Flying();
 	bWallRide = false;
+	bWallJump = true;
 
 	SimplePhysics _Physics;
-	_Physics.Acceleration = 500.f;
+	_Physics.Acceleration = 200.f;
 	_Physics.Dir = WallRideDir;
-	_Physics.Friction = 0.97f;
-	_Physics.Speed = WallRideDir *3000.f;
-	_Physics.Resistance = 0.4f;
-	_Physics.MaxT = FLT_MAX;
+	_Physics.Speed = WallRideDir *2000.f;
+	_Physics.MaxT = WallJumpCoolTime;
 	_Physics.T = 0.f;
 
 	_Physic_TransformComp->Move(std::move(_Physics));

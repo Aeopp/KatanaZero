@@ -31,15 +31,14 @@ void Scene::LateUpdate()
 
 void Scene::Initialize()
 {
-	const std::wstring MapStateKey = L"Bunkermansion";
-
 	TextureManager::instance().LoadTexturesFromTexInfoFile(LoadTextureFilePath);
-	RenderManager::instance()._Terrain.CurrentTileTextureStateKey = MapStateKey;
-	CollisionTileManager::instance().CurrentStateKey = MapStateKey;
-	CollisionLineManager::instance().CurrentStateKey = MapStateKey;
+	RenderManager::instance()._Terrain.CurrentTileTextureStateKey = CurrentMapStateKey;
+	CollisionTileManager::instance().CurrentStateKey = CurrentMapStateKey;
+	CollisionLineManager::instance().CurrentStateKey = CurrentMapStateKey;
 	RenderManager::instance()._Terrain.LoadTilesCurrentStateKeyOnly(LoadMapTexInfoFilePath);
 	CollisionTileManager::instance().LoadCollisionTile(LoadCollisionTileInfoFilePath);
 	CollisionLineManager::instance().LoadCollisionLine(LoadLineInfoFilePath);
+	CollisionTileManager::instance().SetUpWallRideTile();
 }
 
 void Scene::Release()

@@ -19,6 +19,8 @@ public :
 		LAYER::ELAYER _Layer;
 	};
 
+
+
 	RenderInfo _RenderInfo{};
 private:
 	bool bRenderControl = false; 

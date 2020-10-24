@@ -18,6 +18,7 @@
 
 void PhysicTransformComponent::Move(SimplePhysics _Physics)
 {
+	
 	Forces.emplace_back(std::move(_Physics));
 };
 
@@ -63,19 +64,14 @@ void PhysicTransformComponent::Update()
 	for (auto iter = std::begin(Forces); std::end(Forces) != iter;)
 	{
 		auto& _Physics=*iter;
-
 		_Physics.T += Dt;
 		_Physics.Speed += (_Physics.Dir * (_Physics.Acceleration * Dt));
-		_Physics.Speed *= (_Physics.Friction );
-
-		vec3 RepulsionVec = (((-_Physics.Speed) * (_Physics.Resistance)));
 
 		float Force = D3DXVec3Length(&_Physics.Speed);
-		float RepulsionForce= D3DXVec3Length(&RepulsionVec);
 
 		Position += _Physics.Speed * Dt;
-		Position +=  RepulsionVec*Dt;
-		if (_Physics.T > _Physics.MaxT || std::abs(Force - RepulsionForce) < Mass * Time::instance().TimeScale)
+
+		if (_Physics.T >=_Physics.MaxT || std::abs(Force) < Mass)
 		{
 			iter = Forces.erase(iter);
 			continue;
