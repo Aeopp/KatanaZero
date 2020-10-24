@@ -41,6 +41,8 @@ public:
 	void Reflect(const float Repulsion);
 	// 땅에 닿았다는 처리가 발생하면 초기화 해주세요.
 	float GravityAcceleration = 0.f;
+	float GravityCoefficient = 1.f;
+
 	float Friction = 1.f;
 	float Mass = 100.f;
 	bool bLand = false;

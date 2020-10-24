@@ -91,6 +91,32 @@ RECT math::ConvertLocalPtToRECT(const std::pair<vec3, vec3>& LocalPt)
 	
 	return _Rt;
 }
+vec3 math::RotationVec(const vec3 Vec,float Degree)
+{
+	matrix _MRot;
+	D3DXMatrixRotationZ(&_MRot, D3DXToRadian(Degree));
+	vec3 RotVec;
+	D3DXVec3TransformNormal(&RotVec, &Vec, &_MRot);
+	return RotVec;
+}
+vec3 math::GetCenter(const RECT& _Rt)
+{
+	return vec3
+	{
+		 ( _Rt.right +_Rt.left  ) /2.f,
+		 (_Rt.bottom + _Rt.top) / 2.f, 
+		 0.f
+	};
+}
+vec3 math::GetCenter(const std::array<vec3, 4ul> _Points)
+{
+	return vec3
+	{
+		 ( _Points[0].x +_Points[2].x  )/2.f ,
+		(_Points[0].y + _Points[2].y ) / 2.f  ,
+		  0.f 
+	};
+}
 // 화면 좌표가 아님 !! Y 축이 뒤집힘에 유의
 std::array<vec3, 5ul> math::GetLocalRect(const vec2 & Size)
 {
@@ -201,7 +227,8 @@ math::Collision::CircleAndCircle
 
 typename math::Collision::IsCollision_Dir math::Collision::SegmentAndRect(
 	const std::pair<std::pair<vec3, vec3>, std::array<vec3, 4ul>>
-	SegmentAndRect, const bool bDirNormal)
+	SegmentAndRect, const bool bDirNormal,
+	float& PushScala,vec3& PushDir, vec3& Position)
 {
 	auto& [Segment,Rect ]= SegmentAndRect;
 
@@ -220,16 +247,18 @@ typename math::Collision::IsCollision_Dir math::Collision::SegmentAndRect(
 	vec3 Distance= Segment.second - Segment.first;
 	vec3 Line{};
 	D3DXVec3Normalize(&Line, &Distance);
-	vec3 ToLB = Rect[3] - Segment.first;
-	vec3 ToRB = Rect[2] - Segment.first;
+	//vec3 ToLB = Rect[3] - Segment.first;
+	//vec3 ToRB = Rect[2] - Segment.first;
 
 	float left = min(Segment.first.x, Segment.second.x);
 	float top = min(Segment.first.y, Segment.second.y);
 	float right = max(Segment.first.x, Segment.second.x);
 	float bottom = max(Segment.first.y, Segment.second.y);
 
+	for(int i=0;i<4;++i)
 	{
-		float dot = D3DXVec3Dot(&Line, &ToLB);
+		vec3 ToVectex = Rect[i] - Segment.first;
+		float dot = D3DXVec3Dot(&Line, &ToVectex);
 		vec3 SegmentPoint = Segment.first + (Line * dot);
 
 		// 직선과 사각형의 충돌
@@ -242,28 +271,56 @@ typename math::Collision::IsCollision_Dir math::Collision::SegmentAndRect(
 					Segment.first - Segment.second : Segment.second - Segment.first;
 				if (bDirNormal)
 					 D3DXVec3Normalize(&ToRightDir, &ToRightDir);
+
+				// 사각형의 좌우 꼭짓점의 중간에 대응하는 선분의 중앙 점
+				vec3 SegmentCenter =SegmentPoint + Segment.first + (Line * dot);
+				SegmentCenter *= 0.5f;
+				Position = SegmentCenter;
+				const vec3 RectCenter = math::GetCenter(Rect);
+				PushDir =RectCenter - SegmentCenter;
+				vec3 RectDiagonal{ 0.f,0.f,0.f };
+				RectDiagonal.x = Rect[1].x - Rect[3].x;
+				RectDiagonal.y = Rect[1].y - Rect[3].y;
+				float Diagonal  =D3DXVec3Length(&RectDiagonal);
+				Diagonal - D3DXVec3Length(&PushDir);
+				D3DXVec3Normalize(&PushDir, &PushDir);
+
 				return ToRightDir;
 			}
 		}
 	}
 
-	{
-		float dot = D3DXVec3Dot(&Line, &ToRB);
-		vec3 SegmentPoint = Segment.first + (Line * dot);
+	//{
+	//	float dot = D3DXVec3Dot(&Line, &ToRB);
+	//	vec3 SegmentPoint = Segment.first + (Line * dot);
 
-		if (math::IsPointInnerRect(Rect, SegmentPoint))
-		{
-			if (SegmentPoint.x >= left && SegmentPoint.x <= right
-				&& SegmentPoint.y <= bottom && SegmentPoint.y >= top)
-			{
-				vec3 ToRightDir = Segment.first.x >= Segment.second.x ?
-					Segment.first - Segment.second : Segment.second - Segment.first;
-				if (bDirNormal)
-					D3DXVec3Normalize(&ToRightDir, &ToRightDir);
-				return ToRightDir;
-			}
-		}
-	}
+	//	if (math::IsPointInnerRect(Rect, SegmentPoint))
+	//	{
+	//		if (SegmentPoint.x >= left && SegmentPoint.x <= right
+	//			&& SegmentPoint.y <= bottom && SegmentPoint.y >= top)
+	//		{
+	//			vec3 ToRightDir = Segment.first.x >= Segment.second.x ?
+	//				Segment.first - Segment.second : Segment.second - Segment.first;
+	//			if (bDirNormal)
+	//				D3DXVec3Normalize(&ToRightDir, &ToRightDir);
+
+	//			// 사각형의 좌우 꼭짓점의 중간에 대응하는 선분의 중앙 점
+	//			vec3 SegmentCenter = SegmentPoint + Segment.first + (Line * dot);
+	//			SegmentCenter *= 0.5f;
+	//			Position = SegmentCenter;
+	//			const vec3 RectCenter = math::GetCenter(Rect);
+	//			PushDir = RectCenter - SegmentCenter;
+	//			vec3 RectDiagonal{ 0.f,0.f,0.f };
+	//			RectDiagonal.x = Rect[1].x - Rect[3].x;
+	//			RectDiagonal.y = Rect[1].y - Rect[3].y;
+	//			float Diagonal = D3DXVec3Length(&RectDiagonal);
+	//			Diagonal - D3DXVec3Length(&PushDir);
+	//			D3DXVec3Normalize(&PushDir, &PushDir);
+
+	//			return ToRightDir;
+	//		}
+	//	}
+	//}
 
 	return std::nullopt;
 }

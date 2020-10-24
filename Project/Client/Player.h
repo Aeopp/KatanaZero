@@ -15,14 +15,20 @@ public:
 	virtual void Release() & noexcept;
 	virtual void Update();
 	virtual void LateUpdate();
-
+	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override; 
 
 	void KeyBinding()&noexcept;
 	void Jump();
 	void DownJump();
 	
-	
+	void WallRideEnd();
+	void WallRide();
+	bool bWallRide{ false };
+
+	vec3 WallRideDir{0.f,0.f,0.f};
+	float GravityRepulsion = 100.f;
+	void JumpWallRide();
 private:
 	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};

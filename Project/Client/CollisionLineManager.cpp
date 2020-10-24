@@ -10,6 +10,7 @@
 #include "ComponentManager.h"
 #include "CollisionComponent.h"
 #include "object.h"
+#include "Player.h"
 
 
 
@@ -129,49 +130,120 @@ void CollisionLineManager::DebugRender()  &
 
 void CollisionLineManager::Update()&
 {
-	auto& _CollisionCompVec = ComponentManager::instance().Find<CollisionComponent>();
-
-	for (auto& _spCollision : _CollisionCompVec)
+	// 벽타기가 불가능한 선분
 	{
-		bool bCollision = false;
-		bool bLand = false;
+		auto& _CollisionCompVec = ComponentManager::instance().Find<CollisionComponent>();
 
-		if (!_spCollision->bCollision)continue;
-		auto _Owner = _spCollision->_Owner.lock();
-
-		// 일반 선분 (벽타기 불가능)
-		for (auto& _Line : GetLineContainer(false))
+		for (auto& _spCollision : _CollisionCompVec)
 		{
-			auto WorldRectPt = _spCollision->GetWorldRectPt();
+			bool bCollision = false;
+			bool bLand = false;
 
-			auto ODir =math::Collision::SegmentAndRect({ _Line,WorldRectPt }, true);
+			if (!_spCollision->bCollision)continue;
+			auto _Owner = _spCollision->_Owner.lock();
 
-			if (ODir)
+			// 일반 선분 (벽타기 불가능)
+			for (auto& _Line : GetLineContainer(false))
 			{
-				bCollision = true;
-				
-				if (!_Owner)continue;
-				_Owner->LineLanding(*ODir);
-				
-			/*	const vec3 StartPoint = _Line.first.x <= _Line.second.x ?
-											_Line.first : _Line.second;
+				auto WorldRectPt = _spCollision->GetWorldRectPt();
 
-				const vec3 EndPoint = _Line.first.x > _Line.second.x ?
-					_Line.first: _Line.second;
+				float Distance = 0.f;
+				vec3 Position = {};
+				vec3 Dir{}; 
+				auto ODir = math::Collision::SegmentAndRect({ _Line,WorldRectPt }, true,
+				Distance,Dir,Position);
 
-				float m = (EndPoint.y - StartPoint.y)
-					/ (EndPoint.x - StartPoint.x);
+				if (ODir)
+				{
+					bCollision = true;
 
-				_Owner->_TransformComp->Position.y =
-					m * (_Owner->_TransformComp->Position.x - StartPoint.x)
-						+ StartPoint.y;*/
-			} 
-		}
-		if (!bCollision)
-		{
-			_Owner->LineOff();
+					if (!_Owner)continue;
+					_Owner->LineLanding(*ODir);
+
+					math::Collision::HitInfo _HitInfo{};
+					_HitInfo.Distance = Distance;
+					_HitInfo.Dir = Dir;
+					D3DXVec3Normalize(&*ODir, &*ODir);
+					std::swap(ODir->x, ODir->y);
+					ODir->x *= -1.f;
+					_HitInfo.Normal = *ODir;
+					_HitInfo.Position = Position;
+					_HitInfo._Target = { };
+					_HitInfo._ID = OBJECT_ID::ELINE;
+					_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
+
+					_Owner->MapHit(std::move(_HitInfo));
+				}
+			}
+			if (!bCollision)
+			{
+				_Owner->LineOff();
+			}
 		}
 	}
+
+	{
+		auto& _CollisionCompVec = ComponentManager::instance().Find<CollisionComponent>();
+		
+		for (auto& _spCollision : _CollisionCompVec)
+		{
+			bool bCollision = false;
+			bool bLand = false;
+			
+			if (!_spCollision->bCollision)continue;
+			auto _Owner = _spCollision->_Owner.lock();
+			// 벽타기 가능한 선분이랑 상호작용가능한 타입
+			if (_Owner->GetID() != OBJECT_ID::EPLAYER)continue;
+			auto _Player = std::dynamic_pointer_cast<Player>(_Owner);
+			auto _PhysicComp =std::dynamic_pointer_cast<PhysicTransformComponent>(_Player->_TransformComp);
+		//	if (_PhysicComp->bLand)continue;
+
+			for (auto& _Line : GetLineContainer(true))
+			{
+				auto WorldRectPt = _spCollision->GetWorldRectPt();
+				float Distance = 0.f;
+				vec3 Position = {};
+				vec3 Dir{};
+				auto ODir = math::Collision::SegmentAndRect({ _Line,WorldRectPt }, true,
+					Distance, Dir, Position);
+				if (ODir)
+				{
+					bCollision = true;
+
+					if (!_Owner)continue;
+					_Player->WallRide();
+
+					math::Collision::HitInfo _HitInfo{};
+					_HitInfo.Distance = Distance;
+					_HitInfo.Dir = Dir;
+					D3DXVec3Normalize(&*ODir, &*ODir);
+					std::swap(ODir->x, ODir->y);
+					ODir->x *= -1.f;
+					_HitInfo.Normal = *ODir;
+					_HitInfo.Position = Position;
+					_HitInfo._Target = { };
+					_HitInfo._ID = OBJECT_ID::EWALLRIDELINE;
+					_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
+
+					auto PlayerCenter  =math::GetCenter(WorldRectPt);
+					vec3 WallRideLineNormal = PlayerCenter - _Line.first;
+					WallRideLineNormal.y = 0.f;
+					WallRideLineNormal.x = WallRideLineNormal.x < 0.f ?
+																-1 : 1;
+
+					_HitInfo._Variable = WallRideLineNormal;
+					_Player->MapHit(std::move(_HitInfo));
+					continue;
+				}
+			}
+
+			if (!bCollision)
+			{
+				_Player->WallRideEnd(); 
+			}
+		}
+	}
+	
 }
 
 void CollisionLineManager::LateUpdate()&

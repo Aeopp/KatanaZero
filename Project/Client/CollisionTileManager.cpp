@@ -183,25 +183,32 @@ void CollisionTileManager::Update()&
 			{
 				bCollision = true;
 
+				 vec3 TilePushDir = *opDir;
+
 				auto spOwner =_spCollision->_Owner.lock();
 
-				if ( std::abs(opDir->x) < std::abs(opDir->y))
-					opDir->y = 0;
-				else
-					opDir->x = 0;
+				if ( std::abs(TilePushDir.x) < std::abs(TilePushDir.y))
+					TilePushDir.y = 0;
+				else		   
+					TilePushDir.x = 0;
 				
 				if (spOwner->_TransformComp->bMapSlide)
 				{
-					if (spOwner->_TransformComp->bLineMode)
-					{
-						// opDir->x = 0;
-					}
-					spOwner->_TransformComp->Position += *opDir;
+					spOwner->_TransformComp->Position += TilePushDir;
 				}
 
 				math::Collision::HitInfo _HitInfo{};
+				_HitInfo.Distance = D3DXVec3Length(&(*opDir));
+				D3DXVec3Normalize(&(*opDir), &(*opDir));
+				_HitInfo.Dir = *opDir;
+				D3DXVec3Normalize(&TilePushDir, &TilePushDir);
+				_HitInfo.Normal = TilePushDir;
+				_HitInfo.Position = math::GetCenter(_CollisionTile);
+				_HitInfo._Target = { };
+				_HitInfo._ID = OBJECT_ID::ETILE;
+				_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
 
-				spOwner->MapHit(std::move( _HitInfo ) );
+				spOwner->MapHit(std::move(_HitInfo));
 
 				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
 				if (     std::abs ( WorldRectPt[2].y -  _CollisionTile[0].y )  < LandCheckDistance)
@@ -219,6 +226,7 @@ void CollisionTileManager::Update()&
 		//	if (spOwner->GetTag() == OBJECT_TAG::CHARCTER)
 		//	{
 		//		auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+		//		spPhysicTransform->bLand = false;
 		//		spPhysicTransform->Flying();
 		//	}
 		//}
@@ -245,25 +253,33 @@ void CollisionTileManager::Update()&
 			{
 				bCollision = true;
 
+				vec3 TilePushDir = *opDir; 
 				auto spOwner = _spCollision->_Owner.lock();
 
-				if (std::abs(opDir->x) < std::abs(opDir->y))
-					opDir->y = 0;
-				else
-					opDir->x = 0;
+				if (std::abs(TilePushDir.x) < std::abs(TilePushDir.y))
+					TilePushDir.y = 0;
+				else		   
+					TilePushDir.x = 0;
 
 				// 대상의 바닥 콜리전과 타일 상단의 거리로 판단
 				const bool Check = (std::abs(_CollisionTile[0].y - WorldRectPt[3].y) < LandCheckDistance);
 
-				if (spOwner->_TransformComp->bMapSlide && opDir->y < 0.0f && Check)
+				if (spOwner->_TransformComp->bMapSlide && TilePushDir.y < 0.0f && Check)
 				{
-					if (spOwner->_TransformComp->bLineMode)
-					{
-						//opDir->x = 0;
-					}
-					spOwner->_TransformComp->Position += *opDir;
+					spOwner->_TransformComp->Position += TilePushDir;
 				}
+
 				math::Collision::HitInfo _HitInfo{};
+				_HitInfo.Distance = D3DXVec3Length(&(*opDir));
+				D3DXVec3Normalize(&(*opDir), &(*opDir));
+				_HitInfo.Dir = *opDir;
+				D3DXVec3Normalize(&TilePushDir, &TilePushDir);
+				_HitInfo.Normal = TilePushDir;
+				_HitInfo.Position = math::GetCenter(_CollisionTile);
+				_HitInfo._Target = { };
+				_HitInfo._ID = OBJECT_ID::EDOWNJUMPTILE;
+				_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
+
 
 				spOwner->MapHit(std::move(_HitInfo));
 
@@ -276,16 +292,16 @@ void CollisionTileManager::Update()&
 					spPhysicTransform->DownLanding();
 				}
 			}
-
-			/*if (bLand == false)
-			{
-				auto spOwner = _spCollision->_Owner.lock();
-				auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
-				if (!spPhysicTransform)continue;
-				spPhysicTransform->bDownLand = false;
-			}*/
 		}
 
+		if (bLand == false)
+		{
+			auto spOwner = _spCollision->_Owner.lock();
+			auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+			if (!spPhysicTransform)continue;
+			if (spPhysicTransform->bLand)continue;
+			spPhysicTransform->Flying();
+		}
 		//if(bLand==false)
 		//{
 		//	auto spOwner = _spCollision->_Owner.lock();

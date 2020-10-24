@@ -76,11 +76,28 @@ void Player::Release() & noexcept
 void Player::Update()
 {
 	Super::Update();
+
+	
+	
 }
 
 void Player::LateUpdate()
 {
 	Super::LateUpdate();
+}
+
+void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
+{
+	Super::MapHit(_CollisionInfo);
+
+	constexpr float WallJumpAngle = 30.f;
+	const vec3 UpVec = { 0.f,-1.f,0.f };
+
+	if (_CollisionInfo._ID == OBJECT_ID::EWALLRIDELINE)
+	{
+		WallRideDir =  *_CollisionInfo._Variable._Cast<vec3>();
+		D3DXVec3Lerp(&WallRideDir, &WallRideDir, &UpVec, 0.3f);
+	}
 }
 
 void Player::Move( vec3 Dir,const float AddSpeed)
@@ -90,60 +107,62 @@ void Player::Move( vec3 Dir,const float AddSpeed)
 
 void Player::KeyBinding() & noexcept
 {
-	auto wpThis = _This;
+	auto Observer = _This;
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([this, wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{		
-		if (!object::IsValid(wpThis))return;
+		if (!object::IsValid(Observer))return;
 		const vec3 Dir{ 1.f,0.f,0.f };
 		Move(Dir,0.f);
 	},
 		'D', InputManager::EKEY_STATE::PRESSING));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([this, wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{ 	
-		if (!object::IsValid(wpThis))return;
+		if (!object::IsValid(Observer))return;
 		const vec3 Dir{ -1.f,0.f,0.f };
 		Move(Dir, 0.f); 
 	},	'A', InputManager::EKEY_STATE::PRESSING));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([this,  wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this,  Observer]()
 	{		
-		if (!object::IsValid(wpThis))return;
+		if (!object::IsValid(Observer))return;
 		DownJump();
 	}, 'S', InputManager::EKEY_STATE::DOWN));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([this,  wpThis]()
-	{ 		if (!object::IsValid(wpThis))return;
-
-		Jump();
+	_Anys.emplace_back(InputManager::instance().EventRegist([this,  Observer]()
+	{ 		if (!object::IsValid(Observer))return;
+		if (bWallRide)
+			JumpWallRide();
+		else 
+			Jump();
 	},'W', InputManager::EKEY_STATE::DOWN));
 
 	//TODO:: TEST CODE
-	_Anys.emplace_back(InputManager::instance().EventRegist([this, wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{ 
-		if (!object::IsValid(wpThis))return;
+		if (!object::IsValid(Observer))return;
 		_RenderComp->_RenderInfo.StateKey = L"spr_dragon_idle";
 	},
 		'2', InputManager::EKEY_STATE::DOWN));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([this,wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this,Observer]()
 	{
-		if (!object::IsValid(wpThis))return;
+		if (!object::IsValid(Observer))return;
 		_RenderComp->_RenderInfo.StateKey = L"spr_dragon_attack";
 	},
 		'1', InputManager::EKEY_STATE::DOWN));
 	
-	_Anys.emplace_back(InputManager::instance().EventRegist([this,wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this,Observer]()
 	{
-		if (!object::IsValid(wpThis))return;
+		if (!object::IsValid(Observer))return;
 		Time::instance().TimeScale = 0.1f;
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::PRESSING));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([this ,wpThis]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this ,Observer]()
 	{
-		if (!object::IsValid(wpThis))return;
+		if (!object::IsValid(Observer))return;
 		Time::instance().TimeScale = 1.f;
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::UP));
@@ -159,10 +178,10 @@ void Player::Jump()
 
 	const vec3 Dir{ 0.f,+1.f,0.f };
 	SimplePhysics _Physics;
-	_Physics.Acceleration = 500.f;
+	_Physics.Acceleration = 1000.f;
 	_Physics.Dir = Dir;
 	_Physics.Friction = 0.97f;
-	_Physics.Speed = { 0.f,-1300.f,0.f };
+	_Physics.Speed = { 0.f,-2500.f,0.f };
 	_Physics.Resistance = 0.4f;
 	_Physics.MaxT = 9999999999.f;
 	_Physics.T = 0.f;
@@ -197,4 +216,46 @@ void Player::DownJump()
 	_Physics.T = 0.f;
 
 	PhysicComp->Move(std::move(_Physics));
+}
+
+void Player::WallRideEnd()
+{
+	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
+	if (!_Physic_TransformComp) return;
+
+	_Physic_TransformComp->GravityCoefficient = 1.f;
+	bWallRide = false;
+}
+
+void Player::WallRide()
+{
+	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
+	if (!_Physic_TransformComp) return;
+	// 점프중이 아니라면 벽타기 불가능
+//	if (!_Physic_TransformComp->bFly)return;
+	// 벽에 매달리는 중이라면 가속도가 감소
+	_Physic_TransformComp->GravityCoefficient = 0.2f;
+	_Physic_TransformComp->Flying();
+
+	bWallRide = true;
+}
+
+void Player::JumpWallRide()
+{
+	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
+	if (!_Physic_TransformComp) return;
+
+	_Physic_TransformComp->Flying();
+	bWallRide = false;
+
+	SimplePhysics _Physics;
+	_Physics.Acceleration = 500.f;
+	_Physics.Dir = WallRideDir;
+	_Physics.Friction = 0.97f;
+	_Physics.Speed = WallRideDir *3000.f;
+	_Physics.Resistance = 0.4f;
+	_Physics.MaxT = FLT_MAX;
+	_Physics.T = 0.f;
+
+	_Physic_TransformComp->Move(std::move(_Physics));
 }

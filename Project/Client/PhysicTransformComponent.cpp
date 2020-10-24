@@ -31,6 +31,7 @@ void PhysicTransformComponent::Flying()
 void PhysicTransformComponent::FlyEnd()
 {
 	bFly = false;
+	bLand = true;
 };
 
 void PhysicTransformComponent::Landing()
@@ -43,7 +44,6 @@ void PhysicTransformComponent::DownLanding()
 {
 	Landing();
 	bDownLand = true;
-
 }
 void PhysicTransformComponent::Reflect(const float Repulsion)
 {
@@ -59,7 +59,6 @@ void PhysicTransformComponent::Update()
 	TransformComponent::Update();
 
 	const float Dt = Time::instance().Delta();
-	
 
 	for (auto iter = std::begin(Forces); std::end(Forces) != iter;)
 	{
@@ -75,16 +74,18 @@ void PhysicTransformComponent::Update()
 		float RepulsionForce= D3DXVec3Length(&RepulsionVec);
 
 		Position += _Physics.Speed * Dt;
-		Position += RepulsionVec*Dt;
-		if (_Physics.T > _Physics.MaxT  || std::abs(Force- RepulsionForce )< Mass)
-			iter =Forces.erase(iter); 
-		else 
+		Position +=  RepulsionVec*Dt;
+		if (_Physics.T > _Physics.MaxT || std::abs(Force - RepulsionForce) < Mass * Time::instance().TimeScale)
+		{
+			iter = Forces.erase(iter);
+			continue;
+		}
 			++iter;
 	}
 
 	if (bGravity)
 	{
-		GravityAcceleration += (math::GRAVITY * Dt);
+		GravityAcceleration += (GravityCoefficient * (math::GRAVITY * Dt));
 		Position += vec3{ 0.f,1.f,0.f }*GravityAcceleration * Dt;
 	}
 }

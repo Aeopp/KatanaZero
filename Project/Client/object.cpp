@@ -49,10 +49,11 @@ void object::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 }; 
 
-void object::MapHit(math::Collision::HitInfo _CollisionInfo)
+void object::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 {
 
 };
+
 
 void object::LineLanding(const vec3 LineDir)
 {

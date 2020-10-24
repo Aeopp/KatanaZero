@@ -4,6 +4,10 @@
 #include <array>
 #include <forward_list>
 #include <optional>
+#include <memory>
+#include "Tags.h"
+#include <any>
+
 
 using float_t = float;
 
@@ -34,6 +38,12 @@ public:
 
 	static RECT ConvertLocalPtToRECT(const std::array<vec3, 4ul>& LocalPt);
 	static RECT ConvertLocalPtToRECT(const std::pair<vec3, vec3>& LocalPt);
+
+	// 단위는 디그리 회전 방향은 양의 x축에서 봤을때의 시계방향
+	static vec3 RotationVec(const vec3 Vec,float Degree);
+
+	static vec3 GetCenter(const RECT& _Rt);
+	static vec3 GetCenter(const std::array<vec3, 4ul > _Points);
 
 	// 데카르트 좌표계
 	// 마지막 포인트는 로컬좌표의 정중앙을 의미
@@ -70,11 +80,29 @@ public:
 		// 반환값이 바라보는 방향은 항상 ->  왼쪽에서 오른쪽으로 약속
 		static IsCollision_Dir SegmentAndRect(
 			const std::pair<    std::pair<vec3, vec3>, std::array<vec3, 4ul>  > SegmentAndRect,
-			const bool bDirNormal);
-
+			const bool bDirNormal,
+			// 밀어내야 하는 양
+			float& PushScala,
+			// 밀어내야 하는 방향
+			vec3& PushDir,
+			// 사각형의 아래부분 꼭짓점 두부분의 중간에 대응하는 선분의 교점
+			vec3& Position);
+		
 		struct HitInfo
 		{
-
+			OBJECT_ID::EID _ID{};
+			OBJECT_TAG::ETAG _TAG{};
+			// 노말
+			vec3 Normal{} ;
+			// 부딪힌 물체가 나를 바라보는 방향
+			vec3 Dir{} ;
+			// 부딪힌 물체와 교차하는 영역 만큼의 거리
+			float Distance{} ;
+			// 부딪힌 물체의 중심점
+			vec3 Position{} ;
+			// 타겟
+			std::weak_ptr<class object> _Target{};
+			std::any _Variable{};
 		};
 	};
 };

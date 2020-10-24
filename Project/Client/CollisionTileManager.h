@@ -27,7 +27,7 @@ public:
 	void Clear()&;
 
 
-	const float LandCheckDistance = 5.f;
+	const float LandCheckDistance = 10.f;
 	_CollisionTileContainerType& GetCollisionTileContainerRef(const bool bCanGoDown)&;
 };
 
