@@ -9,6 +9,8 @@
 #include <utility>
 #include "ComponentManager.h"
 #include "CollisionComponent.h"
+#include "object.h"
+
 
 
 
@@ -129,21 +131,45 @@ void CollisionLineManager::Update()&
 {
 	auto& _CollisionCompVec = ComponentManager::instance().Find<CollisionComponent>();
 
-	_CollisionLineMap;
-
 	for (auto& _spCollision : _CollisionCompVec)
 	{
 		bool bCollision = false;
 		bool bLand = false;
 
 		if (!_spCollision->bCollision)continue;
+		auto _Owner = _spCollision->_Owner.lock();
 
 		// 일반 선분 (벽타기 불가능)
 		for (auto& _Line : GetLineContainer(false))
 		{
 			auto WorldRectPt = _spCollision->GetWorldRectPt();
-			math::Collision::SegmentAndRect({ _Line,WorldRectPt }, true);
 
+			auto ODir =math::Collision::SegmentAndRect({ _Line,WorldRectPt }, true);
+
+			if (ODir)
+			{
+				bCollision = true;
+				
+				if (!_Owner)continue;
+				_Owner->LineLanding(*ODir);
+				
+			/*	const vec3 StartPoint = _Line.first.x <= _Line.second.x ?
+											_Line.first : _Line.second;
+
+				const vec3 EndPoint = _Line.first.x > _Line.second.x ?
+					_Line.first: _Line.second;
+
+				float m = (EndPoint.y - StartPoint.y)
+					/ (EndPoint.x - StartPoint.x);
+
+				_Owner->_TransformComp->Position.y =
+					m * (_Owner->_TransformComp->Position.x - StartPoint.x)
+						+ StartPoint.y;*/
+			} 
+		}
+		if (!bCollision)
+		{
+			_Owner->LineOff();
 		}
 	}
 }

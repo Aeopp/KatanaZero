@@ -4,7 +4,7 @@
 
 void InputManager::Initialize() & noexcept
 {
-	EventRegist([]() {global::bDebug = !global::bDebug; }, 'P', EKEY_STATE::DOWN)->bFree=true;
+	EventRegist([]() {global::bDebug = !global::bDebug;  ShowCursor(global::bDebug); }, 'P', EKEY_STATE::DOWN)->bFree = true;
 	EventRegist([]() {Time::instance().bTimeInfoRender= !Time::instance().bTimeInfoRender; }, 'O', EKEY_STATE::DOWN)->bFree = true;
 }
 

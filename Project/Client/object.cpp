@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "object.h"
 #include "ComponentManager.h"
+#include "TransformComponent.h"
+#include "PhysicTransformComponent.h"
 
 void object::SetOwner(std::weak_ptr<class object> _Owner)
 {
@@ -50,6 +52,20 @@ void object::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 void object::MapHit(math::Collision::HitInfo _CollisionInfo)
 {
 
+};
+
+void object::LineLanding(const vec3 LineDir)
+{
+	_TransformComp->bLineMode = true;
+	_TransformComp->CurrentLineDir = LineDir;
+	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
+	if (!_Physic_TransformComp) return;
+	_Physic_TransformComp->FlyEnd();
+};
+
+void object::LineOff()
+{
+	_TransformComp->bLineMode = false; 
 };
 
 

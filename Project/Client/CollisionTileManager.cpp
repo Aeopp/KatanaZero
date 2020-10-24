@@ -189,9 +189,15 @@ void CollisionTileManager::Update()&
 					opDir->y = 0;
 				else
 					opDir->x = 0;
-
-				if(spOwner->_TransformComp->bMapSlide)
+				
+				if (spOwner->_TransformComp->bMapSlide)
+				{
+					if (spOwner->_TransformComp->bLineMode)
+					{
+						// opDir->x = 0;
+					}
 					spOwner->_TransformComp->Position += *opDir;
+				}
 
 				math::Collision::HitInfo _HitInfo{};
 
@@ -251,6 +257,10 @@ void CollisionTileManager::Update()&
 
 				if (spOwner->_TransformComp->bMapSlide && opDir->y < 0.0f && Check)
 				{
+					if (spOwner->_TransformComp->bLineMode)
+					{
+						//opDir->x = 0;
+					}
 					spOwner->_TransformComp->Position += *opDir;
 				}
 				math::Collision::HitInfo _HitInfo{};
@@ -263,8 +273,7 @@ void CollisionTileManager::Update()&
 					bLand = true;
 					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
 					if (!spPhysicTransform)continue;
-					spPhysicTransform->Landing();
-					spPhysicTransform->bDownLand = true;
+					spPhysicTransform->DownLanding();
 				}
 			}
 

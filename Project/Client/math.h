@@ -67,6 +67,7 @@ public:
 			const bool bDirNormal);
 
 		// 반환값은 기울기를 나타냅니다.
+		// 반환값이 바라보는 방향은 항상 ->  왼쪽에서 오른쪽으로 약속
 		static IsCollision_Dir SegmentAndRect(
 			const std::pair<    std::pair<vec3, vec3>, std::array<vec3, 4ul>  > SegmentAndRect,
 			const bool bDirNormal);

@@ -15,13 +15,14 @@ public:
 	virtual void Release() & noexcept;
 	virtual void Update();
 	virtual void LateUpdate();
-	
-	void Move(const vec3 Dir,const float AddSpeed=0.f);
+
+	virtual void Move(vec3 Dir, const float AddSpeed)override; 
+
 	void KeyBinding()&noexcept;
 	void Jump();
 	void DownJump();
 	
-	float Speed = 500.f;
+	
 private:
 	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};

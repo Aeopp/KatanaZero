@@ -44,7 +44,7 @@ void Player::Initialize() & noexcept
 
 	_CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
 	_CollisionComp->_CollisionInfo.Height = 20;
-	_CollisionComp->_CollisionInfo.Width = 15;
+	_CollisionComp->_CollisionInfo.Width = 20;
 
 	KeyBinding();
 
@@ -58,7 +58,9 @@ void Player::Initialize() & noexcept
 	_SpUIItemIcon->SetOwner(_This);
 
 
+	_PhysicComp->bGravity = true;
 
+	Speed = 1000.f;
 }
 
 void Player::LateInitialize() & noexcept
@@ -81,12 +83,9 @@ void Player::LateUpdate()
 	Super::LateUpdate();
 }
 
-void Player::Move(const vec3 Dir,const float AddSpeed)
+void Player::Move( vec3 Dir,const float AddSpeed)
 {
-	const float DeltaTime = Time::instance().Delta();
-	const vec3 CurrentPos = _TransformComp->Position;
-	const vec3 GoalPos = _TransformComp->Position + (Dir * Speed); 
-	_TransformComp->Position = math::lerp(CurrentPos, GoalPos, 1.f, DeltaTime);
+	Super::Move(Dir, AddSpeed);
 }
 
 void Player::KeyBinding() & noexcept
@@ -97,7 +96,7 @@ void Player::KeyBinding() & noexcept
 	{		
 		if (!object::IsValid(wpThis))return;
 		const vec3 Dir{ 1.f,0.f,0.f };
-		Move(Dir);
+		Move(Dir,0.f);
 	},
 		'D', InputManager::EKEY_STATE::PRESSING));
 
@@ -105,7 +104,7 @@ void Player::KeyBinding() & noexcept
 	{ 	
 		if (!object::IsValid(wpThis))return;
 		const vec3 Dir{ -1.f,0.f,0.f };
-		Move(Dir); 
+		Move(Dir, 0.f); 
 	},	'A', InputManager::EKEY_STATE::PRESSING));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this,  wpThis]()

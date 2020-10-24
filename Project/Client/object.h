@@ -17,6 +17,7 @@ public:
 	virtual OBJECT_ID::EID   GetID()abstract;
 	virtual OBJECT_TAG::ETAG GetTag()abstract;
 	virtual std::wstring_view GetName()const& abstract;
+	virtual ~object()noexcept = default;
 	template<typename ObjType>
 	std::shared_ptr<ObjType>GetThis();
 
@@ -33,6 +34,9 @@ public:
 
 	virtual void Hit(std::weak_ptr<class object>_Target,math::Collision::HitInfo _CollisionInfo);
 	virtual void MapHit(math::Collision::HitInfo _CollisionInfo);
+
+	void LineLanding(const vec3 LineDir);
+	void LineOff();
 };
 
 // 컴파일 타임 캐스팅이니 타입에 매우 유의

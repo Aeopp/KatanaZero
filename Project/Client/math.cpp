@@ -216,19 +216,34 @@ typename math::Collision::IsCollision_Dir math::Collision::SegmentAndRect(
 
 	/*const vec3 RectCenter{ (Rect[0].x + Rect[2].x) / 2.f,
 							(Rect[0].y + Rect[2].y) / 2.f,0.f };*/
-
-	vec3 Line= Segment.second - Segment.first;
-	D3DXVec3Normalize(&Line, &Line);
+	
+	vec3 Distance= Segment.second - Segment.first;
+	vec3 Line{};
+	D3DXVec3Normalize(&Line, &Distance);
 	vec3 ToLB = Rect[3] - Segment.first;
 	vec3 ToRB = Rect[2] - Segment.first;
+
+	float left = min(Segment.first.x, Segment.second.x);
+	float top = min(Segment.first.y, Segment.second.y);
+	float right = max(Segment.first.x, Segment.second.x);
+	float bottom = max(Segment.first.y, Segment.second.y);
 
 	{
 		float dot = D3DXVec3Dot(&Line, &ToLB);
 		vec3 SegmentPoint = Segment.first + (Line * dot);
 
+		// 직선과 사각형의 충돌
 		if (math::IsPointInnerRect(Rect, SegmentPoint))
 		{
-			MessageBox(global::hWND, L"충돌!", L"충돌!", 1);
+			if (SegmentPoint.x >= left && SegmentPoint.x <= right
+				&& SegmentPoint.y <= bottom && SegmentPoint.y >= top)
+			{
+				vec3 ToRightDir = Segment.first.x >= Segment.second.x ?
+					Segment.first - Segment.second : Segment.second - Segment.first;
+				if (bDirNormal)
+					 D3DXVec3Normalize(&ToRightDir, &ToRightDir);
+				return ToRightDir;
+			}
 		}
 	}
 
@@ -238,7 +253,15 @@ typename math::Collision::IsCollision_Dir math::Collision::SegmentAndRect(
 
 		if (math::IsPointInnerRect(Rect, SegmentPoint))
 		{
-			MessageBox(global::hWND, L"충돌!", L"충돌!", 1);
+			if (SegmentPoint.x >= left && SegmentPoint.x <= right
+				&& SegmentPoint.y <= bottom && SegmentPoint.y >= top)
+			{
+				vec3 ToRightDir = Segment.first.x >= Segment.second.x ?
+					Segment.first - Segment.second : Segment.second - Segment.first;
+				if (bDirNormal)
+					D3DXVec3Normalize(&ToRightDir, &ToRightDir);
+				return ToRightDir;
+			}
 		}
 	}
 

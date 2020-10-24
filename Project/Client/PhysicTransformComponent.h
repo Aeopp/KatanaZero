@@ -34,7 +34,9 @@ public:
 	//            방향        회전값                  계수                     지수
 	void Move(SimplePhysics _Physics);
 	void Flying();
+	void FlyEnd();
 	void Landing();
+	void DownLanding();
 						// 반발력
 	void Reflect(const float Repulsion);
 	// 땅에 닿았다는 처리가 발생하면 초기화 해주세요.
@@ -44,6 +46,7 @@ public:
 	bool bLand = false;
 	bool bFly = false;
 	bool bDownLand = false;
+	bool bGravity = true;
 	std::vector<SimplePhysics> Forces;
 	virtual void Update()override;;
 	virtual void LateUpdate()override;;
