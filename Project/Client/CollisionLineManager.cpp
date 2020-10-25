@@ -211,13 +211,6 @@ void CollisionLineManager::Update()&
 				if (ODir)
 				{
 					bCollision = true;
-
-				/*	if (   (std::abs(WorldRectPt[0].x - _Line.first.x ) > WallLineCheckXMin)  &&  (std::abs( WorldRectPt[1].x - _Line.first.x ) > WallLineCheckXMin))
-					{
-						continue;
-					}*/
-
-					_Player->WallRide();
 					math::Collision::HitInfo _HitInfo{};
 					_HitInfo.Distance = Distance;
 					_HitInfo.Dir = Dir;

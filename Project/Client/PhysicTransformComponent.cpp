@@ -27,7 +27,7 @@ void PhysicTransformComponent::Flying()
 	bFly = true;
 	bLand = false;
 	bDownLand = false;
-}
+};
 
 void PhysicTransformComponent::FlyEnd()
 {
@@ -40,12 +40,14 @@ void PhysicTransformComponent::Landing()
 	bLand = true;
 	bFly = false;
 	GravityAcceleration = 0.f;
-}
+};
+
 void PhysicTransformComponent::DownLanding()
 {
 	Landing();
 	bDownLand = true;
-}
+};
+
 void PhysicTransformComponent::Reflect(const float Repulsion)
 {
 	//for (auto& _Physics : Forces)

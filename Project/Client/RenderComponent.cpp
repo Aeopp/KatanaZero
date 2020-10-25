@@ -155,5 +155,6 @@ void RenderComponent::Anim(
 	_Info.T = StartT;
 	_Info._Color = _Color == D3DCOLOR_ARGB(255, 255, 255, 255) ?	_Info._Color : _Color;
 	_Info._Layer = _Layer == LAYER::ELAYER::ENONE ? _Info._Layer : _Layer;
+	_Info._Nofify.clear();
 	_Info._Nofify = std::move(_Nofify);
 }

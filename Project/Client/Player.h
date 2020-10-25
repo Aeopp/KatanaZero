@@ -4,12 +4,12 @@
 
 class Player  : public Character
 {
-private:
+public :
 	enum class State : uint8_t
 	{
 		Attack,
 		Crouch,
-		Dash, 
+		Dash,
 		DoorKick,
 		Fall,
 		Flip,
@@ -30,10 +30,9 @@ private:
 		StairFall,
 		Wall_Ride,
 	};
-
-	typename Player::State _CurrentAnimState{ Player::State::Idle };
-public :
 	using Super = Character;
+private:
+	typename Player::State _CurrentState{ Player::State::Idle };
 public :
 	virtual OBJECT_ID::EID   GetID();
 	virtual OBJECT_TAG::ETAG GetTag();
@@ -47,13 +46,22 @@ public:
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override; 
 
+	//State 
+	void Idle();
+	void IdleToRun();
+	void Run();
+	void RunToIdle();
+	void Fall();
+	void WallRide();
+	void Jump();
+	// // 
 	void FSM();
 
 	void MoveStart(const vec3 Dir);
 	void MoveEnd(const vec3 Dir);
 
-	void KeyBinding()&noexcept;
-	void Jump();
+	void KeyBinding() & noexcept;
+	
 	void DownJump();
 	void Attack();
 	void AttackSlash();
@@ -64,10 +72,18 @@ public:
 	void PreCrouch();
 	void Crouch();
 	void PostCrouch();
-
+	
 	void WallRideEnd();
-	void WallRide();
 	bool bWallRide{ false };
+private :
+	bool bJumpAnimEnd{ false };
+	bool bJumpKeyCheck{ false };
+	bool bMoveCurrentFrameKeyCheck{ false };
+	bool bIdleToRunMotionEnd{ false };
+	bool bRunToIdleMotionEnd{ false };
+	bool bAttackMotionEnd{ false }; 
+public :
+	
 	bool bWallJump{ false };
 	bool bMovingOn{ false };
 	bool bJumpStartAnimEnd{ false };
@@ -79,7 +95,6 @@ public:
 	float GravityRepulsion = 100.f;
 
 	bool bCrouch = false;
-	bool bAttacking = false;
 
 	const float RollCoolTime = 0.25f;
 	float CurrentRollCoolTime = 0.0f;
@@ -103,6 +118,9 @@ public:
 
 	std::bitset<2> _RollCheck;
 	vec3 RollDir{ 1.f,0.f,0.f };
+private:
+	vec3 CurrentMoveDir{ 1.f,0.f,0.f };
+	std::shared_ptr<class PhysicTransformComponent>_PhysicComp;
 private:
 	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};

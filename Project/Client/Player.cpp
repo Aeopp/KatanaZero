@@ -12,6 +12,8 @@
 #include "PhysicTransformComponent.h"
 #include "math.h"
 
+using namespace std;
+
 OBJECT_ID::EID Player::GetID()
 {
 	return OBJECT_ID::EPLAYER;
@@ -34,11 +36,11 @@ void Player::Initialize() & noexcept
 	_TransformComp=ComponentManager::instance().Insert< PhysicTransformComponent>(_This);
 
 	_TransformComp->Scale *= 3.f;
-	auto _PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
+	_PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
 	_PhysicComp->Mass = 100.f;
 
 	_RenderComp->Anim(false, true,
-		L"spr_dragon_idle", 12, 12* AnimFrameSpeed,
+		L"spr_dragon_idle", 12, 1.f,
 		{}, D3DCOLOR_ARGB(255, 255, 255, 255),
 		0.f, vec2{ 1.f,1.f }, L"Dragon",
 		LAYER::ELAYER::EOBJECT);
@@ -79,59 +81,46 @@ void Player::Release() & noexcept
 void Player::Update()
 {
 	Super::Update();
+
+	FSM();
 }
 
 void Player::LateUpdate()
 {
 	Super::LateUpdate();
 
-	// fly 가 on 이고 wallride 가 false 이고 jump 애니메이션 재생이 끝났다면
 	auto PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
 
-	if (PhysicComp->bFly && !bWallRide && bJumpStartAnimEnd)
-	{
-		_RenderComp->Anim(false, true, L"spr_dragon_fall", 41
-			, 0.2f);
-	};
-
-	if (PhysicComp->bLand && !PhysicComp->bFly  && 
-			!bAttacking && !bCrouch && !CurrentFrameCharacterInput &&
-		!bMovingOn)
-	{
-		_RenderComp->Anim(false, true, L"spr_dragon_idle", 12, 12 * AnimFrameSpeed);
-	};
-
 	CurrentFrameCharacterInput = false;
+	bMoveCurrentFrameKeyCheck = false;
+	bJumpKeyCheck = false;
 };
 
 void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 {
 	Super::MapHit(_CollisionInfo);
 
-	constexpr float WallJumpAngle = 30.f;
-	const vec3 UpVec = { 0.f,-1.f,0.f };
-
 	if (_CollisionInfo._ID == OBJECT_ID::EWALLRIDELINE)
 	{
+		const vec3 UpVec = { 0.f,-1.f,0.f };
 		WallRideDir = *_CollisionInfo._Variable._Cast<vec3>();
 		D3DXVec3Lerp(&WallRideDir, &WallRideDir, &UpVec, 0.5f);
+
+		if (_CurrentState==Player::State::Fall)
+		{
+//			_PhysicComp->Flying();
+			bWallRide = true;
+		}
 	}
-
-	auto _PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
-
-	/*if (!_PhysicComp->bFly && _CollisionInfo._TAG ==OBJECT_TAG::ETERRAIN
-		 && _CollisionInfo._ID !=OBJECT_ID::EWALLRIDELINE 
-		&&_PhysicComp->bLand  && !bMovingOn && bJumpStartAnimEnd && !bWallRide 
-		&&!bWallJump && !CurrentFrameCharacterInput)
-	{
-		_RenderComp->Anim(false, true, L"spr_dragon_idle", 12, 12 * AnimFrameSpeed);
-	}*/
 };
 
 void Player::Move(vec3 Dir,const float AddSpeed)
 {
 	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent>
 		(_TransformComp);
+
+	CurrentMoveDir = Dir;
+	bMoveCurrentFrameKeyCheck = true;
 
 	if (!bMovingOn && !_Physic_TransformComp->bFly)
 	{
@@ -148,12 +137,9 @@ void Player::Move(vec3 Dir,const float AddSpeed)
 		else if (bSneak)
 		{
 			Speed = PlayerSpeed * 0.6f; 
-			_RenderComp->Anim(false, true, L"spr_dragon_sneak", 10,
-				10 * AnimFrameSpeed);
 		}
 		else
 		{
-			_RenderComp->Anim(false, true, L"spr_dragon_run", 10, 10 * AnimFrameSpeed);
 			Speed = PlayerSpeed;
 		}
 
@@ -161,11 +147,99 @@ void Player::Move(vec3 Dir,const float AddSpeed)
 	}
 }
 
+void Player::Idle()
+{
+	// State 행동
+	_RenderComp->Anim(false, true, L"spr_dragon_idle", 12, 1.f);
+	////////////////////
+
+	// 상태전이 검사.
+	if (bMoveCurrentFrameKeyCheck)
+		_CurrentState = Player::State::Idle_to_Run;
+	if (bJumpKeyCheck)
+		_CurrentState = Player::State::Jump;
+	/// ///////////////////////////
+}
+
+void Player::IdleToRun()
+{
+	// State
+	RenderComponent::NotifyType _Notify;
+	_Notify[3] = [this]()
+	{bIdleToRunMotionEnd = true;};
+	_RenderComp->Anim(false, false, L"spr_dragon_idle_to_run", 3, 0.3f, std::move(_Notify));
+	// ///////////////////////////////////////////////////
+
+	// 상태전이
+	if (!bMoveCurrentFrameKeyCheck)
+		_CurrentState = Player::State::Idle;
+	else if (bIdleToRunMotionEnd)
+	{
+		bIdleToRunMotionEnd = false;
+		_CurrentState = Player::State::Run;
+	}
+	if (bJumpKeyCheck)
+		_CurrentState = Player::State::Jump;
+	////////////////////////////////////////////
+}
+
+void Player::Run()
+{
+	// State
+	_RenderComp->Anim(false, true, L"spr_dragon_run", 10, 0.6f);
+	// //
+
+	// 상태 전이
+	if (!bMoveCurrentFrameKeyCheck)
+		_CurrentState = Player::State::Run_to_Idle;
+	if (bJumpKeyCheck)
+		_CurrentState = Player::State::Jump;
+	//// 
+}
+
+void Player::RunToIdle()
+{
+	// State
+	RenderComponent::NotifyType _Notify;
+	_Notify[4] = [this]()
+	{
+		bRunToIdleMotionEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_run_to_idle", 4,0.4f,std::move(_Notify));
+	//  //
+
+	// Translation 
+	if (bRunToIdleMotionEnd)
+	{
+		bRunToIdleMotionEnd = false;
+		_CurrentState = Player::State::Idle;
+	}
+	if (bJumpKeyCheck)
+		_CurrentState = Player::State::Jump;
+	// //
+}
+
+void Player::Fall()
+{
+	//State 
+	_RenderComp->Anim(false, true, L"spr_dragon_fall", 4, 0.2f);
+	_PhysicComp->GravityCoefficient = 0.3f;
+	// // 
+
+	// Transition 
+	if (_PhysicComp->bLand)
+		_CurrentState = Player::State::Idle;
+	if (bWallRide)
+		_CurrentState = Player::State::Wall_Ride;
+	//
+}
+
 void Player::FSM()
 {
-	switch (_CurrentAnimState)
+	switch (_CurrentState)
 	{
 	case Player::State::Attack:
+		Attack();
 		break;
 	case Player::State::Crouch:
 		break;
@@ -174,6 +248,7 @@ void Player::FSM()
 	case Player::State::DoorKick:
 		break;
 	case Player::State::Fall:
+		Fall();
 		break;
 	case Player::State::Flip:
 		break;
@@ -186,13 +261,15 @@ void Player::FSM()
 	case Player::State::HurtRecover:
 		break;
 	case Player::State::Idle:
-		
+		Idle();
 		break;
 	case Player::State::Idle_to_Run:
+		IdleToRun();
 		break;
 	case Player::State::Idle_to_sneak:
 		break;
 	case Player::State::Jump:
+		Jump();
 		break;
 	case Player::State::Post_Crouch:
 		break;
@@ -201,8 +278,10 @@ void Player::FSM()
 	case Player::State::Roll:
 		break;
 	case Player::State::Run:
+		Run();
 		break;
 	case Player::State::Run_to_Idle:
+		RunToIdle();
 		break;
 	case Player::State::Sneak:
 		break;
@@ -224,22 +303,6 @@ void Player::MoveStart(const vec3 Dir)
 
 	_RollCheck[0] = true;
 	RollDir = Dir;
-
-	_Notify[3] = [this]()
-	{
-		bMovingOn = true;
-	};
-
-	if (!bSneak)
-	{
-		_RenderComp->Anim(false, false, L"spr_dragon_idle_to_run",
-			3, 3 * AnimFrameSpeed, std::move(_Notify));
-	}
-	else
-	{
-		_RenderComp->Anim(false, false, L"spr_dragon_idle_to_sneak",
-			4, 4 * AnimFrameSpeed);
-	}
 }
 void Player::MoveEnd(const vec3 Dir)
 {
@@ -256,12 +319,6 @@ void Player::MoveEnd(const vec3 Dir)
 		});
 
 		_RollCheck[0] = false;
-
-		if (!bSneak)
-		{
-			_RenderComp->Anim(false, false, L"spr_dragon_run_to_idle",
-				4, 4 * AnimFrameSpeed );
-		}
 	}
 };
 
@@ -344,18 +401,14 @@ void Player::KeyBinding() & noexcept
 	{ 	
 		if (!object::IsValid(Observer))return;
 		CurrentFrameCharacterInput = true;
-		if (bWallRide)
-			JumpWallRide();
-		else 
-			Jump();
+		bJumpKeyCheck = true;
 	},'W', InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
 		CurrentFrameCharacterInput = true;
-		Attack();
-
+		_CurrentState = Player::State::Attack;
 	}, VK_LBUTTON, InputManager::EKEY_STATE::DOWN));
 	
 	_Anys.emplace_back(InputManager::instance().EventRegist([this,Observer]()
@@ -377,32 +430,37 @@ void Player::KeyBinding() & noexcept
 
 void Player::Jump()
 {
-	auto PhysicComp =std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
-	if (!PhysicComp->bLand)return;
-	if (CurrentJumpCoolTime > 0)return;
+	/*if (!_PhysicComp->bLand)return;
+	if (CurrentJumpCoolTime > 0)return;*/
 
-	CurrentJumpCoolTime = JumpCoolTime;
+	/*CurrentJumpCoolTime = JumpCoolTime;*/
 
-	PhysicComp->Flying();
-
+	//State 
+	_PhysicComp->Flying();
 	const vec3 Dir{ 0.f,-1.f,0.f };
 	SimplePhysics _Physics;
 	_Physics.Acceleration = 100.f;
 	_Physics.Dir = Dir;
 	_Physics.Speed = { 0.f,-800.f,0.f };
 	_Physics.MaxT = JumpCoolTime;
-
-	PhysicComp->Move(std::move(_Physics));
-
-	bJumpStartAnimEnd = false;
-
-	RenderComponent::NotifyType _Nofity;
-	_Nofity[4] = [this]() 
+	_PhysicComp->Move(std::move(_Physics));
+	RenderComponent::NotifyType _Notify;
+	_Notify[4] = [this]() 
 	{
-		bJumpStartAnimEnd = true;
+		bJumpAnimEnd = true;
 	};
+	_RenderComp->Anim(false, false, L"spr_dragon_jump", 4, 0.2f,std::move(_Notify));
+	// // 
 
-	_RenderComp->Anim(false, false, L"spr_dragon_jump", 4, 4 * AnimFrameSpeed,std::move(_Nofity));
+	//Transition
+	if (bWallRide)
+		_CurrentState = Player::State::Wall_Ride;
+	if (bJumpAnimEnd)
+		_CurrentState = Player::State::Fall;
+	// //
+
+
+	/*bJumpStartAnimEnd = false;*/
 }
 
 void Player::DownJump()
@@ -438,41 +496,43 @@ void Player::DownJump()
 	_Physics.MaxT = 0.3f;
 
 	PhysicComp->Move(std::move(_Physics));
-}
+};
 
 void Player::Attack()
 {
-	if (bAttacking) return ;
-	
+	// State 
+
+	// 애니메이션 
 	RenderComponent::NotifyType _Notify;
+	_Notify[7] = [this]() {bAttackMotionEnd = true; };
+	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.23f,std::move(_Notify));
+	// // 
 
-	bAttacking = true;
-
-	_Notify[2] = [this]() { AttackSlash (); };
-	_Notify[7] = [this]() { bAttacking = false;  };
-
-	_RenderComp->Anim(false, false,
-		L"spr_dragon_attack",
-		7,
-		7 * AnimFrameSpeed, std::move(_Notify));
-
+	// 움직임
 	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
 	if (!_Physic_TransformComp) return;
-
 	_Physic_TransformComp->Position.z = 0.f;
-
 	vec3 Distance = global::MousePosWorld - _Physic_TransformComp->Position;
 	vec3 Dir;
 	D3DXVec3Normalize(&Dir, &Distance);
 	SimplePhysics _Physics;
-
 	_Physics.Acceleration = AttackAcceleration;
 	_Physics.Dir = Dir;
 	_Physics.Speed = Dir * AttackForce;
 	_Physics.MaxT = 7 * AnimFrameSpeed;
 	_Physics.T = 0.f;
-
 	_Physic_TransformComp->Move(std::move(_Physics));
+	// // 
+
+	// 전이
+	if (bAttackMotionEnd)
+	{
+		bAttackMotionEnd = false;
+		_CurrentState = Player::State::Fall;
+	}
+	// // 
+
+	////////////////////////////////////////////
 }
 
 void Player::AttackSlash()
@@ -499,9 +559,6 @@ void Player::Roll()
 	_Physics.T = 0.0f;
 
 	PhysicComp->Move(std::move(_Physics));
-
-	_RenderComp->Anim(false, false,
-		L"spr_dragon_roll", 7, 7 * AnimFrameSpeed);
 }
 
 void Player::TimeRegist()
@@ -527,9 +584,6 @@ void Player::PreCrouch()
 	if (bWallRide)return;
 
 	bCrouch = true;
-
-	_RenderComp->Anim(false, false, L"spr_dragon_precrouch",
-		2, 2 * AnimFrameSpeed);
 }
 
 void Player::Crouch()
@@ -539,8 +593,6 @@ void Player::Crouch()
 	if (PhysicComp->bFly)return;
 	if (bWallRide)return;
 	if (!bCrouch)return;
-
-	_RenderComp->Anim(false, true, L"spr_dragon_crouch", 1, 1 * AnimFrameSpeed);
 }
 
 void Player::PostCrouch()
@@ -550,15 +602,6 @@ void Player::PostCrouch()
 	if (PhysicComp->bFly)return;
 	if (bWallRide)return;
 	if (!bCrouch)return;
-
-	RenderComponent::NotifyType _Notify;
-	_Notify[2] = [this]()
-	{
-		bCrouch = false;
-	};
-
-	_RenderComp->Anim(false, false, L"spr_dragon_postcrouch",
-		2, 2 * AnimFrameSpeed, std::move(_Notify));
 }
 
 void Player::WallRideEnd()
@@ -572,17 +615,9 @@ void Player::WallRideEnd()
 
 void Player::WallRide()
 {
-	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
-	if (!_Physic_TransformComp) return;
-	// 점프중이 아니라면 벽타기 불가능
-	if (!_Physic_TransformComp->bFly)return;
-	if (_Physic_TransformComp->bLand)return;
-
 	// 벽에 매달리는 중이라면 가속도가 감소
-	_Physic_TransformComp->GravityCoefficient = 0.2f;
-	_Physic_TransformComp->Flying();
-
-	_RenderComp->Anim(false, false, L"spr_dragon_wallride", 2, 2 * AnimFrameSpeed);
+	_PhysicComp->GravityCoefficient = 0.3f;
+	_PhysicComp->Flying();
 	bWallRide = true;
 }
 
@@ -605,8 +640,4 @@ void Player::JumpWallRide()
 	_Physics.T = 0.f;
 
 	_Physic_TransformComp->Move(std::move(_Physics));
-
-	_RenderComp->Anim(false, false, L"spr_dragon_flip",
-		10,
-		10 * AnimFrameSpeed);
 }
