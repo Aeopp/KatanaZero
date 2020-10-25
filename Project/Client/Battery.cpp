@@ -17,8 +17,8 @@ static auto BatteryRenderMake = [](int32_t& Count)
 
 		auto spOwner = _UIRenderComp._Owner.lock();
 		auto spTexInfo = TextureManager::instance().
-			Get_TexInfo(_UIRenderComp._RenderInfo.ObjectKey,
-				_UIRenderComp._RenderInfo.StateKey, _UIRenderComp._RenderInfo.Number);
+			Get_TexInfo(_UIRenderComp._Info.ObjectKey,
+				_UIRenderComp._Info.StateKey, _UIRenderComp._Info.GetCurFrame());
 
 		if (!spOwner)return;
 		if (!spOwner->_TransformComp)return;
@@ -35,7 +35,7 @@ static auto BatteryRenderMake = [](int32_t& Count)
 			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
 			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
-				_UIRenderComp._RenderInfo._Color);
+				_UIRenderComp._Info._Color);
 
 			MWorld._41 += 15.f ;
 		};
@@ -56,10 +56,12 @@ void Battery::Initialize() & noexcept
 	_TransformComp->Scale*= 3.f;
 	_TransformComp->bFollowOwner = false;
 
-	_RenderComp->_RenderInfo.Number = 0;
-	_RenderComp->_RenderInfo.ObjectKey = L"Dragon";
-	_RenderComp->_RenderInfo.StateKey = L"spr_hud_battery_part_dragon";
-	_RenderComp->_RenderInfo._Layer = LAYER::EUI;
+	_RenderComp->_Info.AnimSpeed = 1.f;
+	_RenderComp->_Info.bLoop = false;
+	_RenderComp->_Info.End = 1;
+	_RenderComp->_Info.ObjectKey = L"Dragon";
+	_RenderComp->_Info.StateKey = L"spr_hud_battery_part_dragon";
+	_RenderComp->_Info._Layer = LAYER::EUI;
 	_RenderComp->Depth = 1;
 
 	_RenderComp->_Control.bRender = true;
@@ -71,17 +73,17 @@ void Battery::Initialize() & noexcept
 	std::weak_ptr<object> wpThis = _This;
 
 	// TODO :: 
-	//Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
-	//	[wpThis,this](){
-	//		auto spThis =wpThis.lock();
-	//		if (!spThis)return true;
-	//		
-	//		this->Count++;
-	//		this->Count %= 12;
+	Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
+		[wpThis,this](){
+			auto spThis =wpThis.lock();
+			if (!spThis)return true;
+			
+			this->Count++;
+			this->Count %= 12;
 
-	//		return false;
-	//	});
-	//
+			return false;
+		});
+	
 }
 
 void Battery::Update()

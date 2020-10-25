@@ -2,7 +2,6 @@
 #include "singleton_interface.h"
 #include "Tags.h"
 #include "object.h"
-
 #include <map>
 
 class ObjectManager : public singleton_interface<ObjectManager>
@@ -20,6 +19,8 @@ public :
 	
 	template<typename ObjectType=object>
 	auto& FindObject(OBJECT_TAG::ETAG _Tag,OBJECT_ID::EID _ID = OBJECT_ID::EID::ENONE);
+
+	std::weak_ptr<class Player> _Player;
 private:
 	std::map<OBJECT_TAG::ETAG, std::map< OBJECT_ID::EID,std::vector<std::shared_ptr<class object>>>>
 	_ObjectMap;

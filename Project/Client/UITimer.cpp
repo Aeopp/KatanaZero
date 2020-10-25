@@ -14,10 +14,11 @@ void UITimer::Initialize() & noexcept
 
 	_TransformComp->Scale *= 3.f;
 
-	_RenderComp->_RenderInfo.Number = 0;
-	_RenderComp->_RenderInfo.ObjectKey = L"Dragon";
-	_RenderComp->_RenderInfo.StateKey = L"spr_hud_dragon_timer";
-	_RenderComp->_RenderInfo._Layer = LAYER::EUI;
+	_RenderComp->_Info.AnimSpeed = 0;
+	_RenderComp->_Info.bLoop = false;
+	_RenderComp->_Info.ObjectKey = L"Dragon";
+	_RenderComp->_Info.StateKey = L"spr_hud_dragon_timer";
+	_RenderComp->_Info._Layer = LAYER::EUI;
 	_RenderComp->Depth = 1;
 
 	ScreenPos.x = global::ClientSize.first/2.f +10.f;
@@ -28,17 +29,17 @@ void UITimer::Initialize() & noexcept
 	std::weak_ptr<UIRenderComponent> wpRender = _RenderComp;
 	
 	//TODO::
-	//Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
-	//	[wpRender, this]() {
+	Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
+		[wpRender, this]() {
 
-	//	auto spRender = wpRender.lock();
-	//	if (!spRender)return true;
+		auto spRender = wpRender.lock();
+		if (!spRender)return true;
 
-	//	spRender->_RenderInfo.SrcScale.x = (std::max)
-	//		(spRender->_RenderInfo.SrcScale.x - 0.01f,0.f);
+		spRender->_Info.SrcScale.x = (std::max)
+			(spRender->_Info.SrcScale.x - 0.01f,0.f);
 
-	//	return false;
-	//});
+		return false;
+	});
 }
 
 void UITimer::Update()

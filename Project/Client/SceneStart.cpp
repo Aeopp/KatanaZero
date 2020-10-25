@@ -20,9 +20,12 @@ void SceneStart::Initialize()
 	LoadCollisionTileInfoFilePath = L"..\\Data\\Prison\\3rd\\Collision.txt"s;
 	LoadLineInfoFilePath = L"..\\Data\\Prison\\3rd\\Line.txt"s;
 
-	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Player>
-	(vec3{ 1180,5433,0.f }));
+	auto _Player =ObjectManager::instance().InsertObject<Player>
+		(vec3{ 1180,5433,0.f });
 
+	ObjectManager::instance()._Player = _Player;
+
+	SceneManageObjs.push_back(_Player);
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Mouse>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<HUD>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<UITimer>());

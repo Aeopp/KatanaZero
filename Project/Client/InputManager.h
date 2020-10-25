@@ -33,8 +33,6 @@ public:
 		EventRegist(typename DelegateType::EventType NotifyEvent,
 					typename InputManager::VirtualTableKeyDataType VKKey , 
 					typename InputManager::EKEY_STATE _KeyState) & noexcept;
-
-	
 private:
 	struct Record
 	{

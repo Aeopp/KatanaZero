@@ -171,6 +171,7 @@ void CollisionTileManager::Update()&
 	{
 		bool bCollision = false;
 		bool bLand = false;
+		bool bFly = false;
 
 		if (!_spCollision->bCollision)continue;
 
@@ -209,38 +210,26 @@ void CollisionTileManager::Update()&
 				_HitInfo._ID = OBJECT_ID::ETILE;
 				_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
 
-				spOwner->MapHit(std::move(_HitInfo));
-
+			
 				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
 				if (     std::abs ( WorldRectPt[2].y -  _CollisionTile[0].y )  < LandCheckDistance)
 				{
 					bLand = true;
 					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+					bFly=spPhysicTransform->bFly;
 					spPhysicTransform->Landing();
 					if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
 					{
 						auto _Player =std::dynamic_pointer_cast<Player>(spOwner);
 						_Player->bWallJump = false;
 					}
-				/*	if (spOwner->GetID() == OBJECT_ID::EPLAYER)
-					{
-						auto _Player = std::dynamic_pointer_cast<Player>(spOwner);
-						_Player->WallRideEnd();
-					}*/
+			
 			    }
+				spOwner->MapHit(std::move(_HitInfo));
 			}
 		}
 
-		//if(bLand==false)
-		//{
-		//	auto spOwner = _spCollision->_Owner.lock();
-		//	if (spOwner->GetTag() == OBJECT_TAG::CHARCTER)
-		//	{
-		//		auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
-		//		spPhysicTransform->bLand = false;
-		//		spPhysicTransform->Flying();
-		//	}
-		//}
+
 	}
 
 	// 아래방향 점프가 가능한 타일
@@ -250,7 +239,7 @@ void CollisionTileManager::Update()&
 	{
 		bool bCollision = false;
 		bool bLand = false;
-
+		bool bFly = false;
 		if (!_spCollision->bCollision)continue;
 		if (_spCollision->bDownJump)continue;
 
@@ -289,17 +278,15 @@ void CollisionTileManager::Update()&
 				_HitInfo.Position = math::GetCenter(_CollisionTile);
 				_HitInfo._Target = { };
 				_HitInfo._ID = OBJECT_ID::EDOWNJUMPTILE;
-
-
-				spOwner->MapHit(std::move(_HitInfo));
-
+				_HitInfo._TAG == OBJECT_TAG::ETERRAIN;
 				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
 				if (std::abs(WorldRectPt[2].y - _CollisionTile[0].y) < LandCheckDistance)
 				{
 					bLand = true;
-					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
+					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>
+						(spOwner->_TransformComp);
 					if (!spPhysicTransform)continue;
-
+					bFly = spPhysicTransform->bFly;
 					if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
 					{
 						auto _Player = std::dynamic_pointer_cast<Player>(spOwner);
@@ -308,12 +295,9 @@ void CollisionTileManager::Update()&
 							spPhysicTransform->DownLanding();
 						}
 					}
-					//if (spOwner->GetID() == OBJECT_ID::EPLAYER)
-					//{
-					//	auto _Player =std::dynamic_pointer_cast<Player>(spOwner);
-					//	_Player->WallRideEnd();
-					//}
+				
 				}
+				spOwner->MapHit(std::move(_HitInfo));
 			}
 		}
 
@@ -325,15 +309,7 @@ void CollisionTileManager::Update()&
 			if (!spPhysicTransform->bLand)continue;
 			/*spPhysicTransform->Flying();*/
 		}
-		//if(bLand==false)
-		//{
-		//	auto spOwner = _spCollision->_Owner.lock();
-		//	if (spOwner->GetTag() == OBJECT_TAG::CHARCTER)
-		//	{
-		//		auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
-		//		spPhysicTransform->Flying();
-		//	}
-		//}
+	
 	}
 }
 

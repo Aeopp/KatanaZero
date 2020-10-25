@@ -171,7 +171,7 @@ void CollisionLineManager::Update()&
 					_HitInfo._Target = { };
 					_HitInfo._ID = OBJECT_ID::ELINE;
 					_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
-
+					
 					_Owner->MapHit(std::move(_HitInfo));
 				}
 			}
@@ -229,7 +229,7 @@ void CollisionLineManager::Update()&
 					_HitInfo._Target = { };
 					_HitInfo._ID = OBJECT_ID::EWALLRIDELINE;
 					_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
-
+					
 					auto PlayerCenter  =math::GetCenter(WorldRectPt);
 					vec3 WallRideLineNormal = PlayerCenter - _Line.first;
 					WallRideLineNormal.y = 0.f;

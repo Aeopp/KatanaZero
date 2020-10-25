@@ -15,10 +15,12 @@ void HUD::Initialize() & noexcept
 
     _TransformComp->Scale  *=3.f;
     
-    _RenderComp->_RenderInfo.Number = 0;
-    _RenderComp->_RenderInfo.ObjectKey = L"Dragon";
-    _RenderComp->_RenderInfo.StateKey = L"spr_hud_dragon";
-    _RenderComp->_RenderInfo._Layer = LAYER::EUI;
+    _RenderComp->_Info.AnimSpeed = 1.f;
+    _RenderComp->_Info.bLoop = false;
+    _RenderComp->_Info.End = 1;
+    _RenderComp->_Info.ObjectKey = L"Dragon";
+    _RenderComp->_Info.StateKey = L"spr_hud_dragon";
+    _RenderComp->_Info._Layer = LAYER::EUI;
   
 
     ScreenPos.x = 1920.f / 2.f;

@@ -11,8 +11,8 @@ static auto MouseRender = [](Component& _Comp)
 	auto& _UIRenderComp = dynamic_cast<UIRenderComponent&>(_Comp);
 
 	auto spOwner = _UIRenderComp._Owner.lock();
-	auto spTexInfo = TextureManager::instance().Get_TexInfo(_UIRenderComp._RenderInfo.ObjectKey,
-		_UIRenderComp._RenderInfo.StateKey, _UIRenderComp._RenderInfo.Number);
+	auto spTexInfo = TextureManager::instance().Get_TexInfo(_UIRenderComp._Info.ObjectKey,
+		_UIRenderComp._Info.StateKey, _UIRenderComp._Info.GetCurFrame());
 
 	if (!spOwner)return;
 	if (!spOwner->_TransformComp)return;
@@ -40,12 +40,12 @@ static auto MouseRender = [](Component& _Comp)
 	//////////////////
 	if (IsRenderable)
 	{
-		RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _UIRenderComp._RenderInfo.SrcScale.x,
-							  spTexInfo->ImageInfo.Height * _UIRenderComp._RenderInfo.SrcScale.y };
+		RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _UIRenderComp._Info.SrcScale.x,
+							  spTexInfo->ImageInfo.Height * _UIRenderComp._Info.SrcScale.y };
 		vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
 		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 		GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
-			_UIRenderComp._RenderInfo._Color);
+			_UIRenderComp._Info._Color);
 	}
 };
 
@@ -72,9 +72,12 @@ void Mouse::Initialize() & noexcept
     _TransformComp->Scale *= 2.f;
 
     _RenderComp = ComponentManager::instance().Insert<UIRenderComponent>(_This);
-    _RenderComp->_RenderInfo.Number = 0;
-    _RenderComp->_RenderInfo.StateKey = L"Cursor";
-    _RenderComp->_RenderInfo.ObjectKey = L"Cursor";
+    _RenderComp->_Info.T= 0;
+    _RenderComp->_Info.StateKey = L"Cursor";
+    _RenderComp->_Info.ObjectKey = L"Cursor";
+	_RenderComp->_Info.AnimSpeed = 1.f;
+	_RenderComp->_Info.bLoop = false;
+	_RenderComp->_Info.End = 1;
     _RenderComp->Depth = (std::numeric_limits<int32_t>::max)();
 
 	_RenderComp->_Control.bRender = true;
