@@ -138,3 +138,7 @@ Cursor
 Itemicons
 Itemicons
 5
+..\Resource\Texture\Dragon\spr_dragon_wallride\%d.png
+Dragon
+spr_dragon_wallride
+2

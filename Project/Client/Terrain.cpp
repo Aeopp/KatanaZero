@@ -105,6 +105,7 @@ bool Terrain::IsPicking(const vec3& TilePosition, const vec3& Point)
 void Terrain::DebugRender()
 {
 	if (!global::bDebug)return;
+	if (!bDebugGridRender)return;
 
 	constexpr float DebugLineWidth = 0.5f;
 	constexpr float ScreenCenterX = global::ClientSize.first / 2.f;

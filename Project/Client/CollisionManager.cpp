@@ -23,7 +23,7 @@ void CollisionManager::Update()
 
 void CollisionManager::Initialize()
 {
-
+	CollisionTileManager::instance().Initialize();
 }
 
 void CollisionManager::Render()

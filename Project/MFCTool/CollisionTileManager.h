@@ -13,8 +13,11 @@ private:
 	// 미리 포인트 4개를 구해놓는다.
 	//           Key StateKey        Value Tile Points
 	_CollisionTileMapType _CollisionTilePointsMap;
+
 public:
 	std::wstring CurrentStateKey;
+
+	
 	void Push(const vec3& Position,const bool bCanGoDown)&;
 	void Erase(const vec3& TargetPosition,const bool bCanGoDown)&;
 	void DebugRender()&;

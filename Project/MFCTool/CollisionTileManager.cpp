@@ -8,6 +8,7 @@
 #include <ostream>
 #include <istream>
 
+
 void CollisionTileManager::Push(const vec3 & Position, const bool bCanGoDown) &
 {
 	float SizeXHalf = global::TileSize.first / 2;
@@ -68,6 +69,8 @@ void CollisionTileManager::Erase(const vec3 & TargetPosition, const bool bCanGoD
 void CollisionTileManager::DebugRender()&
 {
 	if (!global::bDebug)return;
+	
+
 	static constexpr float DebugLineWidth = 2.f;
 
 	std::pair<float, float > CameraPos{ 0.f,0.f }; 

@@ -8,6 +8,8 @@
 #include "GraphicDevice.h"
 #include "math.h"
 #include <sstream>
+#include "InputManager.h"
+
 
 // 정적 람다는 가변적인 변수는 절대 캡쳐하지마세요.
 static auto YSort = [](std::shared_ptr<RenderComponent>& Lhs,std::shared_ptr<RenderComponent>& Rhs)
@@ -61,7 +63,10 @@ void RenderManager::Release() & noexcept
 
 void RenderManager::Initialize() & noexcept
 {
-	
+	InputManager::instance().EventRegist([]()
+	{
+		RenderManager::instance()._Terrain.bDebugGridRender = !RenderManager::instance()._Terrain.bDebugGridRender;
+	}, 'I', InputManager::EKEY_STATE::DOWN)->bFree = true;
 }
 
 void RenderManager::DebugMouseInfoRender() & noexcept

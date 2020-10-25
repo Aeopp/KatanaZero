@@ -4,6 +4,34 @@
 
 class Player  : public Character
 {
+private:
+	enum class State : uint8_t
+	{
+		Attack,
+		Crouch,
+		Dash, 
+		DoorKick,
+		Fall,
+		Flip,
+		HurtFly,
+		HurtFly_Begin,
+		Hurt_Ground,
+		HurtRecover,
+		Idle,
+		Idle_to_Run,
+		Idle_to_sneak,
+		Jump,
+		Post_Crouch,
+		Pre_Crouch,
+		Roll,
+		Run,
+		Run_to_Idle,
+		Sneak,
+		StairFall,
+		Wall_Ride,
+	};
+
+	typename Player::State _CurrentAnimState{ Player::State::Idle };
 public :
 	using Super = Character;
 public :
@@ -18,6 +46,8 @@ public:
 	virtual void LateUpdate();
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override; 
+
+	void FSM();
 
 	void MoveStart(const vec3 Dir);
 	void MoveEnd(const vec3 Dir);
@@ -49,15 +79,15 @@ public:
 	float GravityRepulsion = 100.f;
 
 	bool bCrouch = false;
+	bool bAttacking = false;
 
 	const float RollCoolTime = 0.25f;
 	float CurrentRollCoolTime = 0.0f;
 	float RollSpeed = 1000.f;
-
-	const float AttackCoolTime = 0.15f;
-	const float AttackForce = 1000.f;
-	const float AttackAcceleration = 500.f;
-	float CurrentAttackCoolTime = 0.0f;
+	
+	const float AttackForce = 500.f;
+	const float AttackAcceleration = 200.f;
+	
 
 	const float JumpCoolTime = 0.3f;
 	float CurrentJumpCoolTime = 0.0f;

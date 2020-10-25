@@ -22,14 +22,14 @@ HRESULT App::Initialize()
 	GraphicDevice& GraphicDeviceRef = GraphicDevice::instance();
 	GraphicDeviceRef.Initialize(bAppWindowScreenMode);
 
+	InputManager& InputManagerRef = InputManager::instance();
+	InputManagerRef.Initialize();
+
 	RenderManager& RenderManagerRef = RenderManager::instance();
 	RenderManagerRef.Initialize();
 
 	Time& TimeRef = Time::instance();
 	TimeRef.Initialize(AppFrameLimit,global::DeltaMax);
-
-	InputManager& InputManagerRef = InputManager::instance();
-	InputManagerRef.Initialize();
 
 	ComponentManager::instance().Initialize();
 

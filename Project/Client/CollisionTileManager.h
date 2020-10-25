@@ -15,7 +15,11 @@ private:
 	//           Key StateKey        Value Tile Points
 	_CollisionTileMapType _CollisionTilePointsMap;
 	void Collision()&;
+	
+	
 public:
+	void Initialize() & noexcept;
+
 	std::wstring CurrentStateKey;
 	void Push(const vec3& Position,const bool bCanGoDown)&;
 	void Erase(const vec3& TargetPosition,const bool bCanGoDown)&;

@@ -9,8 +9,14 @@
 #include "CollisionComponent.h"
 #include "ComponentManager.h"
 #include "Player.h"
+#include "InputManager.h"
 
 void CollisionTileManager::Collision()&
+{
+
+}
+
+void CollisionTileManager::Initialize() & noexcept
 {
 
 }
@@ -75,6 +81,7 @@ void CollisionTileManager::Erase(const vec3 & TargetPosition, const bool bCanGoD
 void CollisionTileManager::DebugRender()&
 {
 	if (!global::bDebug)return;
+
 	static constexpr float DebugLineWidth = 2.f;
 
 	std::pair<float, float > CameraPos{ 0.f,0.f }; 
