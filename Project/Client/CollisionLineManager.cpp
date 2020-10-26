@@ -237,7 +237,7 @@ void CollisionLineManager::Update()&
 
 			if (!bCollision || _PhysicComp->bLand)
 			{
-				_Player->WallRideEnd(); 
+				_Player->_PhysicComp->GravityCoefficient = 1.f; 
 			}
 		}
 	}

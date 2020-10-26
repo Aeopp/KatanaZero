@@ -30,6 +30,8 @@ class PhysicTransformComponent : public TransformComponent
 public:
 	//            방향        회전값                  계수                     지수
 	void Move(SimplePhysics _Physics);
+	void Move(vec3 InitVec, float Acceleration, float MaxT, 
+	vec3 Dir = { 0.f,0.f,0.f } , float InitT = 0.f);
 	void Flying();
 	void FlyEnd();
 	void Landing();
@@ -46,6 +48,7 @@ public:
 	bool bFly = false;
 	bool bDownLand = false;
 	bool bGravity = true;
+	bool bCurCollisionTile = false;
 	std::vector<SimplePhysics> Forces;
 	virtual void Update()override;;
 	virtual void LateUpdate()override;;

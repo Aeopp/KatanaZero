@@ -49,6 +49,8 @@ public :
 		LAYER::ELAYER _Layer = LAYER::ELAYER::ENONE);
 
 	Info _Info{};
+
+	int32_t AnimDir = 1.f;
 private:
 	bool bRenderControl = false; 
 };

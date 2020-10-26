@@ -18,9 +18,19 @@
 
 void PhysicTransformComponent::Move(SimplePhysics _Physics)
 {
-	
 	Forces.emplace_back(std::move(_Physics));
-};
+}
+void PhysicTransformComponent::Move(
+	vec3 InitVec, float Acceleration, float MaxT, vec3 Dir, float InitT)
+{
+	if (Dir == vec3{ 0.f,0.f,0.f })
+	{
+		D3DXVec3Normalize(&Dir, &InitVec);
+	};
+
+	Forces.emplace_back(SimplePhysics{ InitVec,Acceleration,Dir,InitT,MaxT });
+}
+;
 
 void PhysicTransformComponent::Flying()
 {
@@ -39,6 +49,7 @@ void PhysicTransformComponent::Landing()
 {
 	bLand = true;
 	bFly = false;
+	bCurCollisionTile = true;
 	GravityAcceleration = 0.f;
 };
 

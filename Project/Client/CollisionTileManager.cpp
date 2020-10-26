@@ -312,11 +312,9 @@ void CollisionTileManager::Update()&
 		{
 			auto spOwner = _spCollision->_Owner.lock();
 			auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
-			if (!spPhysicTransform)continue;
-			if (!spPhysicTransform->bLand)continue;
+			spPhysicTransform->bCurCollisionTile = false;
 			/*spPhysicTransform->Flying();*/
 		}
-	
 	}
 }
 

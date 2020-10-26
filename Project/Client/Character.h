@@ -11,8 +11,8 @@ public :
 	virtual OBJECT_TAG::ETAG GetTag();
 	virtual std::wstring_view GetName()const&;
 public :
-	virtual void Initialize() & noexcept;
-
+	virtual void Initialize() & noexcept override;
+	virtual void Update()override;
 	virtual void Move( vec3 Dir, const float AddSpeed);
 
 	std::shared_ptr<class RenderComponent> _RenderComp;

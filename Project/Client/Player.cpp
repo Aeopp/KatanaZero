@@ -60,10 +60,9 @@ void Player::Initialize() & noexcept
 	_SpUIItemIcon = ObjectManager::instance().InsertObject<UIItemIcon>();
 	_SpUIItemIcon->SetOwner(_This);
 
-
 	_PhysicComp->bGravity = true;
 
-	Speed = PlayerSpeed;
+	Speed= PlayerSpeed;
 
 	TimeRegist();
 }
@@ -89,149 +88,226 @@ void Player::LateUpdate()
 {
 	Super::LateUpdate();
 
-	auto PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
+	const float Dt = Time::instance().Delta();
 
-	CurrentFrameCharacterInput = false;
-	bMoveCurrentFrameKeyCheck = false;
-	bJumpKeyCheck = false;
+	bFrameCurrentCharacterInput = false;
+	bMoveKeyCheck = false;
+	bJumpKeyCheck = false; 
+	bAttackKeyCheck = false;
+	bDownKeyCheck = false;
+	bCurWallRideCollision = false;
+
+	CurAttackCoolTime -= Dt;
 };
 
 void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 {
 	Super::MapHit(_CollisionInfo);
 
-	if (_CollisionInfo._ID == OBJECT_ID::EWALLRIDELINE)
+	if (_CollisionInfo._ID == OBJECT_ID::EWALLRIDELINE && _PhysicComp->bFly)
 	{
 		const vec3 UpVec = { 0.f,-1.f,0.f };
-		WallRideDir = *_CollisionInfo._Variable._Cast<vec3>();
-		D3DXVec3Lerp(&WallRideDir, &WallRideDir, &UpVec, 0.5f);
-
-		if (_CurrentState==Player::State::Fall)
-		{
-//			_PhysicComp->Flying();
-			bWallRide = true;
-		}
+		FlipDir = *_CollisionInfo._Variable._Cast<vec3>();
+		D3DXVec3Lerp(&FlipDir, &FlipDir, &UpVec, 0.5f);
+		bCurWallRideCollision = true;
+		FSM();
 	}
 };
 
 void Player::Move(vec3 Dir,const float AddSpeed)
 {
-	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent>
-		(_TransformComp);
-
-	CurrentMoveDir = Dir;
-	bMoveCurrentFrameKeyCheck = true;
-
-	if (!bMovingOn && !_Physic_TransformComp->bFly)
+	switch (_CurrentState)
 	{
-		MoveStart(Dir);
-		return;
+	case Player::State::Sneak:
+		Speed = PlayerSpeed * 0.6f;
+		break; 
+	case Player::State::Fall:
+		Speed = PlayerSpeed * 0.4f;
+		break;
+	case Player::State::Jump:
+		Speed = PlayerSpeed * 0.4f;
+		break;
+	case Player::State::Run:
+		Speed = PlayerSpeed;
+		break;
+	default:
+		break;
 	}
 
-	if (!bWallRide)
-	{
-		if (_Physic_TransformComp->bFly )
-		{
-			Speed = PlayerSpeed*0.5f ;
-		}
-		else if (bSneak)
-		{
-			Speed = PlayerSpeed * 0.6f; 
-		}
-		else
-		{
-			Speed = PlayerSpeed;
-		}
-
-		Super::Move(Dir, AddSpeed);
-	}
+	Super::Move(Dir, AddSpeed);
 }
 
 void Player::Idle()
 {
 	// State 행동
+	_CurrentState = Player::State::Idle;
 	_RenderComp->Anim(false, true, L"spr_dragon_idle", 12, 1.f);
 	////////////////////
+}
 
+void Player::IdleState()
+{
 	// 상태전이 검사.
-	if (bMoveCurrentFrameKeyCheck)
-		_CurrentState = Player::State::Idle_to_Run;
+	if (bMoveKeyCheck)
+	{
+		IdleToRun();
+	}
 	if (bJumpKeyCheck)
-		_CurrentState = Player::State::Jump;
+	{
+		Jump();
+	}
+	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	{
+		DownJump();
+	}
 	/// ///////////////////////////
 }
 
 void Player::IdleToRun()
 {
-	// State
+	_CurrentState = Player::State::Idle_to_Run;
+
 	RenderComponent::NotifyType _Notify;
 	_Notify[3] = [this]()
-	{bIdleToRunMotionEnd = true;};
-	_RenderComp->Anim(false, false, L"spr_dragon_idle_to_run", 3, 0.3f, std::move(_Notify));
-	// ///////////////////////////////////////////////////
+	{bIdleToRunMotionEnd = true; };
+	_RenderComp->Anim(false, false, L"spr_dragon_idle_to_run", 3, 0.12f , std::move(_Notify));
+}
 
+void Player::IdleToRunState()
+{
 	// 상태전이
-	if (!bMoveCurrentFrameKeyCheck)
-		_CurrentState = Player::State::Idle;
-	else if (bIdleToRunMotionEnd)
+	if (!bMoveKeyCheck)
 	{
+		Idle(); 
+	}
+	if (bIdleToRunMotionEnd)
+	{
+		Run();
 		bIdleToRunMotionEnd = false;
-		_CurrentState = Player::State::Run;
 	}
 	if (bJumpKeyCheck)
-		_CurrentState = Player::State::Jump;
+	{
+		Jump(); 
+	}
+	if (bDownKeyCheck && !_PhysicComp->bDownLand)
+	{
+		Roll();
+	}
+	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	{
+		DownJump();
+	}
 	////////////////////////////////////////////
 }
 
 void Player::Run()
 {
+	_CurrentState = Player::State::Run;
+
 	// State
 	_RenderComp->Anim(false, true, L"spr_dragon_run", 10, 0.6f);
+	Move(_PhysicComp->Dir, 0.f);
 	// //
+}
 
-	// 상태 전이
-	if (!bMoveCurrentFrameKeyCheck)
-		_CurrentState = Player::State::Run_to_Idle;
+void Player::RunState()
+{
+	Move(_PhysicComp->Dir, 0.f);
+
+	if (!bMoveKeyCheck)
+	{
+		RunToIdle();
+	}
 	if (bJumpKeyCheck)
-		_CurrentState = Player::State::Jump;
-	//// 
+	{
+		Jump();
+	}	
+	if (bDownKeyCheck && !_PhysicComp->bDownLand)
+	{
+		Roll();
+	}
+	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	{
+		DownJump();
+	}
 }
 
 void Player::RunToIdle()
 {
-	// State
+	_CurrentState = Player::State::Run_to_Idle;
+
 	RenderComponent::NotifyType _Notify;
 	_Notify[4] = [this]()
 	{
 		bRunToIdleMotionEnd = true;
 	};
-	_RenderComp->Anim(false, false, L"spr_dragon_run_to_idle", 4,0.4f,std::move(_Notify));
-	//  //
+	_RenderComp->Anim(false, false, L"spr_dragon_run_to_idle", 4, 0.2f, std::move(_Notify));
+}
 
-	// Translation 
+void Player::RunToIdleState()
+{
 	if (bRunToIdleMotionEnd)
 	{
+		Idle(); 
 		bRunToIdleMotionEnd = false;
-		_CurrentState = Player::State::Idle;
 	}
 	if (bJumpKeyCheck)
-		_CurrentState = Player::State::Jump;
-	// //
+	{
+		Jump();
+	}
+	if (bDownKeyCheck && !_PhysicComp->bDownLand)
+	{
+		Roll(); 
+	}
+	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	{
+		DownJump();
+	}
 }
 
 void Player::Fall()
 {
+	_CurrentState = Player::State::Fall;
 	//State 
 	_RenderComp->Anim(false, true, L"spr_dragon_fall", 4, 0.2f);
-	_PhysicComp->GravityCoefficient = 0.3f;
 	// // 
+}
 
-	// Transition 
+void Player::FallState()
+{
 	if (_PhysicComp->bLand)
-		_CurrentState = Player::State::Idle;
-	if (bWallRide)
-		_CurrentState = Player::State::Wall_Ride;
-	//
+	{
+		Idle(); 
+	}	
+	if (bCurWallRideCollision)
+	{
+		WallRide(); 
+	}
+	if (bMoveKeyCheck)
+	{
+		Move(_PhysicComp->Dir, 0.f);
+	}
+}
+
+void Player::Jump()
+{
+	_CurrentState = Player::State::Jump;
+
+	_PhysicComp->Flying();
+	const vec3 Dir{ 0.f,-1.f,0.f };
+	SimplePhysics _Physics;
+	_Physics.Acceleration = 100.f;
+	_Physics.Dir = Dir;
+	_Physics.Speed = { 0.f,-800.f,0.f };
+	_Physics.MaxT = 0.2f;
+	_PhysicComp->Move(std::move(_Physics));
+
+	RenderComponent::NotifyType _Notify;
+	_Notify[4] = [this]()
+	{
+		bJumpAnimEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_jump", 4, 0.2f, std::move(_Notify));
 }
 
 void Player::FSM()
@@ -239,7 +315,7 @@ void Player::FSM()
 	switch (_CurrentState)
 	{
 	case Player::State::Attack:
-		Attack();
+		AttackState();
 		break;
 	case Player::State::Crouch:
 		break;
@@ -248,9 +324,10 @@ void Player::FSM()
 	case Player::State::DoorKick:
 		break;
 	case Player::State::Fall:
-		Fall();
+		FallState();
 		break;
 	case Player::State::Flip:
+		FlipState();
 		break;
 	case Player::State::HurtFly:
 		break;
@@ -261,66 +338,45 @@ void Player::FSM()
 	case Player::State::HurtRecover:
 		break;
 	case Player::State::Idle:
-		Idle();
+		IdleState();
 		break;
 	case Player::State::Idle_to_Run:
-		IdleToRun();
+		IdleToRunState();
 		break;
 	case Player::State::Idle_to_sneak:
 		break;
 	case Player::State::Jump:
-		Jump();
+		JumpState();
 		break;
 	case Player::State::Post_Crouch:
 		break;
 	case Player::State::Pre_Crouch:
 		break;
 	case Player::State::Roll:
+		RollState();
 		break;
 	case Player::State::Run:
-		Run();
+		RunState();
 		break;
 	case Player::State::Run_to_Idle:
-		RunToIdle();
+		RunToIdleState();
 		break;
 	case Player::State::Sneak:
 		break;
 	case Player::State::StairFall:
 		break;
 	case Player::State::Wall_Ride:
+		WallRideState(); 
+		break;
+	case Player::State::DownJump : 
+		DownJumpState();  
 		break;
 	default:
 		break;
 	}
+
+	AnyState();
 }
-
-void Player::MoveStart(const vec3 Dir)
-{
-	auto PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
-	if (PhysicComp->bFly)return;
-
-	RenderComponent::NotifyType _Notify;
-
-	_RollCheck[0] = true;
-	RollDir = Dir;
-}
-void Player::MoveEnd(const vec3 Dir)
-{
-	if (bMovingOn)
-	{
-		Time::instance().TimerRegist(4 * AnimFrameSpeed, 4 * AnimFrameSpeed, 4 * AnimFrameSpeed,
-			[this, Observer = _This]()
-		{
-			if (!Observer.expired())
-			{
-				bMovingOn = false;
-			}
-			return true;
-		});
-
-		_RollCheck[0] = false;
-	}
-};
 
 void Player::KeyBinding() & noexcept
 {
@@ -329,86 +385,75 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{		
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
+		bMoveKeyCheck = true;
+		bFrameCurrentCharacterInput = true;
 		const vec3 Dir{ 1.f,0.f,0.f };
-		Move(Dir,0.f);
+		_PhysicComp->Dir = Dir;
 	},
 		'D', InputManager::EKEY_STATE::PRESSING));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{ 	
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
+		bMoveKeyCheck = true;
+		bFrameCurrentCharacterInput = true;
 		const vec3 Dir{ -1.f,0.f,0.f };
-		Move(Dir, 0.f); 
+		_PhysicComp->Dir = Dir;
 	},	'A', InputManager::EKEY_STATE::PRESSING));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
-		const vec3 Dir{ 1.f,0.f,0.f };
-		MoveEnd(Dir);
+		bFrameCurrentCharacterInput = true;
 	},
 		'D', InputManager::EKEY_STATE::UP));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
-		const vec3 Dir{ -1.f,0.f,0.f };
-		MoveEnd(Dir);
 	}, 'A', InputManager::EKEY_STATE::UP));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
-		bSneak = true;
+		bFrameCurrentCharacterInput = true;
 	}, VK_CONTROL, InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
-		bSneak = false;
+		bFrameCurrentCharacterInput = true;
 	}, VK_CONTROL, InputManager::EKEY_STATE::UP));
-
-	_Anys.emplace_back(InputManager::instance().EventRegist([this,  Observer]()
-	{		
-		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
-		DownJump();
-		Roll();
-		PreCrouch();
-	}, 'S', InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
-		Crouch();
+		bFrameCurrentCharacterInput = true;
+		bDownKeyCheck = true;
 	}, 'S', InputManager::EKEY_STATE::PRESSING));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
-		PostCrouch();
+		bFrameCurrentCharacterInput = true;
 	}, 'S', InputManager::EKEY_STATE::UP));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this,  Observer]()
 	{ 	
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
+		bFrameCurrentCharacterInput = true;
 		bJumpKeyCheck = true;
 	},'W', InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		CurrentFrameCharacterInput = true;
-		_CurrentState = Player::State::Attack;
+		bFrameCurrentCharacterInput = true;
+		bAttackKeyCheck = true;
+		_PhysicComp->Position.z = 0.f;
+		vec3 MouseToDistance = global::MousePosWorld - _PhysicComp->Position;
+		D3DXVec3Normalize(&_PhysicComp->Dir, &MouseToDistance);
+		vec3 Dir = _PhysicComp->Dir;
 	}, VK_LBUTTON, InputManager::EKEY_STATE::DOWN));
 	
 	_Anys.emplace_back(InputManager::instance().EventRegist([this,Observer]()
@@ -428,59 +473,50 @@ void Player::KeyBinding() & noexcept
 	//////////
 }
 
-void Player::Jump()
+void Player::JumpState()
 {
-	/*if (!_PhysicComp->bLand)return;
-	if (CurrentJumpCoolTime > 0)return;*/
+	if (bCurWallRideCollision)
+	{
+		WallRide(); 
+	}
+	if (bJumpAnimEnd)
+	{
+		Fall();
+		bJumpAnimEnd = false;
+	}
+	if (bMoveKeyCheck)
+	{
+		Move(_PhysicComp->Dir, 0.f);
+	}
+}
 
-	/*CurrentJumpCoolTime = JumpCoolTime;*/
+void Player::Attack()
+{
+	_CurrentState = Player::State::Attack;
 
-	//State 
-	_PhysicComp->Flying();
-	const vec3 Dir{ 0.f,-1.f,0.f };
+	RenderComponent::NotifyType _Notify;
+	_Notify[7] = [this]() {bAttackMotionEnd = true; };
+	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.23f, std::move(_Notify));
+	
+	_PhysicComp->Position.z = 0.f;
+	vec3 Distance = global::MousePosWorld - _PhysicComp->Position;
+	vec3 Dir;
+	D3DXVec3Normalize(&Dir, &Distance);
 	SimplePhysics _Physics;
 	_Physics.Acceleration = 100.f;
 	_Physics.Dir = Dir;
-	_Physics.Speed = { 0.f,-800.f,0.f };
-	_Physics.MaxT = JumpCoolTime;
+	_Physics.Speed = Dir * 300.f;
+	_Physics.MaxT = 0.2f;
+	_Physics.T = 0.f;
 	_PhysicComp->Move(std::move(_Physics));
-	RenderComponent::NotifyType _Notify;
-	_Notify[4] = [this]() 
-	{
-		bJumpAnimEnd = true;
-	};
-	_RenderComp->Anim(false, false, L"spr_dragon_jump", 4, 0.2f,std::move(_Notify));
-	// // 
-
-	//Transition
-	if (bWallRide)
-		_CurrentState = Player::State::Wall_Ride;
-	if (bJumpAnimEnd)
-		_CurrentState = Player::State::Fall;
-	// //
-
-
-	/*bJumpStartAnimEnd = false;*/
 }
 
 void Player::DownJump()
 {
-	auto PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
-
-	if (!PhysicComp->bDownLand)
-	{
-		_RollCheck[1] = true;
-		return;
-	}
-	else
-	{
-		_RollCheck[1] = false;
-	}
-
-	PhysicComp->Flying();
+	_CurrentState = Player::State::DownJump;
+	_PhysicComp->Flying();
 	_CollisionComp->bDownJump = true;
-
-	Time::instance().TimerRegist(0.5f, 0.f, 0.5f,
+	Time::instance().TimerRegist(0.2f, 0.2f, 0.2f,
 		[wpThis = _This, this]()
 	{
 		if (!object::IsValid(wpThis))return true;
@@ -488,77 +524,60 @@ void Player::DownJump()
 		return false;
 	});
 
-	const vec3 Dir{ 0.f,-1.f,0.f };
-	SimplePhysics _Physics;
-	_Physics.Acceleration = 100.f;
-	_Physics.Dir = Dir;
-	_Physics.Speed = { 0.f,+400.f,0.f };
-	_Physics.MaxT = 0.3f;
-
-	PhysicComp->Move(std::move(_Physics));
-};
-
-void Player::Attack()
+	_RenderComp->Anim(false, true, L"spr_dragon_fall", 4, 0.2f);
+}
+void Player::DownJumpState()
 {
-	// State 
+	if (!_CollisionComp->bDownJump)
+	{
+		Fall();
+	}
+}
+void Player::DoorKick()
+{
+}
+void Player::DoorKickState()
+{
+}
+;
 
-	// 애니메이션 
-	RenderComponent::NotifyType _Notify;
-	_Notify[7] = [this]() {bAttackMotionEnd = true; };
-	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.23f,std::move(_Notify));
-	// // 
-
-	// 움직임
-	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
-	if (!_Physic_TransformComp) return;
-	_Physic_TransformComp->Position.z = 0.f;
-	vec3 Distance = global::MousePosWorld - _Physic_TransformComp->Position;
-	vec3 Dir;
-	D3DXVec3Normalize(&Dir, &Distance);
-	SimplePhysics _Physics;
-	_Physics.Acceleration = AttackAcceleration;
-	_Physics.Dir = Dir;
-	_Physics.Speed = Dir * AttackForce;
-	_Physics.MaxT = 7 * AnimFrameSpeed;
-	_Physics.T = 0.f;
-	_Physic_TransformComp->Move(std::move(_Physics));
-	// // 
-
-	// 전이
+void Player::AttackState()
+{
 	if (bAttackMotionEnd)
 	{
 		bAttackMotionEnd = false;
-		_CurrentState = Player::State::Fall;
+		Fall();
 	}
-	// // 
+}
 
-	////////////////////////////////////////////
+void Player::Roll()
+{
+	_CurrentState = Player::State::Roll;
+	RenderComponent::NotifyType _Notify;
+	_Notify[7] = [this]() 
+	{
+		bRollMotionEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_roll",7, 0.4f ,std::move(_Notify));
+	_PhysicComp->Move(_PhysicComp->Dir *1000.f, 100.f, 0.4f);
+}
+
+void Player::RollState()
+{
+	if (bJumpKeyCheck)
+	{
+		Jump();
+	}
+	if (bRollMotionEnd)
+	{
+		bRollMotionEnd = false;
+		Idle();
+	}
 }
 
 void Player::AttackSlash()
 {
 	// TODO :: 여기서 슬래쉬 객체에게 공격 요청
-}
-
-void Player::Roll()
-{
-	auto PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
-	if (PhysicComp->bDownLand)return;
-	if (!PhysicComp->bLand)return;
-	if (PhysicComp->bFly)return;
-	if (!_RollCheck.all())return;
-	if (CurrentRollCoolTime > 0.f)return;
-
-	CurrentRollCoolTime = RollCoolTime;
-
-	SimplePhysics _Physics;
-	_Physics.Acceleration = 200.f;
-	_Physics.Dir = RollDir;
-	_Physics.Speed = RollDir * RollSpeed;
-	_Physics.MaxT = RollCoolTime;
-	_Physics.T = 0.0f;
-
-	PhysicComp->Move(std::move(_Physics));
 }
 
 void Player::TimeRegist()
@@ -569,74 +588,73 @@ void Player::TimeRegist()
 	{
 		if (Obsever.expired())return true;
 		const float Dt =Time::instance().Delta();
-		CurrentJumpCoolTime -= Dt;
-		CurrentWallJumpCoolTime -= Dt;
-		CurrentRollCoolTime -= Dt;
 		return false;
 	});
 }
 
-void Player::PreCrouch()
-{
-	auto PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
-	if (!PhysicComp->bLand)return;
-	if (PhysicComp->bFly)return;
-	if (bWallRide)return;
-
-	bCrouch = true;
-}
-
-void Player::Crouch()
-{
-	auto PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
-	if (!PhysicComp->bLand)return;
-	if (PhysicComp->bFly)return;
-	if (bWallRide)return;
-	if (!bCrouch)return;
-}
-
-void Player::PostCrouch()
-{
-	auto PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
-	if (!PhysicComp->bLand)return;
-	if (PhysicComp->bFly)return;
-	if (bWallRide)return;
-	if (!bCrouch)return;
-}
-
-void Player::WallRideEnd()
-{
-	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
-	if (!_Physic_TransformComp) return;
-
-	_Physic_TransformComp->GravityCoefficient = 1.f;
-	bWallRide = false;
-}
-
 void Player::WallRide()
 {
-	// 벽에 매달리는 중이라면 가속도가 감소
+	_CurrentState = Player::State::Wall_Ride;
+	_PhysicComp->Dir = FlipDir;
+	_PhysicComp->Dir.x *= -1.f;
 	_PhysicComp->GravityCoefficient = 0.3f;
-	_PhysicComp->Flying();
-	bWallRide = true;
+	_RenderComp->Anim(false, false, L"spr_dragon_wallride", 2, 0.2f);
+}
+void Player::WallRideState()
+{
+	if (bJumpKeyCheck)
+	{
+		Flip();
+		_PhysicComp->GravityCoefficient = 1.f;
+	}
+	if (_PhysicComp->bLand)
+	{	
+		_PhysicComp->GravityCoefficient = 1.f;
+		Idle();
+	}
+}
+void Player::Flip()
+{
+	_CurrentState = Player::State::Flip;
+
+	RenderComponent::NotifyType _Notify;
+	_Notify[10] = [this]() {
+		bFlipMotionEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_flip", 10, 0.35f , std::move(_Notify));
+	_PhysicComp->Move(FlipDir * 1500.f, 100.f, 0.35f);
+}
+void Player::FlipState()
+{
+	if (bFlipMotionEnd)
+	{
+		bFlipMotionEnd = false;
+		Fall();
+	}
+};
+
+void Player::AnyState()
+{
+	if (bAttackKeyCheck && CurAttackCoolTime<0.f)
+	{
+		CurAttackCoolTime = 0.2f;
+		Attack();
+	}
 }
 
 void Player::JumpWallRide()
 {
 	auto _Physic_TransformComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
 	if (!_Physic_TransformComp) return;
-	if (CurrentWallJumpCoolTime > 0)return;
 
-	CurrentWallJumpCoolTime = WallJumpCoolTime;
 	_Physic_TransformComp->Flying();
-	bWallRide = false;
 	bWallJump = true;
 
 	SimplePhysics _Physics;
 	_Physics.Acceleration = 200.f;
-	_Physics.Dir = WallRideDir;
-	_Physics.Speed = WallRideDir *2000.f;
-	_Physics.MaxT = WallJumpCoolTime;
+	_Physics.Dir = FlipDir;
+	_Physics.Speed = FlipDir *2000.f;
+	_Physics.MaxT = 0.25f;
 	_Physics.T = 0.f;
 
 	_Physic_TransformComp->Move(std::move(_Physics));

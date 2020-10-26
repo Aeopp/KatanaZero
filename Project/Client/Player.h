@@ -29,6 +29,7 @@ public :
 		Sneak,
 		StairFall,
 		Wall_Ride,
+		DownJump ,
 	};
 	using Super = Character;
 private:
@@ -45,82 +46,70 @@ public:
 	virtual void LateUpdate();
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override; 
+	void KeyBinding() & noexcept;
+public : 
+	void AttackSlash();
+	void TimeRegist();
 
+public : 
 	//State 
-	void Idle();
+	void Idle(); 
+	void IdleState();
 	void IdleToRun();
-	void Run();
+	void IdleToRunState();
+	void Run(); 
+	void RunState();
 	void RunToIdle();
+	void RunToIdleState();
 	void Fall();
-	void WallRide();
+	void FallState();
 	void Jump();
+	void JumpState();
+	void Attack();
+	void AttackState();
+	void Roll();
+	void RollState();
+	void WallRide();
+	void WallRideState();
+	void Flip();
+	void FlipState();
+	void DownJump();
+	void DownJumpState();
+	void DoorKick();
+	void DoorKickState();
+
+
+	void AnyState();
 	// // 
 	void FSM();
-
-	void MoveStart(const vec3 Dir);
-	void MoveEnd(const vec3 Dir);
-
-	void KeyBinding() & noexcept;
+private:
+	float CurAttackCoolTime = 0.0f;
+public  : 
 	
-	void DownJump();
-	void Attack();
-	void AttackSlash();
-
-	void Roll();
-
-	void TimeRegist();
-	void PreCrouch();
-	void Crouch();
-	void PostCrouch();
 	
-	void WallRideEnd();
-	bool bWallRide{ false };
+	bool bCurWallRideCollision{ false };
 private :
 	bool bJumpAnimEnd{ false };
-	bool bJumpKeyCheck{ false };
-	bool bMoveCurrentFrameKeyCheck{ false };
 	bool bIdleToRunMotionEnd{ false };
 	bool bRunToIdleMotionEnd{ false };
-	bool bAttackMotionEnd{ false }; 
+	bool bAttackMotionEnd{ false };
+	bool bRollMotionEnd{ false };
+	bool bFlipMotionEnd{ false };
+
+	bool bJumpKeyCheck{ false };
+	bool bMoveKeyCheck{ false };
+	bool bAttackKeyCheck{ false };
+	bool bDownKeyCheck{ false };
+
+	bool bFrameCurrentCharacterInput = false;
 public :
-	
 	bool bWallJump{ false };
-	bool bMovingOn{ false };
-	bool bJumpStartAnimEnd{ false };
-	bool bSneak{ false };
 
-	bool CurrentFrameCharacterInput = false;
-
-	vec3 WallRideDir{0.f,0.f,0.f};
-	float GravityRepulsion = 100.f;
-
-	bool bCrouch = false;
-
-	const float RollCoolTime = 0.25f;
-	float CurrentRollCoolTime = 0.0f;
-	float RollSpeed = 1000.f;
-	
-	const float AttackForce = 500.f;
-	const float AttackAcceleration = 200.f;
-	
-
-	const float JumpCoolTime = 0.3f;
-	float CurrentJumpCoolTime = 0.0f;
-
-	const float WallJumpCoolTime = 0.3f;
-	float CurrentWallJumpCoolTime = 0.0f;
-	
-	const float PlayerSpeed = 2000.f;
-
-	const float AnimFrameSpeed = 0.085f;
-
+	vec3 FlipDir{0.f,0.f,0.f};
 	void JumpWallRide();
-
-	std::bitset<2> _RollCheck;
-	vec3 RollDir{ 1.f,0.f,0.f };
-private:
-	vec3 CurrentMoveDir{ 1.f,0.f,0.f };
 	std::shared_ptr<class PhysicTransformComponent>_PhysicComp;
+private:
+	const float PlayerSpeed = 1500.f;
 private:
 	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};

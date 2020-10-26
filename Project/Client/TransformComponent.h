@@ -9,6 +9,7 @@ public:
 	vec3 Rotation   = { 0.f,0.f,0.f };
 	vec3 Position   = { 0.f,0.f,0.f };
 	vec3 Revolution = { 0.f,0.f,0.f };
+	vec3 Dir={ 1.f,0.f,0.f };
 	vec3 CurrentLineDir={ 0.f,0.f,0.f }; 
 	bool bFollowOwner = true;
 	bool bMapSlide = true;

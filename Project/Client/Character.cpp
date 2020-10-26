@@ -31,22 +31,35 @@ void Character::Initialize() & noexcept
     _RenderComp = ComponentManager::instance().Insert<RenderComponent>(_This);
 };
 
+void Character::Update()
+{
+    Super::Update();
+
+    if (_TransformComp->Dir.x < 0.f)
+    {
+        _RenderComp->AnimDir = -1.f;
+    }
+    else
+    {
+        _RenderComp->AnimDir= 1.f;
+    }
+};
+
 void Character::Move(vec3 Dir, const float AddSpeed)
 {
     const float DeltaTime = Time::instance().Delta();
-    float _MoveSpeed = Speed;
 
     float AddY = 0.f;
     // 선분에 과 충돌중이라면 선분의 기울기만큼 Y좌표를 통제한다.
     if (_TransformComp->bLineMode)
     {
         float m = _TransformComp->CurrentLineDir.y / _TransformComp->CurrentLineDir.x;
-        AddY = Dir.x * _MoveSpeed *  m;
+        AddY = Dir.x * Speed *  m;
     }
 
     const vec3 CurrentPos = _TransformComp->Position;
 
-    vec3 GoalPos = _TransformComp->Position + (Dir * _MoveSpeed);
+    vec3 GoalPos = _TransformComp->Position + (Dir * Speed);
     GoalPos.y += AddY;
     _TransformComp->Position = math::lerp(CurrentPos, GoalPos, MoveGoalTime, DeltaTime);
 
