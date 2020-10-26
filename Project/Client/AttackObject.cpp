@@ -1,28 +1,29 @@
 #include "stdafx.h"
-#include "Character.h"
-#include "ComponentManager.h"
+#include "AttackObject.h"
 #include "RenderComponent.h"
 #include "ObjectManager.h"
 #include "PhysicTransformComponent.h"
 #include "CollisionComponent.h"
 #include "Time.h"
+#include "ComponentManager.h"
 
-OBJECT_ID::EID Character::GetID()
+
+OBJECT_ID::EID AttackObject::GetID()
 {
-    return OBJECT_ID::CHARACTER;
+    return OBJECT_ID::EID::ATTACK;
 }
 
-OBJECT_TAG::ETAG Character::GetTag()
+OBJECT_TAG::ETAG AttackObject::GetTag()
 {
-    return OBJECT_TAG::CHARCTER;
+    return OBJECT_TAG::ATTACK;
 }
 
-std::wstring_view Character::GetName() const&
-{ 
-    return L"Character"sv;
+std::wstring_view AttackObject::GetName() const&
+{
+    return L"AttackObject"sv;
 }
 
-void Character::Initialize() & noexcept
+void AttackObject::Initialize() & noexcept
 {
     Super::Initialize();
 
@@ -30,9 +31,9 @@ void Character::Initialize() & noexcept
     _CollisionComp = ComponentManager::instance().Insert<CollisionComponent>(_This);
     _RenderComp = ComponentManager::instance().Insert<RenderComponent>(_This);
     _PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
-};
+}
 
-void Character::Update()
+void AttackObject::Update()
 {
     Super::Update();
 
@@ -42,22 +43,13 @@ void Character::Update()
     }
     else
     {
-        _RenderComp->AnimDir= 1.f;
+        _RenderComp->AnimDir = 1.f;
     }
-};
+}
 
-void Character::Move(vec3 Dir, const float AddSpeed)
+void AttackObject::Move(vec3 Dir, const float AddSpeed)
 {
     const float DeltaTime = Time::instance().Delta();
-
-    float AddY = 0.f;
-    // 선분에 과 충돌중이라면 선분의 기울기만큼 Y좌표를 통제한다.
-    if (_TransformComp->bLineMode)
-    {
-        float m = _TransformComp->CurrentLineDir.y / _TransformComp->CurrentLineDir.x;
-        AddY = Dir.x * (Speed+ AddSpeed) *  m;
-    }
-    vec3 GoalPos = _TransformComp->Position + (Dir *  ( Speed + AddSpeed));
-    GoalPos.y += AddY;
+    vec3 GoalPos = _TransformComp->Position + (Dir *( Speed + AddSpeed));
     _TransformComp->Position = math::lerp(_TransformComp->Position, GoalPos, MoveGoalTime, DeltaTime);
 }

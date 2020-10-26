@@ -94,8 +94,8 @@ void PhysicTransformComponent::Update()
 
 	if (bGravity)
 	{
-		//GravityAcceleration += (GravityCoefficient * (math::GRAVITY * Dt));
-		Position += vec3{ 0.f,1.f,0.f }*math::GRAVITY  * GravityCoefficient * Dt;
+		GravityAcceleration += (math::GRAVITY_ACC * Dt);
+		Position += vec3{ 0.f,1.f,0.f }* ( math::GRAVITY + GravityAcceleration) * GravityCoefficient * Dt;
 	}
 }
 

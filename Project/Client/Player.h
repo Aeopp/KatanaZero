@@ -45,12 +45,13 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo)override;
+	virtual void Hit(std::weak_ptr<class object>_Target, math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override; 
-public : 
+private:
 	void AttackSlash();
 	void TimeRegist();
 	void KeyBinding() & noexcept;
-public : 
+private:
 	//State 
 	void Idle(); 
 	void IdleState();
@@ -92,16 +93,11 @@ public :
 	void HurtGroundState();
 	void HurtRecover();
 	void HurtRecoverState();
-
-	void AnyState();
-	// // 
-	void FSM();
 private:
-	float CurAttackCoolTime = 0.0f;
-public  : 
-	bool bCurWallRideCollision{ false };
+	void AnyState();
+	void FSM();
 private :
-	bool bJumpAnimEnd{ false };
+	bool bJumpMotionEnd{ false };
 	bool bIdleToRunMotionEnd{ false };
 	bool bRunToIdleMotionEnd{ false };
 	bool bAttackMotionEnd{ false };
@@ -110,23 +106,28 @@ private :
 	bool bDoorKickMotionEnd{ false };
 	bool bPreCrouchMotionEnd{ false };
 	bool bPostCrouchMotionEnd{ false };
-	
+	bool bHurtFlyBeginMotionEnd{ false };
+	bool bHurtGroundMotionEnd{ false }; 
+	bool bHurtRecoverMotionEnd{ false };
+private:
+	bool bFrameCurrentCharacterInput = false;
+private:
+	bool bHurt{ false };
+private:
 	bool bSneakKeyCheck{ false };
 	bool bJumpKeyCheck{ false };
 	bool bMoveKeyCheck{ false };
 	bool bAttackKeyCheck{ false };
 	bool bDownKeyCheck{ false };
-
-	bool bFrameCurrentCharacterInput = false;
-public :
-	bool bWallJump{ false };
-
+public :	
 	vec3 FlipDir{0.f,0.f,0.f};
+	bool bCurWallRideCollision{ false };
+	bool bWallJump{ false };
 	void JumpWallRide();
-	std::shared_ptr<class PhysicTransformComponent>_PhysicComp;
 private:
+	float CurAttackCoolTime = 0.0f;
 	const float PlayerSpeed = 1500.f;
-private:
+	std::shared_ptr<class Attack_Slash> _SpAttackSlash{};
 	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};
 	std::shared_ptr<class UIItemIcon > _SpUIItemIcon{};

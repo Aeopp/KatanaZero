@@ -208,6 +208,8 @@
     </ClInclude>
     <ClInclude Include="UITimer.h" />
     <ClInclude Include="UIItemIcon.h" />
+    <ClInclude Include="AttackObject.h" />
+    <ClInclude Include="AttackSlash.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -331,6 +333,8 @@
     </ClCompile>
     <ClCompile Include="UITimer.cpp" />
     <ClCompile Include="UIItemIcon.cpp" />
+    <ClCompile Include="AttackObject.cpp" />
+    <ClCompile Include="AttackSlash.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

@@ -160,6 +160,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AttackObject.h" />
+    <ClInclude Include="AttackSlash.h" />
     <ClInclude Include="Battery.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Character.h" />
@@ -213,6 +215,8 @@
     <ClInclude Include="UITimer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AttackObject.cpp" />
+    <ClCompile Include="AttackSlash.cpp" />
     <ClCompile Include="Battery.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Character.cpp" />

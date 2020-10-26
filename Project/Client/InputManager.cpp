@@ -76,7 +76,11 @@ void InputManager::Update() & noexcept
 		while (!_InputTable.empty() && _InputTable.front().T <= T)
 		{
 			auto& [Key, State, T] = _InputTable.front();
-			_ActionTable[Key].second[std::underlying_type_t<std::decay_t<decltype(State)>>(State)].BroadCast();
+			//슬로우는 재현할 필요 없음.
+			if (Key != VK_SHIFT)
+			{
+				_ActionTable[Key].second[std::underlying_type_t<std::decay_t<decltype(State)>>(State)].BroadCast();
+			}
 			_InputTable.pop();
 		}
 	}

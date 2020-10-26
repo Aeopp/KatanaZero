@@ -12,6 +12,8 @@
 
 void RenderComponent::Render()
 {
+	if (!bRender)return;
+
 	Component::Render();
 
 	auto spOwner = _Owner.lock();
@@ -35,7 +37,7 @@ void RenderComponent::Render()
 	const auto LocalPoints = math::GetLocalRect(vec2{ (float)spTexInfo->ImageInfo.Width,(float)spTexInfo->ImageInfo.Height });
 
 	bool IsRenderable = false;
-
+	
 	for (const auto& LocalPoint : LocalPoints)
 	{
 		vec3 WorldPoint{ 0,0,0 };
@@ -51,9 +53,37 @@ void RenderComponent::Render()
 							  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
 		vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
 		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+	
+		if (bAfterImg)
+		{
+			for (auto& _AfterImg : _AfterQ)
+			{
+				auto TexInfo = TextureManager::instance().Get_TexInfo(_Info.ObjectKey, _AfterImg.StateKey, _AfterImg.ID);
+				RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width * _Info.SrcScale.x,
+							  TexInfo->ImageInfo.Height * _Info.SrcScale.y };
+				vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+				vec3 v = _AfterImg.PastPosition - spOwner->_TransformComp->Position;
+
+				GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture, &_srcRT, &TextureCenter,
+					&(v * 0.04f), _AfterImg._Color);
+			}
+
+			AfterImg _AfterImg;
+			_AfterImg.ID = _Info.CurrentFrame;
+			_AfterImg.StateKey = _Info.StateKey;
+			_AfterImg.PastPosition = spOwner->_TransformComp->Position;
+			_AfterImg._Color = AfterImg::_ColorTable[AfterImg::CurColorIdx++]; 
+			AfterImg::CurColorIdx %= AfterImg::_ColorTable.size();
+			_AfterQ.push_back(std::move(_AfterImg));
+			if (_AfterQ.size() > 15)
+				_AfterQ.pop_front();
+		}
+
 		GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
 			_Info._Color);
 	}
+
+
 
 	auto NotifyEvent = _Info._Nofify.find(_Info.CurrentFrame);
 
@@ -111,12 +141,6 @@ void RenderComponent::Update()
 
 	_Info.T += Dt * (_Info.End / _Info.AnimSpeed);/*스프라이트 개수가 많고 애니메이션 스피드가 짧을수록 가속*/
 	_Info.CurrentFrame = (std::min<uint8_t>)(_Info.T, _Info.End - 1);
-
-	//if (_Owner.lock()->GetID() == OBJECT_ID::EPLAYER)
-	//{
-	//	int j = 0;
-	//	int i = 0;
-	//}
 }
 
 std::optional<float>RenderComponent::CalcY()

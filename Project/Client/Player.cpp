@@ -10,9 +10,12 @@
 #include "Battery.h"
 #include "UIItemIcon.h"
 #include "PhysicTransformComponent.h"
+#include "AttackSlash.h"
 #include "math.h"
 
 using namespace std;
+
+
 
 OBJECT_ID::EID Player::GetID()
 {
@@ -33,17 +36,14 @@ void Player::Initialize() & noexcept
 {
 	Super::Initialize();
 
-	_TransformComp=ComponentManager::instance().Insert< PhysicTransformComponent>(_This);
-
-	_TransformComp->Scale *= 3.f;
-	_PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent> (_TransformComp);
+	_TransformComp->Scale *= 2.5f;
 	_PhysicComp->Mass = 100.f;
-
 	_RenderComp->Anim(false, true,
 		L"spr_dragon_idle", 12, 1.f,
 		{}, D3DCOLOR_ARGB(255, 255, 255, 255),
 		0.f, vec2{ 1.f,1.f }, L"Dragon",
 		LAYER::ELAYER::EOBJECT);
+	_RenderComp->bAfterImg = false;
 
 	_CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
 	_CollisionComp->_CollisionInfo.Height = 40;
@@ -60,10 +60,13 @@ void Player::Initialize() & noexcept
 	_SpUIItemIcon = ObjectManager::instance().InsertObject<UIItemIcon>();
 	_SpUIItemIcon->SetOwner(_This);
 
+	_SpAttackSlash = ObjectManager::instance().InsertObject<typename Attack_Slash>();
+	_SpAttackSlash->SetOwner(_This);
+
 	_PhysicComp->bGravity = true;
 
 	Speed= PlayerSpeed;
-
+	MoveGoalTime = 2.f;
 	TimeRegist();
 }
 
@@ -113,6 +116,11 @@ void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 		bCurWallRideCollision = true;
 		FSM();
 	}
+}
+void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
+{
+      // 여기서 타겟을 체크하고 
+	  // Hurt 호출
 };
 
 void Player::Move(vec3 Dir,const float AddSpeed)
@@ -120,19 +128,19 @@ void Player::Move(vec3 Dir,const float AddSpeed)
 	switch (_CurrentState)
 	{
 	case Player::State::Sneak:
-		Speed = PlayerSpeed * 0.4f;
+		Speed = PlayerSpeed * 0.5f;
 		break; 
 	case Player::State::Fall:
-		Speed = PlayerSpeed * 0.4f;
+		Speed = PlayerSpeed * 0.40f;
 		break;
 	case Player::State::Jump:
-		Speed = PlayerSpeed * 0.4f;
+		Speed = PlayerSpeed * 0.70f;
 		break;
 	case Player::State::Run:
 		Speed = PlayerSpeed;
 		break;
 	case Player::State::Roll:
-		Speed = PlayerSpeed * 1.4f;
+		Speed = PlayerSpeed * 1.15f;
 		break;
 	default:
 		break;
@@ -331,7 +339,7 @@ void Player::Jump()
 	RenderComponent::NotifyType _Notify;
 	_Notify[4] = [this]()
 	{
-		bJumpAnimEnd = true;
+		bJumpMotionEnd = true;
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_jump", 4, 0.3f, std::move(_Notify));
 }
@@ -421,9 +429,9 @@ void Player::KeyBinding() & noexcept
 	{
 		if (!object::IsValid(Observer))return;
 		bFrameCurrentCharacterInput = true;
-		DoorKick();
+		HurtFlyBegin();
 	},
-		VK_RBUTTON, InputManager::EKEY_STATE::PRESSING));
+		VK_RBUTTON, InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{		
@@ -517,10 +525,10 @@ void Player::JumpState()
 	{
 		WallRide(); 
 	}
-	if (bJumpAnimEnd)
+	if (bJumpMotionEnd)
 	{
 		Fall();
-		bJumpAnimEnd = false;
+		bJumpMotionEnd = false;
 	}
 	if (bMoveKeyCheck)
 	{
@@ -547,6 +555,8 @@ void Player::Attack()
 	_Physics.MaxT = 0.25f;
 	_Physics.T = 0.f;
 	_PhysicComp->Move(std::move(_Physics));
+
+	_SpAttackSlash->AttackStart(Dir *10.f );
 }
 
 void Player::DownJump()
@@ -686,7 +696,7 @@ void Player::SneakState()
 	if (bMoveKeyCheck && !bSneakKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
-		IdleToRun(); 
+		IdleToRun();
 	}
 	if (bMoveKeyCheck && bSneakKeyCheck && bDownKeyCheck)
 	{
@@ -700,32 +710,87 @@ void Player::SneakState()
 	}
 
 	Move(_PhysicComp->Dir, 0.f);
-}
+};
+
 void Player::HurtFlyBegin()
 {
-}
+	_CurrentState = Player::State::HurtFly_Begin;
+	RenderComponent::NotifyType _Notify;
+	_Notify[2] = [this]()
+	{
+		bHurtFlyBeginMotionEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_hurtfly_begin", 2, 0.2f, std::move(_Notify));
+	_PhysicComp->Move(vec3{ -0.f,-3000.f,0.f }, 500.f, 1.f);
+	bHurt = true;
+};
+
 void Player::HurtFlyBeginState()
 {
-}
+	if (bHurtFlyBeginMotionEnd)
+	{
+		bHurtFlyBeginMotionEnd = false;
+		HurtFly();
+	}
+};
+
 void Player::HurtFly()
 {
+	_PhysicComp->Flying();
+	_CurrentState = Player::State::HurtFly;
+	_RenderComp->Anim(false, true, L"spr_dragon_hurtfly", 4, 0.4f);
 }
 void Player::HurtFlyState()
 {
+	// 여기서 땅에닿았다고 판정되면 그라운드 호출 !!
+	if (_PhysicComp->bLand)
+	{
+		HurtGround();
+	}
 }
 void Player::HurtGround()
 {
+	_CurrentState = Player::State::Hurt_Ground;
+	RenderComponent::NotifyType _Notify;
+	_Notify[6] = [this]() 
+	{
+		bHurtGroundMotionEnd = true; 
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_hurtground", 6, 0.5f, std::move(_Notify));
+	_RenderComp->PositionCorrection.y += 17 ;
 }
 void Player::HurtGroundState()
 {
-}
+	if (bHurtGroundMotionEnd && bAttackKeyCheck)
+	{
+		_RenderComp->PositionCorrection.y -= 17;
+		HurtRecover();
+		bHurtGroundMotionEnd = false;
+	}
+};
+
 void Player::HurtRecover()
 {
-}
+	_CurrentState = Player::State::HurtRecover;
+	RenderComponent::NotifyType _Notify;
+	_Notify[9] = [this]()
+	{
+		bHurtRecoverMotionEnd= true;
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_hurtrecover", 9, 0.7f, move(_Notify));
+	_RenderComp->PositionCorrection.y -= 15;
+};
+
 void Player::HurtRecoverState()
 {
-}
-;
+	if (bHurtRecoverMotionEnd)
+	{
+		_RenderComp->PositionCorrection.y +=15;
+		bHurtRecoverMotionEnd = false;
+		bHurt = false;
+		Idle();
+	}
+};
 
 void Player::AttackState()
 {
@@ -745,16 +810,19 @@ void Player::Roll()
 		bRollMotionEnd = true;
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_roll",7, 0.4f ,std::move(_Notify));
+	_RenderComp->PositionCorrection.y += 10.f;
 }
 
 void Player::RollState()
 {
 	if (bJumpKeyCheck)
 	{
+		_RenderComp->PositionCorrection.y -= 10.f;
 		Jump();
 	}
 	if (bRollMotionEnd)
 	{
+		_RenderComp->PositionCorrection.y -= 10.f;
 		bRollMotionEnd = false;
 		Idle();
 	}
@@ -822,7 +890,7 @@ void Player::FlipState()
 
 void Player::AnyState()
 {
-	if (bAttackKeyCheck && CurAttackCoolTime<0.f)
+	if (bAttackKeyCheck && CurAttackCoolTime<0.f && !bHurt)
 	{
 		CurAttackCoolTime = 0.3f;
 		Attack();

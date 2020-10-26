@@ -7,6 +7,8 @@ namespace OBJECT_ID
 	// 태그 다음 집합
 	enum EID : uint8_t
 	{
+		ATTACK,
+		ATTACK_SLASH,
 		ELINE,
 		ETILE,
 		EDOWNJUMPTILE,
@@ -33,6 +35,9 @@ namespace OBJECT_TAG
 	// 집합
 	enum ETAG : uint8_t
 	{
+		ATTACK,
+		PLAYER_ATTACK,
+		ENEMY_ATTACK,
 		ETERRAIN,
 		CHARCTER,
 		EOBJECT,

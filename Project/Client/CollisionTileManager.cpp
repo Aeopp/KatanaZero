@@ -307,13 +307,13 @@ void CollisionTileManager::Update()&
 				spOwner->MapHit(std::move(_HitInfo));
 			}
 		}
-
 		if (bLand == false)
 		{
 			auto spOwner = _spCollision->_Owner.lock();
 			auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>(spOwner->_TransformComp);
 			spPhysicTransform->bCurCollisionTile = false;
-			/*spPhysicTransform->Flying();*/
+			// TODO::
+			spPhysicTransform->bDownLand = false;
 		}
 	}
 }
