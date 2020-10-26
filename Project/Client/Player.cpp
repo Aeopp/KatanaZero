@@ -43,7 +43,7 @@ void Player::Initialize() & noexcept
 		{}, D3DCOLOR_ARGB(255, 255, 255, 255),
 		0.f, vec2{ 1.f,1.f }, L"Dragon",
 		LAYER::ELAYER::EOBJECT);
-	_RenderComp->bAfterImg = false;
+	_RenderComp->bAfterImg = true;
 
 	_CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
 	_CollisionComp->_CollisionInfo.Height = 40;
