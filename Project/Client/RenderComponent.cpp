@@ -28,6 +28,10 @@ void RenderComponent::Render()
 
 	MWorld = MWorld * math::GetCameraJoomMatrix(JoomScale, vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
 	MWorld._11 *= AnimDir;
+	MWorld._41 += PositionCorrection.x;
+	MWorld._42 += PositionCorrection.y;
+	MWorld._43 += PositionCorrection.z;
+
 	const auto LocalPoints = math::GetLocalRect(vec2{ (float)spTexInfo->ImageInfo.Width,(float)spTexInfo->ImageInfo.Height });
 
 	bool IsRenderable = false;

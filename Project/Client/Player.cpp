@@ -95,6 +95,7 @@ void Player::LateUpdate()
 	bJumpKeyCheck = false; 
 	bAttackKeyCheck = false;
 	bDownKeyCheck = false;
+	bSneakKeyCheck = false;
 	bCurWallRideCollision = false;
 
 	CurAttackCoolTime -= Dt;
@@ -119,7 +120,7 @@ void Player::Move(vec3 Dir,const float AddSpeed)
 	switch (_CurrentState)
 	{
 	case Player::State::Sneak:
-		Speed = PlayerSpeed * 0.6f;
+		Speed = PlayerSpeed * 0.4f;
 		break; 
 	case Player::State::Fall:
 		Speed = PlayerSpeed * 0.4f;
@@ -130,6 +131,9 @@ void Player::Move(vec3 Dir,const float AddSpeed)
 	case Player::State::Run:
 		Speed = PlayerSpeed;
 		break;
+	case Player::State::Roll:
+		Speed = PlayerSpeed * 1.4f;
+		break;
 	default:
 		break;
 	}
@@ -139,16 +143,22 @@ void Player::Move(vec3 Dir,const float AddSpeed)
 
 void Player::Idle()
 {
-	// State 행동
 	_CurrentState = Player::State::Idle;
 	_RenderComp->Anim(false, true, L"spr_dragon_idle", 12, 1.f);
-	////////////////////
 }
 
 void Player::IdleState()
 {
-	// 상태전이 검사.
-	if (bMoveKeyCheck)
+	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	{
+		DownJump();
+		return; 
+	}
+	if (bSneakKeyCheck && bMoveKeyCheck)
+	{
+		Sneak();
+	}
+	else if (bMoveKeyCheck)
 	{
 		IdleToRun();
 	}
@@ -156,11 +166,11 @@ void Player::IdleState()
 	{
 		Jump();
 	}
-	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	
+	if (bDownKeyCheck && !_PhysicComp->bDownLand)
 	{
-		DownJump();
+		PreCrouch();
 	}
-	/// ///////////////////////////
 }
 
 void Player::IdleToRun()
@@ -175,7 +185,11 @@ void Player::IdleToRun()
 
 void Player::IdleToRunState()
 {
-	// 상태전이
+	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	{
+		DownJump();
+		return;
+	}
 	if (!bMoveKeyCheck)
 	{
 		Idle(); 
@@ -193,9 +207,10 @@ void Player::IdleToRunState()
 	{
 		Roll();
 	}
-	if (bDownKeyCheck && _PhysicComp->bDownLand)
+
+	if (bMoveKeyCheck && bSneakKeyCheck)
 	{
-		DownJump();
+		Sneak();
 	}
 	////////////////////////////////////////////
 }
@@ -212,8 +227,12 @@ void Player::Run()
 
 void Player::RunState()
 {
-	Move(_PhysicComp->Dir, 0.f);
 
+	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	{
+		DownJump();
+		return;
+	}
 	if (!bMoveKeyCheck)
 	{
 		RunToIdle();
@@ -226,10 +245,11 @@ void Player::RunState()
 	{
 		Roll();
 	}
-	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	if (bMoveKeyCheck && bSneakKeyCheck)
 	{
-		DownJump();
+		Sneak();
 	}
+	Move(_PhysicComp->Dir, 0.f);
 }
 
 void Player::RunToIdle()
@@ -246,6 +266,11 @@ void Player::RunToIdle()
 
 void Player::RunToIdleState()
 {
+	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	{
+		DownJump();
+		return;
+	}
 	if (bRunToIdleMotionEnd)
 	{
 		Idle(); 
@@ -259,14 +284,15 @@ void Player::RunToIdleState()
 	{
 		Roll(); 
 	}
-	if (bDownKeyCheck && _PhysicComp->bDownLand)
+	if (bMoveKeyCheck && bSneakKeyCheck)
 	{
-		DownJump();
+		Sneak();
 	}
 }
 
 void Player::Fall()
 {
+	_PhysicComp->Flying();
 	_CurrentState = Player::State::Fall;
 	//State 
 	_RenderComp->Anim(false, true, L"spr_dragon_fall", 4, 0.2f);
@@ -275,7 +301,7 @@ void Player::Fall()
 
 void Player::FallState()
 {
-	if (_PhysicComp->bLand)
+	if (_PhysicComp->bLand&& !_CollisionComp->bDownJump)
 	{
 		Idle(); 
 	}	
@@ -296,10 +322,10 @@ void Player::Jump()
 	_PhysicComp->Flying();
 	const vec3 Dir{ 0.f,-1.f,0.f };
 	SimplePhysics _Physics;
-	_Physics.Acceleration = 100.f;
+	_Physics.Acceleration = 200.f;
 	_Physics.Dir = Dir;
-	_Physics.Speed = { 0.f,-800.f,0.f };
-	_Physics.MaxT = 0.2f;
+	_Physics.Speed = { 0.f,-1000.f ,0.f };
+	_Physics.MaxT = 0.3f;
 	_PhysicComp->Move(std::move(_Physics));
 
 	RenderComponent::NotifyType _Notify;
@@ -307,7 +333,7 @@ void Player::Jump()
 	{
 		bJumpAnimEnd = true;
 	};
-	_RenderComp->Anim(false, false, L"spr_dragon_jump", 4, 0.2f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_dragon_jump", 4, 0.3f, std::move(_Notify));
 }
 
 void Player::FSM()
@@ -318,10 +344,12 @@ void Player::FSM()
 		AttackState();
 		break;
 	case Player::State::Crouch:
+		CrouchState();
 		break;
 	case Player::State::Dash:
 		break;
 	case Player::State::DoorKick:
+		DoorKickState();
 		break;
 	case Player::State::Fall:
 		FallState();
@@ -330,12 +358,16 @@ void Player::FSM()
 		FlipState();
 		break;
 	case Player::State::HurtFly:
+		HurtFlyState();
 		break;
 	case Player::State::HurtFly_Begin:
+		HurtFlyBeginState();
 		break;
 	case Player::State::Hurt_Ground:
+		HurtGroundState();
 		break;
 	case Player::State::HurtRecover:
+		HurtRecoverState();
 		break;
 	case Player::State::Idle:
 		IdleState();
@@ -349,8 +381,10 @@ void Player::FSM()
 		JumpState();
 		break;
 	case Player::State::Post_Crouch:
+		PostCrouchState(); 
 		break;
 	case Player::State::Pre_Crouch:
+		PreCrouchState(); 
 		break;
 	case Player::State::Roll:
 		RollState();
@@ -362,6 +396,7 @@ void Player::FSM()
 		RunToIdleState();
 		break;
 	case Player::State::Sneak:
+		SneakState(); 
 		break;
 	case Player::State::StairFall:
 		break;
@@ -381,6 +416,14 @@ void Player::FSM()
 void Player::KeyBinding() & noexcept
 {
 	auto Observer = _This;
+
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	{
+		if (!object::IsValid(Observer))return;
+		bFrameCurrentCharacterInput = true;
+		DoorKick();
+	},
+		VK_RBUTTON, InputManager::EKEY_STATE::PRESSING));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{		
@@ -417,13 +460,8 @@ void Player::KeyBinding() & noexcept
 	{
 		if (!object::IsValid(Observer))return;
 		bFrameCurrentCharacterInput = true;
-	}, VK_CONTROL, InputManager::EKEY_STATE::DOWN));
-
-	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
-	{
-		if (!object::IsValid(Observer))return;
-		bFrameCurrentCharacterInput = true;
-	}, VK_CONTROL, InputManager::EKEY_STATE::UP));
+		bSneakKeyCheck = true;
+	}, VK_CONTROL, InputManager::EKEY_STATE::PRESSING));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
@@ -493,10 +531,10 @@ void Player::JumpState()
 void Player::Attack()
 {
 	_CurrentState = Player::State::Attack;
-
+	_PhysicComp->Flying();
 	RenderComponent::NotifyType _Notify;
 	_Notify[7] = [this]() {bAttackMotionEnd = true; };
-	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.23f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.25f, std::move(_Notify));
 	
 	_PhysicComp->Position.z = 0.f;
 	vec3 Distance = global::MousePosWorld - _PhysicComp->Position;
@@ -505,8 +543,8 @@ void Player::Attack()
 	SimplePhysics _Physics;
 	_Physics.Acceleration = 100.f;
 	_Physics.Dir = Dir;
-	_Physics.Speed = Dir * 300.f;
-	_Physics.MaxT = 0.2f;
+	_Physics.Speed = Dir * 500.f;
+	_Physics.MaxT = 0.25f;
 	_Physics.T = 0.f;
 	_PhysicComp->Move(std::move(_Physics));
 }
@@ -516,7 +554,7 @@ void Player::DownJump()
 	_CurrentState = Player::State::DownJump;
 	_PhysicComp->Flying();
 	_CollisionComp->bDownJump = true;
-	Time::instance().TimerRegist(0.2f, 0.2f, 0.2f,
+	Time::instance().TimerRegist(0.3f,0.3f,0.3f,
 		[wpThis = _This, this]()
 	{
 		if (!object::IsValid(wpThis))return true;
@@ -532,11 +570,159 @@ void Player::DownJumpState()
 	{
 		Fall();
 	}
-}
+};
+
 void Player::DoorKick()
 {
-}
+	_CurrentState = Player::State::DoorKick;
+	RenderComponent::NotifyType _Notify;
+	_Notify[6] = [this]()
+	{
+		bDoorKickMotionEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_doorkick", 6, 0.4f, std::move(_Notify));
+};
+
 void Player::DoorKickState()
+{
+	if (bDoorKickMotionEnd)
+	{
+		bDoorKickMotionEnd = false;
+		Idle();
+	}
+}
+void Player::PreCrouch()
+{
+	_CurrentState = Player::State::Pre_Crouch;
+	RenderComponent::NotifyType _Notify;
+	_Notify[2] = [this]()
+	{
+		bPreCrouchMotionEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_precrouch",
+		2, 0.1f , std::move(_Notify ) );
+};
+
+void Player::PreCrouchState()
+{
+	if (bPreCrouchMotionEnd)
+	{
+		bPreCrouchMotionEnd = false;
+		Crouch();
+	}
+	if (!bDownKeyCheck)
+	{
+		Idle();
+	}
+	if (bMoveKeyCheck)
+	{
+		IdleToRun();
+	}
+	if (bJumpKeyCheck)
+	{
+		Jump();
+	}
+}
+void Player::Crouch()
+{
+	_CurrentState = Player::State::Crouch;
+	_RenderComp->Anim(false, true, L"spr_dragon_crouch", 1, 0.1f);
+}
+void Player::CrouchState()
+{
+	if (!bDownKeyCheck)
+	{
+		PostCrouch();
+	}
+	if (bMoveKeyCheck)
+	{
+		Roll();
+	}
+	if (bJumpKeyCheck)
+	{
+		Jump();
+	}
+}
+void Player::PostCrouch()
+{
+	_CurrentState = Player::State::Post_Crouch;
+	RenderComponent::NotifyType _Notify;
+	_Notify[2] = [this]() 
+	{
+		bPostCrouchMotionEnd = true; 
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_postcrouch", 2, 0.2f,std::move(_Notify));
+};
+
+void Player::PostCrouchState()
+{
+	if (bPostCrouchMotionEnd)
+	{
+		bPostCrouchMotionEnd = false; 
+		Idle(); 
+	}
+	if (bMoveKeyCheck)
+	{
+		Roll();
+	}
+	if (bJumpKeyCheck)
+	{
+		Jump();
+	}
+}
+void Player::Sneak()
+{
+	_CurrentState = Player::State::Sneak;
+	_RenderComp->Anim(false, true, L"spr_dragon_sneak", 10, 0.8f);
+	_RenderComp->PositionCorrection.y += 12;
+}
+void Player::SneakState()
+{
+	if (bSneakKeyCheck && !bMoveKeyCheck)
+	{
+		_RenderComp->PositionCorrection.y -= 12;
+		RunToIdle();
+	}
+	if (bMoveKeyCheck && !bSneakKeyCheck)
+	{
+		_RenderComp->PositionCorrection.y -= 12;
+		IdleToRun(); 
+	}
+	if (bMoveKeyCheck && bSneakKeyCheck && bDownKeyCheck)
+	{
+		_RenderComp->PositionCorrection.y -= 12;
+		Roll();
+	}
+	if (bJumpKeyCheck)
+	{
+		_RenderComp->PositionCorrection.y -= 12;
+		Jump();
+	}
+
+	Move(_PhysicComp->Dir, 0.f);
+}
+void Player::HurtFlyBegin()
+{
+}
+void Player::HurtFlyBeginState()
+{
+}
+void Player::HurtFly()
+{
+}
+void Player::HurtFlyState()
+{
+}
+void Player::HurtGround()
+{
+}
+void Player::HurtGroundState()
+{
+}
+void Player::HurtRecover()
+{
+}
+void Player::HurtRecoverState()
 {
 }
 ;
@@ -559,7 +745,6 @@ void Player::Roll()
 		bRollMotionEnd = true;
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_roll",7, 0.4f ,std::move(_Notify));
-	_PhysicComp->Move(_PhysicComp->Dir *1000.f, 100.f, 0.4f);
 }
 
 void Player::RollState()
@@ -573,6 +758,8 @@ void Player::RollState()
 		bRollMotionEnd = false;
 		Idle();
 	}
+
+	Move(_PhysicComp->Dir, 0.f);
 }
 
 void Player::AttackSlash()
@@ -597,7 +784,7 @@ void Player::WallRide()
 	_CurrentState = Player::State::Wall_Ride;
 	_PhysicComp->Dir = FlipDir;
 	_PhysicComp->Dir.x *= -1.f;
-	_PhysicComp->GravityCoefficient = 0.3f;
+	_PhysicComp->GravityCoefficient = 0.5f;
 	_RenderComp->Anim(false, false, L"spr_dragon_wallride", 2, 0.2f);
 }
 void Player::WallRideState()
@@ -621,8 +808,8 @@ void Player::Flip()
 	_Notify[10] = [this]() {
 		bFlipMotionEnd = true;
 	};
-	_RenderComp->Anim(false, false, L"spr_dragon_flip", 10, 0.35f , std::move(_Notify));
-	_PhysicComp->Move(FlipDir * 1500.f, 100.f, 0.35f);
+	_RenderComp->Anim(false, false, L"spr_dragon_flip", 10, 0.4f , std::move(_Notify));
+	_PhysicComp->Move(FlipDir * 1500.f, 100.f, 0.4f);
 }
 void Player::FlipState()
 {
@@ -637,7 +824,7 @@ void Player::AnyState()
 {
 	if (bAttackKeyCheck && CurAttackCoolTime<0.f)
 	{
-		CurAttackCoolTime = 0.2f;
+		CurAttackCoolTime = 0.3f;
 		Attack();
 	}
 }

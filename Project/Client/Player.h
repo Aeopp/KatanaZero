@@ -46,11 +46,10 @@ public:
 	virtual void LateUpdate();
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override; 
-	void KeyBinding() & noexcept;
 public : 
 	void AttackSlash();
 	void TimeRegist();
-
+	void KeyBinding() & noexcept;
 public : 
 	//State 
 	void Idle(); 
@@ -77,7 +76,22 @@ public :
 	void DownJumpState();
 	void DoorKick();
 	void DoorKickState();
-
+	void PreCrouch();
+	void PreCrouchState();
+	void Crouch();
+	void CrouchState();
+	void PostCrouch();
+	void PostCrouchState();
+	void Sneak();
+	void SneakState();
+	void HurtFlyBegin();
+	void HurtFlyBeginState();
+	void HurtFly();
+	void HurtFlyState();
+	void HurtGround();
+	void HurtGroundState();
+	void HurtRecover();
+	void HurtRecoverState();
 
 	void AnyState();
 	// // 
@@ -85,8 +99,6 @@ public :
 private:
 	float CurAttackCoolTime = 0.0f;
 public  : 
-	
-	
 	bool bCurWallRideCollision{ false };
 private :
 	bool bJumpAnimEnd{ false };
@@ -95,7 +107,11 @@ private :
 	bool bAttackMotionEnd{ false };
 	bool bRollMotionEnd{ false };
 	bool bFlipMotionEnd{ false };
-
+	bool bDoorKickMotionEnd{ false };
+	bool bPreCrouchMotionEnd{ false };
+	bool bPostCrouchMotionEnd{ false };
+	
+	bool bSneakKeyCheck{ false };
 	bool bJumpKeyCheck{ false };
 	bool bMoveKeyCheck{ false };
 	bool bAttackKeyCheck{ false };
