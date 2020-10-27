@@ -142,3 +142,7 @@ Itemicons
 Dragon
 spr_dragon_wallride
 2
+..\Resource\Texture\Dustcloud\Dustcloud\%d.png
+Dustcloud
+Dustcloud
+7

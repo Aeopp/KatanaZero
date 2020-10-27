@@ -29,6 +29,8 @@ public:
 	// false 시 계속 유지
 	void TimerRegist(float initial, float Repeat, float End,
 		NotifyEventType _NotifyEvent/*람다표현식 or std::bind use*/);
+	void SlowDownTime();
+	void Return();
 public:
 	// 등록된 콜백 함수들에게 통지하고싶은 타이밍에 호출하여주세요.
 	void NotificationCheck()&;

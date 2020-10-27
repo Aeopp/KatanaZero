@@ -12,9 +12,14 @@
 
 
 // 정적 람다는 가변적인 변수는 절대 캡쳐하지마세요.
-static auto YSort = [](std::shared_ptr<RenderComponent>& Lhs,std::shared_ptr<RenderComponent>& Rhs)
+static auto YSort = [](std::shared_ptr<RenderComponent>& Lhs, std::shared_ptr<RenderComponent>& Rhs)
 {
 	return *Lhs->CalcY() < *Rhs->CalcY();
+};
+
+static auto LayerSort = [](const std::shared_ptr<RenderComponent>& Lhs, const std::shared_ptr<RenderComponent>& Rhs)
+{
+	return Lhs->_Info._Layer < Rhs->_Info._Layer;
 };
 
 static auto UIDepthSort = [](std::shared_ptr<UIRenderComponent>& Lhs, std::shared_ptr<UIRenderComponent>& Rhs)
@@ -28,6 +33,7 @@ void RenderManager::Render()
 
 	auto& RenderCompVec = ComponentManager::instance().Find<RenderComponent>();
 	std::sort(std::begin(RenderCompVec), std::end(RenderCompVec),YSort);
+	std::stable_sort(std::begin(RenderCompVec), std::end(RenderCompVec), LayerSort);
 
 	for (auto& _RenderComp : RenderCompVec)
 	{

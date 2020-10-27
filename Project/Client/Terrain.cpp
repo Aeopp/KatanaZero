@@ -10,6 +10,7 @@
 
 #include "GraphicDevice.h"
 #include "Texture_Manager.h"
+#include "Time.h"
 
 Terrain::Terrain()
 {
@@ -194,6 +195,9 @@ void Terrain::Render()
 #endif // _AFX
 	DebugRender();
 
+	const float Dt = Time::instance().Delta();
+
+
 	const float JoomScale = global::JoomScale;
 	vec3 CameraPos{ 0.f ,0.f , 0.f };
 	CameraPos = global::CameraPos;
@@ -241,15 +245,33 @@ void Terrain::Render()
 				if (IsRenderable)break;
 			}
 
-			//////////////////
 			if (IsRenderable)
 			{
 				++RenderCount;
 				RECT srcRect = { 0,0,static_cast<int32_t>(sp_TexInfo->ImageInfo.Width),static_cast<int32_t>(sp_TexInfo->ImageInfo.Height) };
 				vec3 TextureCenter = { sp_TexInfo->ImageInfo.Width / 2.f,sp_TexInfo->ImageInfo.Height / 2.f,0.f };
 				GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+				switch (global::_CurGameState)
+				{
+				case global::ECurGameState::Play:
+					_GoalRGB = 255;
+					break;
+				case global::ECurGameState::Replay:
+					_GoalRGB = 255;
+					break;
+				case global::ECurGameState::ReWind:
+					_GoalRGB = 255;
+					break; 
+				case global::ECurGameState::Slow:
+					_GoalRGB = 50;
+					break; 
+				default:
+					_GoalRGB = 255;
+					break;
+				}
+				_CurRGB = math::lerp(_CurRGB, _GoalRGB, LerpT, Dt);
 				GraphicDevice::instance().GetSprite()->Draw(sp_TexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
-					D3DCOLOR_ARGB(255, 255, 255, 255));
+					D3DCOLOR_ARGB(255,(uint8_t)_CurRGB, (uint8_t)_CurRGB, (uint8_t)_CurRGB));
 			}
 		}
 	}

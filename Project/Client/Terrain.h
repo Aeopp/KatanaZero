@@ -22,6 +22,9 @@ public:
 	void SaveTilesCurrentStateKeyOnly(const std::wstring& FilePath);
 	void LoadTilesCurrentStateKeyOnly(const std::wstring& FilePath);
 
+	float _CurRGB = 255;
+	float _GoalRGB = 255;
+	float LerpT = 5.f;
 	// 논리적인 타일 스테이지가 바뀌어야 하는 상황에 반드시 호출
 	std::wstring CurrentTileTextureStateKey;
 			//TileStateKey

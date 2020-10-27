@@ -11,6 +11,8 @@
 #include "UIItemIcon.h"
 #include "PhysicTransformComponent.h"
 #include "AttackSlash.h"
+#include "DustCloud.h"
+
 #include "math.h"
 
 using namespace std;
@@ -43,7 +45,7 @@ void Player::Initialize() & noexcept
 		{}, D3DCOLOR_ARGB(255, 255, 255, 255),
 		0.f, vec2{ 1.f,1.f }, L"Dragon",
 		LAYER::ELAYER::EOBJECT);
-	_RenderComp->bAfterImg = true;
+	_RenderComp->AfterImgOff();
 
 	_CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
 	_CollisionComp->_CollisionInfo.Height = 40;
@@ -62,6 +64,9 @@ void Player::Initialize() & noexcept
 
 	_SpAttackSlash = ObjectManager::instance().InsertObject<typename Attack_Slash>();
 	_SpAttackSlash->SetOwner(_This);
+
+	_SpDustCloud = ObjectManager::instance().InsertObject<DustCloud>();
+	_SpDustCloud->SetOwner(_This);
 
 	_PhysicComp->bGravity = true;
 
@@ -189,6 +194,9 @@ void Player::IdleToRun()
 	_Notify[3] = [this]()
 	{bIdleToRunMotionEnd = true; };
 	_RenderComp->Anim(false, false, L"spr_dragon_idle_to_run", 3, 0.12f , std::move(_Notify));
+
+	_SpDustCloud->_RenderComp->bRender = true;
+
 }
 
 void Player::IdleToRunState()
@@ -501,18 +509,18 @@ void Player::KeyBinding() & noexcept
 		D3DXVec3Normalize(&_PhysicComp->Dir, &MouseToDistance);
 		vec3 Dir = _PhysicComp->Dir;
 	}, VK_LBUTTON, InputManager::EKEY_STATE::DOWN));
-	
+
 	_Anys.emplace_back(InputManager::instance().EventRegist([this,Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		Time::instance().TimeScale = 0.1f;
+		Time::instance().SlowDownTime();
 	},
-		VK_SHIFT, InputManager::EKEY_STATE::PRESSING));
+		VK_SHIFT, InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this ,Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		Time::instance().TimeScale = 1.f;
+		Time::instance().Return();
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::UP));
 
@@ -557,6 +565,9 @@ void Player::Attack()
 	_PhysicComp->Move(std::move(_Physics));
 
 	_SpAttackSlash->AttackStart(Dir *10.f );
+
+	_RenderComp->AfterImgOn();
+
 }
 
 void Player::DownJump()
@@ -796,6 +807,7 @@ void Player::AttackState()
 {
 	if (bAttackMotionEnd)
 	{
+		_RenderComp->AfterImgOff();
 		bAttackMotionEnd = false;
 		Fall();
 	}
@@ -811,6 +823,8 @@ void Player::Roll()
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_roll",7, 0.4f ,std::move(_Notify));
 	_RenderComp->PositionCorrection.y += 10.f;
+	_RenderComp->AfterImgOn();
+
 }
 
 void Player::RollState()
@@ -818,12 +832,14 @@ void Player::RollState()
 	if (bJumpKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 10.f;
+		_RenderComp->AfterImgOff();
 		Jump();
 	}
 	if (bRollMotionEnd)
 	{
 		_RenderComp->PositionCorrection.y -= 10.f;
 		bRollMotionEnd = false;
+		_RenderComp->AfterImgOff();
 		Idle();
 	}
 
@@ -878,11 +894,13 @@ void Player::Flip()
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_flip", 10, 0.4f , std::move(_Notify));
 	_PhysicComp->Move(FlipDir * 1500.f, 100.f, 0.4f);
+	_RenderComp->AfterImgOn();
 }
 void Player::FlipState()
 {
 	if (bFlipMotionEnd)
 	{
+		_RenderComp->AfterImgOff();
 		bFlipMotionEnd = false;
 		Fall();
 	}

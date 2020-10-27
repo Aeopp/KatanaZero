@@ -36,7 +36,7 @@ void Attack_Slash::Initialize() & noexcept
     };
     _RenderComp->Anim(false, true, L"spr_dragon_slash", 5, 0.3f, std::move(_Notify),
     D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, { 1.f,1.f }, L"Dragon", LAYER::ELAYER::EEFFECT);
-    _RenderComp->bAfterImg = false;
+    _RenderComp->AfterImgOff(); 
     _RenderComp->bRender = false;
 
     _CollisionComp->bCollision = false;

@@ -82,6 +82,18 @@ NotifyEventType _NotifyEvent)
 	_NotifyEvents.emplace_back(false,initial,Repeat,End,0.f,initial,std::move(_NotifyEvent));
 }
 
+void Time::SlowDownTime()
+{
+	TimeScale = 0.1f;
+	global::_CurGameState = global::ECurGameState::Slow;
+}
+
+void Time::Return()
+{
+	TimeScale = 1.f;
+	global::_CurGameState = global::ECurGameState::Play;
+}
+
 void Time::NotificationCheck()&
 {
 	

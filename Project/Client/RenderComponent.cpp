@@ -2,7 +2,6 @@
 #include "RenderComponent.h"
 #include "math.h"
 #include "Time.h"
-
 #include "TransformComponent.h"
 #include "Texture_Manager.h"
 #include "GraphicDevice.h"
@@ -46,15 +45,9 @@ void RenderComponent::Render()
 		if (IsRenderable)break;
 	}
 
-	//////////////////
 	if (IsRenderable)
 	{
-		RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width *_Info.SrcScale.x,
-							  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
-		vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
-		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
-	
-		if (bAfterImg)
+		if (bAfterRender)
 		{
 			for (auto& _AfterImg : _AfterQ)
 			{
@@ -62,25 +55,31 @@ void RenderComponent::Render()
 				RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width * _Info.SrcScale.x,
 							  TexInfo->ImageInfo.Height * _Info.SrcScale.y };
 				vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
-				vec3 v = _AfterImg.PastPosition - spOwner->_TransformComp->Position;
-
-				GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture, &_srcRT, &TextureCenter,
-					&(v * 0.04f), _AfterImg._Color);
+				GraphicDevice::instance().GetSprite()->SetTransform(&_AfterImg.PastWorld);
+				GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture, &_srcRT, &__TextureCenter,nullptr, 
+					_AfterImg._Color);
 			}
 
-			AfterImg _AfterImg;
-			_AfterImg.ID = _Info.CurrentFrame;
-			_AfterImg.StateKey = _Info.StateKey;
-			_AfterImg.PastPosition = spOwner->_TransformComp->Position;
-			_AfterImg._Color = AfterImg::_ColorTable[AfterImg::CurColorIdx++]; 
-			AfterImg::CurColorIdx %= AfterImg::_ColorTable.size();
-			_AfterQ.push_back(std::move(_AfterImg));
-			if (_AfterQ.size() > 15)
-				_AfterQ.pop_front();
+			if (bAfterRender)
+			{
+				AfterImg _AfterImg;
+				_AfterImg.ID = _Info.CurrentFrame;
+				_AfterImg.StateKey = _Info.StateKey;
+				_AfterImg.PastWorld = MWorld;
+				_AfterImg._Color = AfterImg::_GradationTable[AfterImg::CurColorIdx++];
+				AfterImg::CurColorIdx %= AfterImg::_GradationTable.size();
+				_AfterQ.push_back(std::move(_AfterImg));
+				if (_AfterQ.size() > AfterImgCount)
+					_AfterQ.pop_front();
+			}
 		}
 
+		RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
+					  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
+		vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
+		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 		GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
-			_Info._Color);
+		 _Info._Color);
 	}
 
 
@@ -185,4 +184,15 @@ void RenderComponent::Anim(
 	_Info._Layer = _Layer == LAYER::ELAYER::ENONE ? _Info._Layer : _Layer;
 	_Info._Nofify.clear();
 	_Info._Nofify = std::move(_Nofify);
+}
+
+void RenderComponent::AfterImgOn()
+{
+	bAfterRender = true;
+	_AfterQ.clear();
+}
+
+void RenderComponent::AfterImgOff()
+{
+	bAfterRender = false;
 }

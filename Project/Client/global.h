@@ -3,10 +3,16 @@
 #include <array>
 #include "Typedef.h"
 
-
 class global
 {
 public:
+	enum class ECurGameState : uint8_t
+	{
+		Play,
+		Slow,
+		Replay,
+		ReWind,
+	};
 	static constexpr std::pair<float, float > ClientSize = { 1920,1080};
 	static constexpr std::pair<float, float > TileNums = { 150 ,150};
 	static constexpr std::pair<float, float > TileSize = { 36 ,36 };
@@ -18,6 +24,7 @@ public:
 	static inline vec3 MousePosScreen{ 0.f,0.f,0.f };
 	static inline vec3 MousePosWorld{ 0.f,0.f,0.f };
 
+	static inline ECurGameState _CurGameState{ ECurGameState::Play};
 	static inline std::chrono::milliseconds DeltaMax = std::chrono::milliseconds(40ul);
 	static inline bool bActive{ true }; 
 	static inline HWND hWND{ nullptr };

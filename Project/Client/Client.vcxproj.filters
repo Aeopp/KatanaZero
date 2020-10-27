@@ -210,6 +210,8 @@
     <ClInclude Include="UIItemIcon.h" />
     <ClInclude Include="AttackObject.h" />
     <ClInclude Include="AttackSlash.h" />
+    <ClInclude Include="Effect.h" />
+    <ClInclude Include="DustCloud.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -335,6 +337,8 @@
     <ClCompile Include="UIItemIcon.cpp" />
     <ClCompile Include="AttackObject.cpp" />
     <ClCompile Include="AttackSlash.cpp" />
+    <ClCompile Include="Effect.cpp" />
+    <ClCompile Include="DustCloud.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

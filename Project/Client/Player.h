@@ -131,5 +131,6 @@ private:
 	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};
 	std::shared_ptr<class UIItemIcon > _SpUIItemIcon{};
+	std::shared_ptr<class DustCloud> _SpDustCloud{};
 };
 

@@ -47,7 +47,7 @@ public:
 	bool bLand = false;
 	bool bFly = false;
 	bool bDownLand = false;
-	bool bGravity = true;
+	bool bGravity = false;
 	bool bCurCollisionTile = false;
 	std::vector<SimplePhysics> Forces;
 	virtual void Update()override;;
