@@ -2,7 +2,7 @@
 ## 일반상태에서 잔상 남기며 그리기
 현재 생각중인 색깔
 AfterStartColor = 0,255,255
-AfterGoalColor = 
+AfterGoalColor = 보라색
 ## 슬로우 상태
 현재 생각중인 색깔
 SlowGoalColor = 0,255,255
