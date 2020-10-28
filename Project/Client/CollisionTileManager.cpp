@@ -10,6 +10,7 @@
 #include "ComponentManager.h"
 #include "Player.h"
 #include "InputManager.h"
+#include "Time.h"
 
 void CollisionTileManager::Collision()&
 {
@@ -18,6 +19,7 @@ void CollisionTileManager::Collision()&
 
 void CollisionTileManager::Initialize() & noexcept
 {
+	
 
 }
 
@@ -181,7 +183,7 @@ void CollisionTileManager::Update()&
 		bool bFly = false;
 
 		if (!_spCollision->bCollision)continue;
-
+		if (!(_CollisionTagSet.contains(_spCollision->_Tag)))continue;
 		for (auto& _CollisionTile : _CollisionTileVec)
 		{
 			auto WorldRectPt = _spCollision->GetWorldRectPt();
@@ -207,9 +209,9 @@ void CollisionTileManager::Update()&
 				}
 
 				math::Collision::HitInfo _HitInfo{};
-				_HitInfo.Distance = D3DXVec3Length(&(*opDir));
+				_HitInfo.PosDistance = D3DXVec3Length(&(*opDir));
 				D3DXVec3Normalize(&(*opDir), &(*opDir));
-				_HitInfo.Dir = *opDir;
+				_HitInfo.PosDir = *opDir;
 				D3DXVec3Normalize(&TilePushDir, &TilePushDir);
 				_HitInfo.Normal = TilePushDir;
 				_HitInfo.Position = math::GetCenter(_CollisionTile);
@@ -248,6 +250,7 @@ void CollisionTileManager::Update()&
 		bool bLand = false;
 		bool bFly = false;
 		if (!_spCollision->bCollision)continue;
+		if (!(_CollisionTagSet.contains(_spCollision->_Tag)))continue;
 		if (_spCollision->bDownJump)continue;
 
 		for (auto& _CollisionTile : _CollisionDownJumpTileVec)
@@ -277,9 +280,9 @@ void CollisionTileManager::Update()&
 				}
 
 				math::Collision::HitInfo _HitInfo{};
-				_HitInfo.Distance = D3DXVec3Length(&(*opDir));
+				_HitInfo.PosDistance = D3DXVec3Length(&(*opDir));
 				D3DXVec3Normalize(&(*opDir), &(*opDir));
-				_HitInfo.Dir = *opDir;
+				_HitInfo.PosDir = *opDir;
 				D3DXVec3Normalize(&TilePushDir, &TilePushDir);
 				_HitInfo.Normal = TilePushDir;
 				_HitInfo.Position = math::GetCenter(_CollisionTile);
@@ -289,6 +292,8 @@ void CollisionTileManager::Update()&
 				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
 				if (std::abs(WorldRectPt[2].y - _CollisionTile[0].y) < LandCheckDistance)
 				{
+			
+
 					bLand = true;
 					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>
 						(spOwner->_TransformComp);
@@ -315,6 +320,7 @@ void CollisionTileManager::Update()&
 			// TODO::
 			spPhysicTransform->bDownLand = false;
 		}
+
 	}
 }
 

@@ -120,9 +120,11 @@ private:
 	bool bAttackKeyCheck{ false };
 	bool bDownKeyCheck{ false };
 public :	
+	bool bSneak{ false };
 	vec3 FlipDir{0.f,0.f,0.f};
 	bool bCurWallRideCollision{ false };
 	bool bWallJump{ false };
+	float InvincibleTime = 0.f;
 	void JumpWallRide();
 private:
 	float CurAttackCoolTime = 0.0f;

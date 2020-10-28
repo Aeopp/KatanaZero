@@ -9,6 +9,8 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 	virtual void Render();
+	virtual ~Component()noexcept = default;
+
 	std::weak_ptr<class object> _Owner{};
 	bool bDie = false;
 private:

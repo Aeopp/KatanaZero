@@ -9,6 +9,7 @@
 #include "Battery.h"
 #include "UITimer.h"
 #include <string_view>
+#include "Grunt.h"
 
 void SceneStart::Initialize()
 {
@@ -29,6 +30,11 @@ void SceneStart::Initialize()
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Mouse>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<HUD>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<UITimer>());
+
+	auto _Grunt = ObjectManager::instance().InsertObject<Grunt>
+		(vec3{ 3325,5365,0.f });
+
+	SceneManageObjs.push_back(_Grunt);
 
 	Scene::Initialize();
 }

@@ -8,13 +8,12 @@
 #include "Tags.h"
 #include <any>
 
-
 using float_t = float;
 
 class math
 {
 private:
-	static const std::random_device rd;
+	static  inline std::random_device rd;
 public:
 	static constexpr float GRAVITY = 300.f;
 	static constexpr float GRAVITY_ACC = 100.f;
@@ -23,14 +22,19 @@ public:
 	template<typename Type>
 	auto LOOP(std::pair<Type, Type> Range, Type Target);
 
+	static vec3 RandVec( std::pair<float, float> Range);
+
 	template<typename Ty>
 	static Ty Rand_Normal(std::pair<Ty, Ty> range);
 
 	template<typename Ty>
 	static Ty Rand(std::pair<Ty, Ty> range);
 
+	static float AngleFromVec(vec3 Dir);
 	static float lerp(float start, float goal, float goal_time, float dt);
 	static vec3 lerp(const vec3 start, const vec3 goal, float goal_time, float dt);
+	static D3DXCOLOR lerp(D3DXCOLOR start, D3DXCOLOR goal, float goal_time, float dt);
+
 	static float Angle360conversion(float degree);
 
 	// 사각형의 회전여부는 상관 없습니다.
@@ -95,13 +99,19 @@ public:
 			OBJECT_ID::EID _ID{};
 			OBJECT_TAG::ETAG _TAG{};
 			// 노말
-			vec3 Normal{} ;
+			vec3 Normal{};
 			// 부딪힌 물체가 나를 바라보는 방향
-			vec3 Dir{} ;
+			vec3 PushDir{ 1.f,0.f,0.f };
+			vec3 PosDir{};
+			vec3 Dir{ 1.f,0.f,0.f };
+
 			// 부딪힌 물체와 교차하는 영역 만큼의 거리
-			float Distance{} ;
+			float PosDistance{};
 			// 부딪힌 물체의 중심점
-			vec3 Position{} ;
+			vec3 Position{};
+			float PushForce= 100.f;
+			float IntersectAreaScale = 0.f;
+			bool IsLhs = false;
 			// 타겟
 			std::weak_ptr<class object> _Target{};
 			std::any _Variable{};

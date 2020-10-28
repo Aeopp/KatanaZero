@@ -21,6 +21,32 @@ float math::Angle360conversion(float degree)
 		return (180 + (180 - degree));
 }
 
+D3DXCOLOR math::lerp(D3DXCOLOR start, D3DXCOLOR goal, float goal_time, float dt)
+{
+	D3DXCOLOR _color;
+
+	_color.a = lerp(start.a, goal.a, goal_time, dt);
+	_color.r = lerp(start.r, goal.r, goal_time, dt);
+	_color.g = lerp(start.g, goal.g, goal_time, dt);
+	_color.b = lerp(start.b, goal.b, goal_time, dt);
+
+	return _color;
+}
+
+vec3 math::RandVec(std::pair<float, float> Range)
+{
+	vec3 vec;
+	vec.x = math::Rand(Range);
+	vec.y = math::Rand(Range);
+	vec.z = 0;
+	return vec;
+}
+
+float math::AngleFromVec(vec3 Dir)
+{
+	return std::atan2(Dir.y, Dir.x);
+}
+
 float math::lerp(float start, float goal, float goal_time, float dt)
 {
 	float f = goal - start;

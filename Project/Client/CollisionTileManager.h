@@ -1,5 +1,7 @@
 #pragma once
 #include "singleton_interface.h"
+#include <set>
+#include "CollisionComponent.h"
 
 // 스테이지를 로딩할시 충돌 타일 정보를 클리어하고 해당 스테이지에 맞게 업데이트 해주세요.
 class CollisionTileManager : public singleton_interface<CollisionTileManager>
@@ -30,9 +32,18 @@ public:
 	void SaveCollisionTile(const std::wstring& FilePath) &; 
 	void Clear()&;
 
+	// 해당 집합에 존재하지 않으면 충돌검사 수행 X
 	
 
 	const float LandCheckDistance = 10.f;
 	_CollisionTileContainerType& GetCollisionTileContainerRef(const bool bCanGoDown)&;
+private:
+	std::set<typename CollisionComponent::ETag> _CollisionTagSet
+	{
+		CollisionComponent::ETag::EPlayer,
+		CollisionComponent::ETag::EEnemy,
+		CollisionComponent::ETag::ECollisionEffect,
+		CollisionComponent::ETag::EItem,
+	};
 };
 

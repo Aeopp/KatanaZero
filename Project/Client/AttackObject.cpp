@@ -31,6 +31,8 @@ void AttackObject::Initialize() & noexcept
     _CollisionComp = ComponentManager::instance().Insert<CollisionComponent>(_This);
     _RenderComp = ComponentManager::instance().Insert<RenderComponent>(_This);
     _PhysicComp = std::dynamic_pointer_cast<PhysicTransformComponent>(_TransformComp);
+
+    _CollisionComp->_Tag = CollisionComponent::ETag::EPlayerAttack;
 }
 
 void AttackObject::Update()

@@ -68,6 +68,11 @@ void PhysicTransformComponent::Reflect(const float Repulsion)
 	//}
 };
 
+void PhysicTransformComponent::ForceClear()
+{
+	Forces.clear();
+}
+
 void PhysicTransformComponent::Update()
 {
 	TransformComponent::Update();
@@ -102,4 +107,7 @@ void PhysicTransformComponent::Update()
 void PhysicTransformComponent::LateUpdate()
 {
 	TransformComponent::LateUpdate();
+
+
+
 }

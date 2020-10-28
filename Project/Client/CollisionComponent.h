@@ -5,6 +5,16 @@ class CollisionComponent :
     public Component
 {
 public:
+    enum class ETag : uint8_t
+    {
+        ENone,
+        EEnemy,
+        EPlayer,
+        EPlayerAttack,
+        EEnemyAttack,
+        ECollisionEffect,
+        EItem,
+    };
     void Render()override;
     void Update()override;
 
@@ -26,6 +36,9 @@ public:
         ////////////////////////////////
     };
 
+    float PushForce = 0.f;
+    vec3 CurrentPushDir{ +1.f,0.f,0.f };
+    ETag _Tag = ETag::ENone;
     bool bDownJump = false;
     bool bCollision = true;
     CollisionInfo _CollisionInfo{};

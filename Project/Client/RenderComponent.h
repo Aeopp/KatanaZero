@@ -83,6 +83,8 @@ public :
 	void AfterImgOn();
 	void AfterImgOff();
 
+
+	std::function<void()> _RenderAfterEvent;
 	std::deque<AfterImg> _AfterQ;
 	Info _Info{};
 	vec3 PositionCorrection{ 0.f,0.f,0.f };

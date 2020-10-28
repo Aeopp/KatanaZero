@@ -44,6 +44,7 @@ void object::LateUpdate()
 	}
 }
 
+		
 void object::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
 

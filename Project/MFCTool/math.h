@@ -22,6 +22,8 @@ public:
 	static Ty Rand(std::pair<Ty, Ty> range);
 
 	static float lerp(float start, float goal, float goal_time, float dt);
+	static D3DXCOLOR lerp(D3DXCOLOR start, D3DXCOLOR goal, float goal_time, float dt);
+
 	static float Angle360conversion(float degree);
 
 	// 사각형의 회전여부는 상관 없습니다.

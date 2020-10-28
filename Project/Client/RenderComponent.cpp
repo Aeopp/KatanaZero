@@ -73,13 +73,13 @@ void RenderComponent::Render()
 					_AfterQ.pop_front();
 			}
 		}
-
+	
 		RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
 					  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
 		vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
 		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 		GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
-		 _Info._Color);
+		_Info._Color);
 	}
 
 
@@ -94,6 +94,12 @@ void RenderComponent::Render()
 			NotifyEvent->second();
 		}
 	}
+
+	if (_RenderAfterEvent)
+	{
+		_RenderAfterEvent();
+	}
+
 
 	if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
 	{

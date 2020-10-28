@@ -43,6 +43,7 @@ void Attack_Slash::Initialize() & noexcept
     _CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
     _CollisionComp->_CollisionInfo.Height = 30;
     _CollisionComp->_CollisionInfo.Width = 25;
+    _CollisionComp->PushForce = 500.f;
 
     _PhysicComp->bGravity = false;
     _PhysicComp->Position = vec3{ 0.f ,0.f ,0.f };
@@ -94,17 +95,21 @@ void Attack_Slash::Move(vec3 Dir, const float AddSpeed)
     Super::Move(Dir, AddSpeed);
 }
 
-void Attack_Slash::AttackStart(vec3 AttackPos)
+void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
 {
     RenderComponent::NotifyType _Notify;
     _Notify[5] = [this]()
     {
         bSlashEffectEnd = true;
     };
-    _RenderComp->Anim(true, true, L"spr_dragon_slash", 5, 0.3f, std::move(_Notify));
+    _RenderComp->Anim(false, false, L"spr_dragon_slash", 5, 0.3f, std::move(_Notify));
     _RenderComp->bRender = true;
     _CollisionComp->bCollision = true;
 
     _PhysicComp->Dir = AttackPos;
     _PhysicComp->Position = std::move(AttackPos);
+    _CollisionComp->CurrentPushDir = Dir;
+   /* D3DXVec3Normalize(&AttackPos, &AttackPos);
+    _PhysicComp->Rotation.z = -atan2f(AttackPos.y, AttackPos.x);*/
+    //_PhysicComp->Rotation.z = 30.f;
 }

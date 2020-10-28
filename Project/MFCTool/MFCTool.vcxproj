@@ -45,7 +45,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
@@ -181,13 +181,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>Full</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
     </ClCompile>

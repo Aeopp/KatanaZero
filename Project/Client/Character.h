@@ -21,5 +21,6 @@ public :
 protected:
 	float Speed = 100.f;
 	float MoveGoalTime = 2.f;
+
 };
 

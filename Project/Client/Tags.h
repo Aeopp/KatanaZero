@@ -7,6 +7,8 @@ namespace OBJECT_ID
 	// 태그 다음 집합
 	enum EID : uint8_t
 	{
+		GRUNT_SLASH,
+		GRUNT,
 		DustCloud ,
 		Effect, 
 		ATTACK,
@@ -37,6 +39,7 @@ namespace OBJECT_TAG
 	// 집합
 	enum ETAG : uint8_t
 	{
+		ENEMY,
 		ATTACK,
 		PLAYER_ATTACK,
 		ENEMY_ATTACK,

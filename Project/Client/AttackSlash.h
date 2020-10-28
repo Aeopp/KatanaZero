@@ -20,7 +20,7 @@ public:
 	virtual void Move(vec3 Dir, const float AddSpeed)override;
 
 public:
-	void AttackStart(vec3 AttackPos);
+	void AttackStart(vec3 AttackPos, vec3 Dir);
 private:
 	bool bSlashEffectEnd{ false };
 };

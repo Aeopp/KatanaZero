@@ -7,7 +7,6 @@
 #include <istream>
 #include <numeric>
 #include "ObjectManager.h"
-
 #include "GraphicDevice.h"
 #include "Texture_Manager.h"
 #include "Time.h"

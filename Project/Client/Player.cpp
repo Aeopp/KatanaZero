@@ -37,7 +37,7 @@ std::wstring_view Player::GetName() const&
 void Player::Initialize() & noexcept
 {
 	Super::Initialize();
-
+	
 	_TransformComp->Scale *= 2.5f;
 	_PhysicComp->Mass = 100.f;
 	_RenderComp->Anim(false, true,
@@ -46,10 +46,14 @@ void Player::Initialize() & noexcept
 		0.f, vec2{ 1.f,1.f }, L"Dragon",
 		LAYER::ELAYER::EOBJECT);
 	_RenderComp->AfterImgOff();
+	_RenderComp->PositionCorrection = vec3{ 0.f,-8.f,0.f };
 
-	_CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
-	_CollisionComp->_CollisionInfo.Height = 40;
-	_CollisionComp->_CollisionInfo.Width = 20;
+	_CollisionComp->_CollisionInfo._ShapeType =
+	CollisionComponent::CollisionInfo::EShapeType::Rect;
+	_CollisionComp->_CollisionInfo.Height = 35;
+	_CollisionComp->_CollisionInfo.Width = 18;
+
+	_CollisionComp->_Tag = CollisionComponent::ETag::EPlayer;
 
 	KeyBinding();
 
@@ -107,6 +111,7 @@ void Player::LateUpdate()
 	bCurWallRideCollision = false;
 
 	CurAttackCoolTime -= Dt;
+	InvincibleTime -= Dt;
 };
 
 void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
@@ -124,8 +129,31 @@ void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 }
 void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
-      // 여기서 타겟을 체크하고 
-	  // Hurt 호출
+	Super::Hit(_Target, _CollisionInfo);
+	if (InvincibleTime > 0.f)return;
+	if (bHurt)return;
+
+	if (_CollisionInfo._TAG == OBJECT_TAG::ENEMY_ATTACK)
+	{
+		_CollisionInfo.PushDir.y -= 0.4f;
+
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 10.f),
+			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
+			0.3f,
+			_CollisionInfo.PushDir);
+
+		Shake _Shake;
+
+		_Shake.DeltaCoefficient = 2.f;
+		_Shake.T= 0.f;
+		_Shake.Vec = (_CollisionInfo.PushDir)*0.5f;
+		_Shake.Coefficient = _CollisionInfo.PushForce* 0.10f;
+
+		_SpCamera->CameraShake(_Shake);
+
+		HurtFlyBegin();
+	};
+
 };
 
 void Player::Move(vec3 Dir,const float AddSpeed)
@@ -156,6 +184,7 @@ void Player::Move(vec3 Dir,const float AddSpeed)
 
 void Player::Idle()
 {
+	_RenderComp->PositionCorrection = vec3{ 0.f,-8.f,0.f };
 	_CurrentState = Player::State::Idle;
 	_RenderComp->Anim(false, true, L"spr_dragon_idle", 12, 1.f);
 }
@@ -175,11 +204,11 @@ void Player::IdleState()
 	{
 		IdleToRun();
 	}
-	if (bJumpKeyCheck)
+	if (bJumpKeyCheck && !_PhysicComp->bFly)
 	{
 		Jump();
+		return;
 	}
-	
 	if (bDownKeyCheck && !_PhysicComp->bDownLand)
 	{
 		PreCrouch();
@@ -559,15 +588,14 @@ void Player::Attack()
 	SimplePhysics _Physics;
 	_Physics.Acceleration = 100.f;
 	_Physics.Dir = Dir;
-	_Physics.Speed = Dir * 500.f;
+	_Physics.Speed = Dir * 700.f;
 	_Physics.MaxT = 0.25f;
 	_Physics.T = 0.f;
 	_PhysicComp->Move(std::move(_Physics));
 
-	_SpAttackSlash->AttackStart(Dir *10.f );
-
+	_SpAttackSlash->AttackStart(Dir *30.f, Dir);
+	
 	_RenderComp->AfterImgOn();
-
 }
 
 void Player::DownJump()
@@ -696,27 +724,32 @@ void Player::Sneak()
 	_CurrentState = Player::State::Sneak;
 	_RenderComp->Anim(false, true, L"spr_dragon_sneak", 10, 0.8f);
 	_RenderComp->PositionCorrection.y += 12;
+	bSneak = true;
 }
 void Player::SneakState()
 {
 	if (bSneakKeyCheck && !bMoveKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
+		bSneak = false;
 		RunToIdle();
 	}
 	if (bMoveKeyCheck && !bSneakKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
+		bSneak = false;
 		IdleToRun();
 	}
 	if (bMoveKeyCheck && bSneakKeyCheck && bDownKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
+		bSneak = false;
 		Roll();
 	}
 	if (bJumpKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
+		bSneak = false;
 		Jump();
 	}
 
@@ -732,7 +765,7 @@ void Player::HurtFlyBegin()
 		bHurtFlyBeginMotionEnd = true;
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_hurtfly_begin", 2, 0.2f, std::move(_Notify));
-	_PhysicComp->Move(vec3{ -0.f,-3000.f,0.f }, 500.f, 1.f);
+	
 	bHurt = true;
 };
 
@@ -799,6 +832,8 @@ void Player::HurtRecoverState()
 		_RenderComp->PositionCorrection.y +=15;
 		bHurtRecoverMotionEnd = false;
 		bHurt = false;
+		_PhysicComp->ForceClear();
+		InvincibleTime = 1.f;
 		Idle();
 	}
 };
@@ -877,11 +912,18 @@ void Player::WallRideState()
 	{
 		Flip();
 		_PhysicComp->GravityCoefficient = 1.f;
+		return;
 	}
 	if (_PhysicComp->bLand)
 	{	
 		_PhysicComp->GravityCoefficient = 1.f;
 		Idle();
+		return;
+	}
+	if (!bCurWallRideCollision)
+	{
+		Fall();
+		return;
 	}
 }
 void Player::Flip()

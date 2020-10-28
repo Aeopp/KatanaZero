@@ -161,8 +161,8 @@ void CollisionLineManager::Update()&
 					_Owner->LineLanding(*ODir);
 
 					math::Collision::HitInfo _HitInfo{};
-					_HitInfo.Distance = Distance;
-					_HitInfo.Dir = Dir;
+					_HitInfo.PosDistance = Distance;
+					_HitInfo.PosDir = Dir;
 					D3DXVec3Normalize(&*ODir, &*ODir);
 					std::swap(ODir->x, ODir->y);
 					ODir->x *= -1.f;
@@ -212,8 +212,8 @@ void CollisionLineManager::Update()&
 				{
 					bCollision = true;
 					math::Collision::HitInfo _HitInfo{};
-					_HitInfo.Distance = Distance;
-					_HitInfo.Dir = Dir;
+					_HitInfo.PosDistance = Distance;
+					_HitInfo.PosDir = Dir;
 					D3DXVec3Normalize(&*ODir, &*ODir);
 					std::swap(ODir->x, ODir->y);
 					ODir->x *= -1.f;
