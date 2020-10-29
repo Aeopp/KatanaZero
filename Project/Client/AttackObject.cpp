@@ -39,14 +39,14 @@ void AttackObject::Update()
 {
     Super::Update();
 
-    if (_TransformComp->Dir.x < 0.f)
+    /*if (_TransformComp->Dir.x < 0.f)
     {
         _RenderComp->AnimDir = -1.f;
     }
     else
     {
         _RenderComp->AnimDir = 1.f;
-    }
+    }*/
 }
 
 void AttackObject::Move(vec3 Dir, const float AddSpeed)

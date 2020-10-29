@@ -47,7 +47,10 @@ void Attack_Slash::Initialize() & noexcept
 
     _PhysicComp->bGravity = false;
     _PhysicComp->Position = vec3{ 0.f ,0.f ,0.f };
-    _PhysicComp->Dir = { 1.f,0.f,0.f };
+    _PhysicComp->Dir = { 0.f,0.f,0.f };
+    _PhysicComp->Scale = { 1.f,1.f,0.f };
+
+    _TransformComp->bFollowOwner = true;
 
     Speed = 0.f;
     MoveGoalTime = 0.f;
@@ -102,7 +105,7 @@ void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
     {
         bSlashEffectEnd = true;
     };
-    _RenderComp->Anim(false, false, L"spr_dragon_slash", 5, 0.3f, std::move(_Notify));
+    _RenderComp->Anim(true, false, L"spr_dragon_slash", 5, 0.3f, std::move(_Notify));
     _RenderComp->bRender = true;
     _CollisionComp->bCollision = true;
 
@@ -110,7 +113,7 @@ void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
     _PhysicComp->Position = std::move(AttackPos);
     _CollisionComp->CurrentPushDir = Dir;
 
-    //Dir.y *= -1.f;
-    //D3DXVec3Normalize(&Dir, &Dir);
-    //_PhysicComp->Rotation.z = math::PI-0.1f;//= atan2f(Dir.y, Dir.x);
+    ;
+    D3DXVec3Normalize(&Dir, &Dir);
+    _PhysicComp->Rotation.z = atan2f(Dir.y, Dir.x);
 }

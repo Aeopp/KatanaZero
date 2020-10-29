@@ -25,6 +25,8 @@ void RenderComponent::Render()
 	const float JoomScale = global::JoomScale;
 	vec3 CameraPos = global::CameraPos;
 
+	//spOwner->_TransformComp->Rotation.z = math::PI - 1.f;
+
 	matrix MWorld = spOwner->_TransformComp->CalcWorldMatrix(true);
 
 	MWorld = MWorld * math::GetCameraJoomMatrix(JoomScale, vec3{ global::ClientSize.first,global::ClientSize.second,0.f });

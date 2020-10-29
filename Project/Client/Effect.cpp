@@ -35,14 +35,14 @@ void Effect::Update()
 {
     Super::Update();
 
-    if (_TransformComp->Dir.x < 0.f)
-    {
-        _RenderComp->AnimDir = -1.f;
-    }
-    else
-    {
-        _RenderComp->AnimDir = 1.f;
-    }
+    //if (_TransformComp->Dir.x < 0.f)
+    //{
+    //    _RenderComp->AnimDir = -1.f;
+    //}
+    //else
+    //{
+    //    _RenderComp->AnimDir = 1.f;
+    //}
 }
 
 void Effect::Move(vec3 Dir, const float AddSpeed)

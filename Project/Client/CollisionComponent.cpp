@@ -15,7 +15,7 @@ void CollisionComponent::Render()
 
 	constexpr float DebugLineWidth = 2.f;
 
-	matrix MWorld = spOwner->_TransformComp->CalcWorldMatrix(true) *
+	matrix MWorld = spOwner->_TransformComp->CalcSTWorldMatrix(true) *
 		math::GetCameraJoomMatrix(global::JoomScale,
 			vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
 	
@@ -60,7 +60,7 @@ std::array<vec3, 4ul> CollisionComponent::GetWorldRectPt() & noexcept
 	auto spOwner = _Owner.lock();
 	if (!spOwner)return {};
 
-	matrix MWorld = spOwner->_TransformComp->CalcWorldMatrix(false);
+	matrix MWorld = spOwner->_TransformComp->CalcSTWorldMatrix(false);
 	_CollisionInfo.Pos = spOwner->_TransformComp->Position;
 
 	auto LocalPoints = math::GetLocalRect(vec2{ _CollisionInfo.Width,_CollisionInfo.Height });
