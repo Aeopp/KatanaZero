@@ -729,33 +729,32 @@ void Player::Sneak()
 	_RenderComp->Anim(false, true, L"spr_dragon_sneak", 10, 0.8f);
 	_RenderComp->PositionCorrection.y += 12;
 	bSneak = true;
-	_SpCamera->bMouseFollow = true;
+
 }
 void Player::SneakState()
 {
 	if (bSneakKeyCheck && !bMoveKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
-		bSneak = false; _SpCamera->bMouseFollow = false;
+		bSneak = false; 
 		RunToIdle();
 	}
 	if (bMoveKeyCheck && !bSneakKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
-		bSneak = false; _SpCamera->bMouseFollow = false;
+		bSneak = false;
 		IdleToRun();
 	}
 	if (bMoveKeyCheck && bSneakKeyCheck && bDownKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
-		bSneak = false; _SpCamera->bMouseFollow = false;
+		bSneak = false;
 		Roll();
 	}
 	if (bJumpKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
 		bSneak = false;
-		_SpCamera->bMouseFollow = false;
 		Jump();
 	}
 

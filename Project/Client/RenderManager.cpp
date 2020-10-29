@@ -9,6 +9,8 @@
 #include "math.h"
 #include <sstream>
 #include "InputManager.h"
+#include "ObjectManager.h"
+#include "Player.h"
 
 
 // 정적 람다는 가변적인 변수는 절대 캡쳐하지마세요.
@@ -103,5 +105,20 @@ void RenderManager::DebugMouseInfoRender() & noexcept
 	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, wss.str().c_str(),
 	wss.str().size(), &_DrawRt, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 
+	wss.str(L"");
+	_DrawRt.top += 25;
+	_DrawRt.bottom += 25;
+
+	auto spPlayer =ObjectManager::instance()._Player.lock();
+	if (!spPlayer)return;
+	vec3 PlayerLocation = spPlayer->_TransformComp->Position;
+	vec3 ToMouseDir = PlayerLocation - global::MousePosWorld;
+	D3DXVec3Normalize(&ToMouseDir, &ToMouseDir);
+	float PI = std::atan2f(ToMouseDir.y, ToMouseDir.x);
+
+	wss << L"ToMouseAngleFromPlayer : " << PI << std::endl;
+
+		GraphicDevice::instance().GetFont()->DrawTextW(nullptr, wss.str().c_str(),
+		wss.str().size(), &_DrawRt, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 	GraphicDevice::instance().GetSprite()->Begin(D3DXSPRITE_ALPHABLEND);
 }

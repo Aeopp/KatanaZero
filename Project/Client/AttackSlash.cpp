@@ -106,10 +106,11 @@ void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
     _RenderComp->bRender = true;
     _CollisionComp->bCollision = true;
 
-    _PhysicComp->Dir = AttackPos;
+    _PhysicComp->Dir = Dir;
     _PhysicComp->Position = std::move(AttackPos);
     _CollisionComp->CurrentPushDir = Dir;
-   /* D3DXVec3Normalize(&AttackPos, &AttackPos);
-    _PhysicComp->Rotation.z = -atan2f(AttackPos.y, AttackPos.x);*/
-    //_PhysicComp->Rotation.z = 30.f;
+
+    //Dir.y *= -1.f;
+    //D3DXVec3Normalize(&Dir, &Dir);
+    //_PhysicComp->Rotation.z = math::PI-0.1f;//= atan2f(Dir.y, Dir.x);
 }

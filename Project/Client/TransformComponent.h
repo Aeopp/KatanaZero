@@ -17,6 +17,8 @@ public:
 	matrix CalcSRTMatrix(const bool bRender=false);
 	matrix CalcSRTRMatrix(const bool bRender = false);
 	matrix CalcWorldMatrix(const bool bRender = false);
+	matrix CalcSTMatrix(const bool bRender = false);
+	matrix CalcSTWorldMatrix(const bool bRender = false);
 
 	virtual void Update()override;;
 	virtual void LateUpdate()override;;

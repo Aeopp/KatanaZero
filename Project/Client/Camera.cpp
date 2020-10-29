@@ -12,6 +12,18 @@
 void Camera::Initialize() & noexcept
 {
 	_Shake= vec3{ 0,0,0 };
+
+	_Anys.emplace_back(InputManager::instance().EventRegist(
+		[this]() 
+	{
+		bMouseFollow = true;
+	}, VK_CONTROL, InputManager::EKEY_STATE::DOWN));
+
+	_Anys.emplace_back(InputManager::instance().EventRegist(
+		[this]()
+	{
+		bMouseFollow = false;
+	}, VK_CONTROL, InputManager::EKEY_STATE::UP));
 };
 
 void Camera::Update()
@@ -27,7 +39,6 @@ void Camera::Update()
 	CurrentCameraPos = OwnerPosition;
 	CurrentCameraPos.x -= global::ClientSize.first / 2.f;
 	CurrentCameraPos.y -= global::ClientSize.second / 2.f;
-	vec3 Goal = CurrentCameraPos;
 
 	if (global::_CurGameState != global::ECurGameState::Replay &&
 		global::_CurGameState != global::ECurGameState::ReWind && bMouseFollow)
@@ -35,15 +46,25 @@ void Camera::Update()
 		vec3 Goal = global::MousePosScreen;
 		Goal.x -= global::ClientSize.first / 2.f;
 		Goal.y -= global::ClientSize.second / 2.f;
-		Goal = CurrentCameraPos + Goal * 0.5f;
+		Goal = CurrentCameraPos + Goal * 0.8f;
+		Shaking(Dt);
+		Goal += _Shake;
+		_Shake = { 0,0 ,0 };
+		global::CameraPos = math::lerp(global::CameraPos, Goal, 0.5f, Time::instance().Delta());
+		return;
+	}
+	else
+	{
+		Shaking(Dt);
+		vec3 Goal = CurrentCameraPos;
+		Goal += _Shake;
+		_Shake = { 0,0 ,0 };
+		global::CameraPos = math::lerp(global::CameraPos, Goal, 0.5f, Time::instance().Delta());
+		
+		return;
 	}
 
-	Shaking(Dt);
-	// 카메라흔들림
-	Goal += _Shake;
-	_Shake = { 0,0 ,0};
 
-	global::CameraPos = math::lerp(global::CameraPos, Goal, 0.5f, Time::instance().Delta());
 };
 
 OBJECT_ID::EID Camera::GetID()

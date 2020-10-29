@@ -323,37 +323,7 @@ typename math::Collision::IsCollision_Dir math::Collision::SegmentAndRect(
 		}
 	}
 
-	//{
-	//	float dot = D3DXVec3Dot(&Line, &ToRB);
-	//	vec3 SegmentPoint = Segment.first + (Line * dot);
 
-	//	if (math::IsPointInnerRect(Rect, SegmentPoint))
-	//	{
-	//		if (SegmentPoint.x >= left && SegmentPoint.x <= right
-	//			&& SegmentPoint.y <= bottom && SegmentPoint.y >= top)
-	//		{
-	//			vec3 ToRightDir = Segment.first.x >= Segment.second.x ?
-	//				Segment.first - Segment.second : Segment.second - Segment.first;
-	//			if (bDirNormal)
-	//				D3DXVec3Normalize(&ToRightDir, &ToRightDir);
-
-	//			// 사각형의 좌우 꼭짓점의 중간에 대응하는 선분의 중앙 점
-	//			vec3 SegmentCenter = SegmentPoint + Segment.first + (Line * dot);
-	//			SegmentCenter *= 0.5f;
-	//			Position = SegmentCenter;
-	//			const vec3 RectCenter = math::GetCenter(Rect);
-	//			PushDir = RectCenter - SegmentCenter;
-	//			vec3 RectDiagonal{ 0.f,0.f,0.f };
-	//			RectDiagonal.x = Rect[1].x - Rect[3].x;
-	//			RectDiagonal.y = Rect[1].y - Rect[3].y;
-	//			float Diagonal = D3DXVec3Length(&RectDiagonal);
-	//			Diagonal - D3DXVec3Length(&PushDir);
-	//			D3DXVec3Normalize(&PushDir, &PushDir);
-
-	//			return ToRightDir;
-	//		}
-	//	}
-	//}
 
 	return std::nullopt;
 }

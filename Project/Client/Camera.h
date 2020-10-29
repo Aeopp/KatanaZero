@@ -19,8 +19,6 @@ public:
 	virtual OBJECT_ID::EID   GetID()override ;
 	virtual OBJECT_TAG::ETAG GetTag()override;
 	virtual std::wstring_view GetName()const& override;
-
-
 	
 	bool bMouseFollow = false;
 	void CameraShake(float force, vec3 dir, float duration);
