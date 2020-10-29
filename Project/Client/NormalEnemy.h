@@ -17,6 +17,8 @@ public :
     void Hit(std::weak_ptr<class object>_Target, math::Collision::HitInfo _CollisionInfo)override;
 
 protected:
+    static inline std::pair<float, float> IsSamefloorRange{-169.f,+48.f};
+    bool IsSamefloor(vec3 TargetPos);
     NormalEnemy::State _CurState = NormalEnemy::State::Idle;
     
     float DetectionRange = 300.f;

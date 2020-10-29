@@ -118,7 +118,7 @@ void Grunt::Attack()
 
 	_CurrentState = Grunt::State::Attack;
 	RenderComponent::NotifyType _Notify;
-	_Notify[8] = [this]()
+	_Notify[4] = [this]()
 	{
 		bAttackMotionEnd = true;
 		_SpAttack->AttackStart(ToTargetDir * AttackRich, ToTargetDir);

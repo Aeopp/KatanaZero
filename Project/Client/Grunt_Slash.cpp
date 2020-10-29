@@ -31,7 +31,6 @@ void Grunt_Slash::Update()
             _RenderComp->bRender = false;
             _CollisionComp->bCollision = false;
         }
-
 }
 
 void Grunt_Slash::Initialize() & noexcept
@@ -91,11 +90,13 @@ void Grunt_Slash::AttackStart(vec3 AttackPos, vec3 Dir)
     {
         bSlashEffectEnd = true;
     }; 
-    _RenderComp->Anim(false, false, L"spr_gruntslash", 5, 0.5f, move(_Notify));
+    _RenderComp->Anim(true, false, L"spr_gruntslash", 5, 0.3f, move(_Notify));
     _RenderComp->bRender = true;
     _CollisionComp->bCollision = true;
 
     _PhysicComp->Dir = AttackPos;
     _PhysicComp->Position = std::move(AttackPos);
     _CollisionComp->CurrentPushDir = Dir;
+
+    _PhysicComp->Rotation.z = atan2f(Dir.y, Dir.x);
 }

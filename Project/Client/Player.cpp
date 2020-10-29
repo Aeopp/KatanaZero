@@ -75,6 +75,8 @@ void Player::Initialize() & noexcept
 
 	_PhysicComp->bGravity = true;
 
+	_PhysicComp->bFollowOwner = false;
+
 	Speed= PlayerSpeed;
 	MoveGoalTime = 2.f;
 	TimeRegist();

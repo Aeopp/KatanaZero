@@ -115,6 +115,21 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 	}
 }
 
+bool NormalEnemy::IsSamefloor(vec3 TargetPos)
+{
+	float y = _PhysicComp->Position.y;
+
+	float upper = y + IsSamefloorRange.second;
+	float lower = y + IsSamefloorRange.first;
+
+	if (TargetPos.y > lower && TargetPos.y < upper)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 bool NormalEnemy::IsRangeInnerTarget()
 {
 	vec3 TargetLocation = _Target->_PhysicComp->Position;
@@ -154,11 +169,15 @@ bool NormalEnemy::IsRangeInnerTarget()
 	switch (_CurState)
 	{
 	case NormalEnemy::State::Idle:
-		// 감지범위 이내에 존재하고 바라보는 방향에 있다면 성공
-		IsRangeInner |= ToTargetDistance < DetectionRange && (Dot > 0);
-		// 플레이어가 살금살금 움직이는 중이 아니라면 좀더 좁은범위에 존재한다면 방향과 상관없이 성공
-		if(!bIsPlayerSneak)
-			IsRangeInner |= ToTargetDistance < NarrowRange;
+		if (IsSamefloor(TargetLocation))
+		{
+			// 감지범위 이내에 존재하고 바라보는 방향에 있다면 성공
+			IsRangeInner |= ToTargetDistance < DetectionRange && (Dot > 0);
+			// 플레이어가 살금살금 움직이는 중이 아니라면 좀더 좁은범위에 존재한다면 방향과 상관없이 성공
+			if (!bIsPlayerSneak)
+				IsRangeInner |= ToTargetDistance < NarrowRange;
+			// 여기서 Y Range 를 조사. 같은 층에 있는지 검출.
+		}
 		break;
 	case NormalEnemy::State::Detecting:
 		// Detect 상태일때 감지범위 이내에만 있다면 성공
