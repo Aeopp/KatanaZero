@@ -18,7 +18,6 @@
 using namespace std;
 
 
-
 OBJECT_ID::EID Player::GetID()
 {
 	return OBJECT_ID::EPLAYER;
@@ -59,6 +58,8 @@ void Player::Initialize() & noexcept
 
 	_SpCamera= ObjectManager::instance().InsertObject<Camera>();
 	_SpCamera->SetOwner(_This);
+	ObjectManager::instance()._Camera = _SpCamera;
+
 	// TODO :: 아이템 획득시 배터리에게 통보해주기.
 	_SpBattery = ObjectManager::instance().InsertObject<Battery>();
 	_SpBattery->SetOwner(_This);
@@ -142,18 +143,21 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 			0.3f,
 			_CollisionInfo.PushDir);
 
-		Shake _Shake;
+		//Shake _Shake;
 
-		_Shake.DeltaCoefficient = 2.f;
+		/*_Shake.DeltaCoefficient = 2.f;
 		_Shake.T= 0.f;
 		_Shake.Vec = (_CollisionInfo.PushDir)*0.5f;
-		_Shake.Coefficient = _CollisionInfo.PushForce* 0.10f;
+		_Shake.Coefficient = _CollisionInfo.PushForce* 0.10f;*/
 
-		_SpCamera->CameraShake(_Shake);
+		_SpCamera->CameraShake(1300.f, math::RandVec({ -1,1 }), 0.2f);
 
+		Time::instance().TimeScale = 0.1f;
+		Time::instance().TimerRegist(0.01f, 0.01f, 0.01f, []() {
+			Time::instance().Return();
+			return true; });
 		HurtFlyBegin();
 	};
-
 };
 
 void Player::Move(vec3 Dir,const float AddSpeed)
@@ -725,31 +729,33 @@ void Player::Sneak()
 	_RenderComp->Anim(false, true, L"spr_dragon_sneak", 10, 0.8f);
 	_RenderComp->PositionCorrection.y += 12;
 	bSneak = true;
+	_SpCamera->bMouseFollow = true;
 }
 void Player::SneakState()
 {
 	if (bSneakKeyCheck && !bMoveKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
-		bSneak = false;
+		bSneak = false; _SpCamera->bMouseFollow = false;
 		RunToIdle();
 	}
 	if (bMoveKeyCheck && !bSneakKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
-		bSneak = false;
+		bSneak = false; _SpCamera->bMouseFollow = false;
 		IdleToRun();
 	}
 	if (bMoveKeyCheck && bSneakKeyCheck && bDownKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
-		bSneak = false;
+		bSneak = false; _SpCamera->bMouseFollow = false;
 		Roll();
 	}
 	if (bJumpKeyCheck)
 	{
 		_RenderComp->PositionCorrection.y -= 12;
 		bSneak = false;
+		_SpCamera->bMouseFollow = false;
 		Jump();
 	}
 

@@ -114,7 +114,7 @@ void Grunt::Die()&
 
 void Grunt::Attack()
 {
-	constexpr float AttackRich = 15.f;
+	constexpr float AttackRich = 20.f;
 
 	_CurrentState = Grunt::State::Attack;
 	RenderComponent::NotifyType _Notify;

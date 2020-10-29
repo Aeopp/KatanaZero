@@ -75,6 +75,8 @@ std::array<vec3, 4ul> CollisionComponent::GetWorldRectPt() & noexcept
 			return LocalPt;
 		});
 
+	LocalPoints.front();
+
 	// 이후에 바텀과 탑을 뒤집기
 	std::swap(_WorldRectPt[0].y, _WorldRectPt[2].y);
 	std::swap(_WorldRectPt[1].y, _WorldRectPt[3].y);

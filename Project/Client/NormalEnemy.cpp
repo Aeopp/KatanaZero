@@ -8,6 +8,8 @@
 #include "RenderComponent.h"
 #include "GraphicDevice.h"
 #include "PhysicTransformComponent.h"
+#include "ObjectManager.h"
+#include "Camera.h"
 
 void NormalEnemy::Initialize() & noexcept
 {
@@ -100,6 +102,14 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			_CollisionInfo.PushDir);
 
 		_CurState = NormalEnemy::State::Die;
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			_CollisionInfo.PushForce*8, _CollisionInfo.PushDir, 0.3f);
+
+		Time::instance().TimeScale = 0.1f;
+		Time::instance().TimerRegist(0.01f, 0.01f, 0.01f, []() {
+			Time::instance().Return();
+			return true; });
 
 		Die();
 	}

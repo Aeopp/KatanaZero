@@ -36,5 +36,70 @@ void SceneStart::Initialize()
 
 	SceneManageObjs.push_back(_Grunt);
 
+	// TODO:: REMOVE PLZ TEST CODE 
+	{
+		float XDiff = 600.f;
+		float x = 1876.f;
+		float y = 5456;
+
+		while (true)
+		{
+			ObjectManager::instance().InsertObject<Grunt>
+				(vec3{ x,y,0.f });
+			x += XDiff;
+			if (x > 4300)
+				break;
+		}
+
+		x = 3549;
+		y = 5153;
+		while (true)
+		{
+			ObjectManager::instance().InsertObject<Grunt>
+				(vec3{ x,y,0.f });
+			x += XDiff;
+			if (x > 4863)
+				break;
+		}
+
+		x = 3549;
+		y = 5153 - 295;
+		while (true)
+		{
+			ObjectManager::instance().InsertObject<Grunt>
+				(vec3{ x,y,0.f });
+			x += XDiff;
+			if (x > 4863)
+				break;
+		}
+
+
+		x = 1645;
+		y = 5153;
+		while (true)
+		{
+			ObjectManager::instance().InsertObject<Grunt>
+				(vec3{ x,y,0.f });
+			x += XDiff;
+			if (x > 4863)
+				break;
+		}
+
+		x = 1645;
+		y = 5153 - 295;
+		while (true)
+		{
+			ObjectManager::instance().InsertObject<Grunt>
+				(vec3{ x,y,0.f });
+			x += XDiff;
+			if (x > 4863)
+				break;
+		}
+
+	}
+
+
+	int i = 0;
+
 	Scene::Initialize();
 }

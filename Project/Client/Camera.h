@@ -4,10 +4,9 @@
 
 struct Shake
 {
-	float T = 0.f;
-	float Coefficient = 1.f;
-	float DeltaCoefficient = 1.f;
-	vec3 Vec{ 1.f,0.f,0.f };
+	float Force;
+	vec3 Dir;
+	float Duration;
 };
 
 class Camera :
@@ -21,9 +20,15 @@ public:
 	virtual OBJECT_TAG::ETAG GetTag()override;
 	virtual std::wstring_view GetName()const& override;
 
-	void CameraShake(Shake _Shake);
+
+	
+	bool bMouseFollow = false;
+	void CameraShake(float force, vec3 dir, float duration);
 private:
 	vec3 CurrentCameraPos{ 0.f,0.f,0.f };
-	std::vector<Shake> _ShakeVec;
+	bool Shaking(float Dt);
+	vec3 _Shake{ 0,0,0 };
+	std::vector<Shake> Shake_Vec{};
+
 };
 

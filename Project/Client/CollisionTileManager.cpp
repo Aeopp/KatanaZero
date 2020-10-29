@@ -186,6 +186,16 @@ void CollisionTileManager::Update()&
 		if (!(_CollisionTagSet.contains(_spCollision->_Tag)))continue;
 		for (auto& _CollisionTile : _CollisionTileVec)
 		{
+			auto spOwner = _spCollision->_Owner.lock();
+			vec3 CompOwnerPos = spOwner->_TransformComp->Position;
+			vec3 CollisionLeftTop = _CollisionTile.front();
+			vec3 ToLT = CompOwnerPos - CollisionLeftTop;
+			float DistanceSq = D3DXVec3LengthSq(&ToLT);
+			// 거리 제곱이 기준치보다 높아서 충돌 검출 무효
+			// 거리는 제곱근이아닌 제곱으로하기
+			if (DistanceSq > TileCollisionCheckDistanceMinSquare)continue;
+			
+
 			auto WorldRectPt = _spCollision->GetWorldRectPt();
 			
 			auto opDir = math::Collision::RectAndRect({ WorldRectPt, _CollisionTile },false);
@@ -196,8 +206,7 @@ void CollisionTileManager::Update()&
 
 				 vec3 TilePushDir = *opDir;
 
-				auto spOwner =_spCollision->_Owner.lock();
-
+				
 				if ( std::abs(TilePushDir.x) < std::abs(TilePushDir.y))
 					TilePushDir.y = 0;
 				else		   

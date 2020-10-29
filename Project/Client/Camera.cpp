@@ -6,10 +6,12 @@
 #include "InputManager.h"
 #include "Time.h"
 #include "math.h"
+#include "Player.h"
+#include "ObjectManager.h"
 
 void Camera::Initialize() & noexcept
 {
-
+	_Shake= vec3{ 0,0,0 };
 };
 
 void Camera::Update()
@@ -25,30 +27,23 @@ void Camera::Update()
 	CurrentCameraPos = OwnerPosition;
 	CurrentCameraPos.x -= global::ClientSize.first / 2.f;
 	CurrentCameraPos.y -= global::ClientSize.second / 2.f;
+	vec3 Goal = CurrentCameraPos;
 
-	vec3 Goal = global::MousePosScreen;
-	Goal.x -= global::ClientSize.first / 2.f;
-	Goal.y -= global::ClientSize.second / 2.f;
-	Goal = CurrentCameraPos + Goal * 0.5f;
-
-	for (auto _ShakeIter = begin(_ShakeVec); _ShakeIter !=end(_ShakeVec);)
+	if (global::_CurGameState != global::ECurGameState::Replay &&
+		global::_CurGameState != global::ECurGameState::ReWind && bMouseFollow)
 	{
-		auto& _Shake = *_ShakeIter;
-		_Shake.T += Dt *_Shake.DeltaCoefficient;
-
-		float factor = sinf(_Shake.T) * _Shake.Coefficient;
-		global::CameraPos += /*_Shake.Vec*/math::RandVec({ -1.f,+1.f }) *factor;
-
-		if (_Shake.T > 1.f)
-		{
-			_ShakeIter = _ShakeVec.erase(_ShakeIter);
-		}
-		else
-			++_ShakeIter; 
+		vec3 Goal = global::MousePosScreen;
+		Goal.x -= global::ClientSize.first / 2.f;
+		Goal.y -= global::ClientSize.second / 2.f;
+		Goal = CurrentCameraPos + Goal * 0.5f;
 	}
 
-	global::CameraPos = math::lerp(global::CameraPos, Goal, 0.5f, Time::instance().Delta());
+	Shaking(Dt);
+	// 카메라흔들림
+	Goal += _Shake;
+	_Shake = { 0,0 ,0};
 
+	global::CameraPos = math::lerp(global::CameraPos, Goal, 0.5f, Time::instance().Delta());
 };
 
 OBJECT_ID::EID Camera::GetID()
@@ -65,8 +60,21 @@ std::wstring_view Camera::GetName() const&
 {
 	return L"Camera"sv;
 }
-void Camera::CameraShake(Shake _Shake)
+bool Camera::Shaking(float Dt)
 {
-	_ShakeVec.push_back(std::move(_Shake));	
-};
+	std::erase_if(Shake_Vec, [Dt](auto& ShakeInfo) {
+		ShakeInfo.Duration -= Dt;
+		return ShakeInfo.Duration < 0; });
 
+	for (auto& ShakeInfo : Shake_Vec)
+	{
+		float  rand = math::Rand<float>({ -ShakeInfo.Force,+ShakeInfo.Force});
+		_Shake+= ShakeInfo.Dir* rand;
+	}
+
+	return true;
+}
+void Camera::CameraShake(float force, vec3 dir, float duration)
+{
+	Shake_Vec.push_back({ force, dir, duration });
+}
