@@ -6,35 +6,16 @@
 
 struct AfterImg
 {
-	static inline const std::array<D3DCOLOR, 20ul> _GradationTable
-	{
-		D3DCOLOR_ARGB(200,0,255,246),
-		D3DCOLOR_ARGB(190,0,210,246),
-		D3DCOLOR_ARGB(180,0,170,246),
-		D3DCOLOR_ARGB(170,0,130,246),
-		D3DCOLOR_ARGB(160,0,90,246),
-		D3DCOLOR_ARGB(150,0,50,246),
-		D3DCOLOR_ARGB(140,0,10,246),
-		D3DCOLOR_ARGB(130,30,0,246),
-		D3DCOLOR_ARGB(120,70,0,246),
-		D3DCOLOR_ARGB(110,110,0,246),
-		D3DCOLOR_ARGB(100,150,0,246),
-		D3DCOLOR_ARGB(90,190,0,255),
-		D3DCOLOR_ARGB(80,230,0,255),
-		D3DCOLOR_ARGB(70,255,0,240),
-		D3DCOLOR_ARGB(60,255,0,200),
-		D3DCOLOR_ARGB(50,255,0,160),
-		D3DCOLOR_ARGB(40,255,0,120),
-		D3DCOLOR_ARGB(30,255,0,80),
-		D3DCOLOR_ARGB(20,255,0,40),
-		D3DCOLOR_ARGB(10,255,0,0)
-	};
-	static inline uint8_t CurColorIdx = 0;
 	matrix PastWorld;
 	std::wstring StateKey{};
 	uint8_t ID{};
-	D3DCOLOR _Color = D3DCOLOR_ARGB(255, 255, 255, 255);
+	float T = 0.f;
+	// 선형 보간 가속 계수
+	float DeltaCoefft = 1.f;
+	D3DXCOLOR _Color = D3DCOLOR_ARGB(120, 0, 255, 255);
+	D3DXCOLOR _GoalColor = D3DCOLOR_ARGB(0,255, 0, 255);
 };
+
 class RenderComponent : public Component
 {
 public :
@@ -82,17 +63,37 @@ public :
 
 	void AfterImgOn();
 	void AfterImgOff();
+	void AfterImgPush(matrix MWorld);
 
 
+
+	static inline D3DXCOLOR ReplayColor = (255, 125, 125, 125);
+
+	D3DXCOLOR PlayStartColor = D3DCOLOR_ARGB(125, 255, 0, 0);
+	D3DXCOLOR PlayGoalColor = D3DCOLOR_ARGB(0, 255, 255, 255);
+	D3DXCOLOR SlowStartColor = D3DCOLOR_ARGB(255, 0, 255, 255);
+	D3DXCOLOR SlowGoalColor= D3DCOLOR_ARGB(0, 255, 0, 255);
+	D3DXCOLOR SlowColor = D3DCOLOR_ARGB(255, 0, 255, 255);
+	D3DXCOLOR GetCurGameStateColor();
+
+	float AfterDeltaCoefft = 0.3f;
+	float SlowDeltaCoefft = 0.4f;
+	float SlowAfterImgPushDelta = 0.05f;
+	float NormalAfterImgPushDelta = 0.0125f;
+
+	
+	bool bSlowRender = true;
 	std::function<void()> _RenderAfterEvent;
-	std::deque<AfterImg> _AfterQ;
+	std::vector<AfterImg> _AfterImgVec;
 	Info _Info{};
 	vec3 PositionCorrection{ 0.f,0.f,0.f };
 	int32_t AnimDir = 1.f;
-	int32_t AfterImgCount = 15ul;
 	bool bRender{ true };
 private:
+	float SlowAfterImgPushCurrentDelta = 0.f;
+	float NormalAfterImgPushCurrentDelta = 0.f;
 	bool bAfterRender = false;
 	bool bRenderControl = false; 
+	void AfterCheckingPush( matrix MWorld);
 };
 

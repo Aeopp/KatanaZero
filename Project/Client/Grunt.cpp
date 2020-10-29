@@ -52,8 +52,6 @@ void Grunt::Initialize() & noexcept
 	DetectionRange = 400.f;
 	AttackRange = 100.f;
 
-	
-
 	_CurrentState = Grunt::State::Idle;
 
 	_PhysicComp->Dir = vec3{ 1.f,0.f,0.f };
@@ -65,7 +63,7 @@ void Grunt::Initialize() & noexcept
 	_SpAttack = ObjectManager::instance().InsertObject < Grunt_Slash>();
 	_SpAttack->SetOwner(_This);
 
-
+	//_RenderComp->SlowColor = D3DCOLOR_ARGB(255, 255, 0, 0);
 }
 
 void Grunt::Update()
@@ -168,6 +166,8 @@ void Grunt::HurtGround()
 	RenderComponent::NotifyType _Notify;
 	_Notify[16] = [this]()
 	{
+		_RenderComp->bSlowRender = false;
+
 		//DIE !!
 	};
 	_RenderComp->Anim(false, false, L"spr_grunt_hurtground",

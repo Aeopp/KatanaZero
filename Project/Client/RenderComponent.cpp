@@ -13,6 +13,8 @@ void RenderComponent::Render()
 {
 	if (!bRender)return;
 
+	const float dt = Time::instance().Delta();
+
 	Component::Render();
 
 	auto spOwner = _Owner.lock();
@@ -49,42 +51,54 @@ void RenderComponent::Render()
 
 	if (IsRenderable)
 	{
-		if (bAfterRender)
+		//if (bAfterRender)
 		{
-			for (auto& _AfterImg : _AfterQ)
+			for (auto _AfterIter = begin(_AfterImgVec);
+				_AfterIter != end(_AfterImgVec);)
 			{
-				auto TexInfo = TextureManager::instance().Get_TexInfo(_Info.ObjectKey, _AfterImg.StateKey, _AfterImg.ID);
+				auto& _After = *_AfterIter;
+
+				auto TexInfo = TextureManager::instance().Get_TexInfo(_Info.ObjectKey, _After.StateKey, _After.ID);
 				RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width * _Info.SrcScale.x,
 							  TexInfo->ImageInfo.Height * _Info.SrcScale.y };
 				vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
-				GraphicDevice::instance().GetSprite()->SetTransform(&_AfterImg.PastWorld);
-				GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture, &_srcRT, &__TextureCenter,nullptr, 
-					_AfterImg._Color);
-			}
+				GraphicDevice::instance().GetSprite()->SetTransform(&_After.PastWorld);
+				GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+					&_srcRT, &__TextureCenter, nullptr,
+					_After._Color);
 
-			if (bAfterRender)
-			{
-				AfterImg _AfterImg;
-				_AfterImg.ID = _Info.CurrentFrame;
-				_AfterImg.StateKey = _Info.StateKey;
-				_AfterImg.PastWorld = MWorld;
-				_AfterImg._Color = AfterImg::_GradationTable[AfterImg::CurColorIdx++];
-				AfterImg::CurColorIdx %= AfterImg::_GradationTable.size();
-				_AfterQ.push_back(std::move(_AfterImg));
-				if (_AfterQ.size() > AfterImgCount)
-					_AfterQ.pop_front();
+				_After.T += _After.DeltaCoefft * dt;
+				D3DXColorLerp(&_After._Color, &_After._Color, &_After._GoalColor, _After.T);
+
+				if (_After._Color.a < 0)
+				{
+					_AfterIter =_AfterImgVec.erase(_AfterIter);
+				}
+					else ++_AfterIter;
 			}
+			AfterImgPush(MWorld);
 		}
-	
-		RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
+		
+
+		if (global::ECurGameState::Slow == global::_CurGameState && bSlowRender)
+		{
+			RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
 					  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
-		vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
-		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
-		GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
-		_Info._Color);
+			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
+			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
+				SlowColor);
+		}
+		else
+		{
+			RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
+					  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
+			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
+			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
+				_Info._Color);
+		}
 	}
-
-
 
 	auto NotifyEvent = _Info._Nofify.find(_Info.CurrentFrame);
 
@@ -121,7 +135,10 @@ void RenderComponent::Update()
 {
 	Component::Update();
 	const float Dt = Time::instance().Delta();
-	
+
+	SlowAfterImgPushCurrentDelta -= Dt;
+	NormalAfterImgPushCurrentDelta -= Dt;
+
 	if ( ! (_Info.T < _Info.End) )
 	{
 		auto NotifyEvent=_Info._Nofify.find(_Info.End);
@@ -197,10 +214,81 @@ void RenderComponent::Anim(
 void RenderComponent::AfterImgOn()
 {
 	bAfterRender = true;
-	_AfterQ.clear();
 }
 
 void RenderComponent::AfterImgOff()
 {
 	bAfterRender = false;
+}
+
+void RenderComponent::AfterImgPush(matrix MWorld)
+{
+	global::_CurGameState;
+	AfterImg _AfterImg;
+
+	switch (global::_CurGameState)
+	{
+	case global::ECurGameState::Slow:
+		if (SlowAfterImgPushCurrentDelta < 0.f && bSlowRender)
+		{
+			SlowAfterImgPushCurrentDelta = SlowAfterImgPushDelta;
+			_AfterImg.ID = _Info.CurrentFrame;
+			_AfterImg.StateKey = _Info.StateKey;
+			_AfterImg.PastWorld = (MWorld);
+			_AfterImg._Color = SlowStartColor;
+			_AfterImg._GoalColor = SlowGoalColor;
+			_AfterImg.T = 0.f;
+			_AfterImg.DeltaCoefft = SlowDeltaCoefft;
+			_AfterImgVec.push_back(std::move(_AfterImg));
+		}
+	//	AfterCheckingPush( MWorld);
+		break;
+	case global::ECurGameState::Play:
+		AfterCheckingPush(MWorld);
+		break;
+	default:
+		break;
+	}
+}
+
+D3DXCOLOR RenderComponent::GetCurGameStateColor()
+{
+	if (!bAfterRender)return _Info._Color;
+
+	switch (global::_CurGameState)
+	{
+	case global::ECurGameState::Replay:
+		// Èæ¹é ¿¬Ãâ.....
+		return ReplayColor;
+		break;
+	case global::ECurGameState::Play:
+		return _Info._Color;
+		break;	
+	case global::ECurGameState::Slow:
+		return SlowStartColor;
+		break;
+	default:
+		break;
+	}
+
+	return _Info._Color;
+}
+
+void RenderComponent::AfterCheckingPush(
+	matrix MWorld)
+{
+	AfterImg _AfterImg;
+
+	if ((NormalAfterImgPushCurrentDelta < 0.f) && bAfterRender)
+	{
+		NormalAfterImgPushCurrentDelta = NormalAfterImgPushDelta;
+		_AfterImg.ID = _Info.CurrentFrame;
+		_AfterImg.StateKey = _Info.StateKey;
+		_AfterImg.PastWorld = std::move(MWorld);
+		_AfterImg._Color = PlayStartColor;
+		_AfterImg._GoalColor = PlayGoalColor;
+		_AfterImg.T = 0.f;
+		_AfterImg.DeltaCoefft = AfterDeltaCoefft;
+		_AfterImgVec.push_back(std::move(_AfterImg));
+	}
 }

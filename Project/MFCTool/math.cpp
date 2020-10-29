@@ -25,16 +25,8 @@ float math::lerp(float start, float goal, float goal_time, float dt)
 {
 	float f = goal - start;
 	return start + ((f * dt) / goal_time);
-}
+};
 
-D3DXCOLOR math::lerp(D3DXCOLOR start, D3DXCOLOR goal, float goal_time, float dt)
-{
-	D3DXCOLOR _color;
-
-	D3DXColorLerp(&_color, &start, &goal, 1.f);
-
-	return _color;
-}
 
 bool math::IsPointInnerRect(const std::array<vec3, 4>& RectPoint, const vec3& Point)
 {

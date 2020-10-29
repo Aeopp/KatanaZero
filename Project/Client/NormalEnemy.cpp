@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+
 #include "ObjectManager.h"
 #include "Time.h"
 #include "NormalEnemy.h"
@@ -64,6 +65,9 @@ void NormalEnemy::Initialize() & noexcept
 	};
 
 	_DetectionRangeColorGoal = D3DCOLOR_ARGB(255, 0, 255, 0);
+
+	_RenderComp->SlowStartColor = D3DCOLOR_ARGB(255, 255, 0, 255);
+	_RenderComp->SlowColor = D3DCOLOR_ARGB(255, 255, 0, 255);
 }
 
 void NormalEnemy::LateUpdate()
@@ -72,15 +76,25 @@ void NormalEnemy::LateUpdate()
 	const float Dt = Time::instance().Delta(); 
 	_DetectionRangeColor = math::lerp(_DetectionRangeColor, _DetectionRangeColorGoal, ColorGoalTime, Dt);
 
-	// 추격중인데 플레이어가 아래에 존재한다면 라인을 타기위해 아래점프가 가능한 벽과 충돌을 해제
-	if (_CurState ==NormalEnemy::State::Detecting)
+	switch (_CurState)
 	{
+	case NormalEnemy::State::Idle:
+		break;
+	case NormalEnemy::State::Detecting:
 		if (ToTarget.y > 5.f)
 		{
 			_CollisionComp->bDownJump = true;
 		}
+		break;
+	case NormalEnemy::State::Die:
+
+		break;
+	default:
+		break;
 	}
-	else
+
+	// 추격중인데 플레이어가 아래에 존재한다면 라인을 타기위해 아래점프가 가능한 벽과 충돌을 해제
+	if (_CurState !=NormalEnemy::State::Detecting)
 	{
 		_CollisionComp->bDownJump = false;
 	}
@@ -101,15 +115,32 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			0.3f,
 			_CollisionInfo.PushDir);
 
+		_RenderComp->AfterImgOn();
 		_CurState = NormalEnemy::State::Die;
 
 		ObjectManager::instance()._Camera.lock()->CameraShake(
-			_CollisionInfo.PushForce*8, _CollisionInfo.PushDir, 0.3f);
+			_CollisionInfo.PushForce*5, _CollisionInfo.PushDir, 0.3f);
 
-		Time::instance().TimeScale = 0.1f;
-		Time::instance().TimerRegist(0.01f, 0.01f, 0.01f, []() {
-			Time::instance().Return();
-			return true; });
+			Time::instance().TimeScale = 0.2f;
+			Time::instance().TimerRegist(0.07f, 0.07f, 0.07f, [this]() {
+				
+				if (global::ECurGameState::Slow != global::_CurGameState)
+				{
+					Time::instance().TimeScale = 1.f;
+				}
+				return true; });
+
+			_RenderComp->AfterImgOn();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+			Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+			{
+				_RenderComp->AfterImgOff();
+				_RenderComp->NormalAfterImgPushDelta *= 1.f;
+				return true;
+			});
+
+		
 
 		Die();
 	}

@@ -14,6 +14,7 @@
 #include "DustCloud.h"
 
 #include "math.h"
+#include "global.h"
 
 using namespace std;
 
@@ -37,7 +38,7 @@ void Player::Initialize() & noexcept
 {
 	Super::Initialize();
 	
-	_TransformComp->Scale *= 2.5f;
+	_TransformComp->Scale *= 2.2f;
 	_PhysicComp->Mass = 100.f;
 	_RenderComp->Anim(false, true,
 		L"spr_dragon_idle", 12, 1.f,
@@ -46,6 +47,8 @@ void Player::Initialize() & noexcept
 		LAYER::ELAYER::EOBJECT);
 	_RenderComp->AfterImgOff();
 	_RenderComp->PositionCorrection = vec3{ 0.f,-8.f,0.f };
+	_RenderComp->SlowDeltaCoefft = 0.2f;
+	_RenderComp->NormalAfterImgPushDelta *= 1.5f;
 
 	_CollisionComp->_CollisionInfo._ShapeType =
 	CollisionComponent::CollisionInfo::EShapeType::Rect;
@@ -80,6 +83,14 @@ void Player::Initialize() & noexcept
 	Speed= PlayerSpeed;
 	MoveGoalTime = 2.f;
 	TimeRegist();
+
+	/*PlayStartColor = D3DCOLOR_ARGB(125, 255, 0, 0);
+	PlayGoalColor = D3DCOLOR_ARGB(0, 0, 255, 255);
+	SlowStartColor = D3DCOLOR_ARGB(125, 0, 0, 255);
+	SlowGoalColor = D3DCOLOR_ARGB(0, 255, 0, 255);*/
+
+	/*_RenderComp->SlowGoalColor = D3DCOLOR_ARGB(0, 255, 0, 255);*/
+
 }
 
 void Player::LateInitialize() & noexcept
@@ -154,10 +165,31 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		_SpCamera->CameraShake(1300.f, math::RandVec({ -1,1 }), 0.2f);
 
-		Time::instance().TimeScale = 0.1f;
-		Time::instance().TimerRegist(0.01f, 0.01f, 0.01f, []() {
-			Time::instance().Return();
+		Time::instance().TimeScale = 0.2f;
+		Time::instance().TimerRegist(0.007f, 0.007f, 0.007f, [this]() {
+		
+			if (global::ECurGameState::Slow != global::_CurGameState)
+			{
+				Time::instance().TimeScale = 1.f;
+			}
+
 			return true; });
+
+		_RenderComp->AfterImgOn();
+		_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+		{
+			_RenderComp->AfterImgOff();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+			return true;
+		});
+
+		
+
+		
+
+
 		HurtFlyBegin();
 	};
 };
@@ -375,7 +407,7 @@ void Player::Jump()
 	SimplePhysics _Physics;
 	_Physics.Acceleration = 200.f;
 	_Physics.Dir = Dir;
-	_Physics.Speed = { 0.f,-1000.f ,0.f };
+	_Physics.Speed = { 0.f,-800.f ,0.f };
 	_Physics.MaxT = 0.3f;
 	_PhysicComp->Move(std::move(_Physics));
 
@@ -585,7 +617,7 @@ void Player::Attack()
 	_PhysicComp->Flying();
 	RenderComponent::NotifyType _Notify;
 	_Notify[7] = [this]() {bAttackMotionEnd = true; };
-	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.25f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.35f, std::move(_Notify));
 	
 	_PhysicComp->Position.z = 0.f;
 	vec3 Distance = global::MousePosWorld - _PhysicComp->Position;
@@ -772,8 +804,10 @@ void Player::HurtFlyBegin()
 		bHurtFlyBeginMotionEnd = true;
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_hurtfly_begin", 2, 0.2f, std::move(_Notify));
-	
+
 	bHurt = true;
+
+	
 };
 
 void Player::HurtFlyBeginState()
@@ -781,6 +815,8 @@ void Player::HurtFlyBeginState()
 	if (bHurtFlyBeginMotionEnd)
 	{
 		bHurtFlyBeginMotionEnd = false;
+		
+
 		HurtFly();
 	}
 };
@@ -809,6 +845,9 @@ void Player::HurtGround()
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_hurtground", 6, 0.5f, std::move(_Notify));
 	_RenderComp->PositionCorrection.y += 17 ;
+
+	
+
 }
 void Player::HurtGroundState()
 {

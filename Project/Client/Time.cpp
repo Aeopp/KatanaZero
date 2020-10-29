@@ -84,7 +84,7 @@ NotifyEventType _NotifyEvent)
 
 void Time::SlowDownTime()
 {
-	TimeScale = 0.1f;
+	TimeScale = 0.2f;
 	global::_CurGameState = global::ECurGameState::Slow;
 }
 

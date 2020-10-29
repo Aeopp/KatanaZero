@@ -22,7 +22,6 @@ public:
 	static Ty Rand(std::pair<Ty, Ty> range);
 
 	static float lerp(float start, float goal, float goal_time, float dt);
-	static D3DXCOLOR lerp(D3DXCOLOR start, D3DXCOLOR goal, float goal_time, float dt);
 
 	static float Angle360conversion(float degree);
 

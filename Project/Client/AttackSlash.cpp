@@ -80,6 +80,8 @@ void Attack_Slash::LateUpdate()
         bSlashEffectEnd = false;
         _RenderComp->bRender = false;
         _CollisionComp->bCollision = false;
+        _RenderComp->_AfterImgVec.clear();
+        _RenderComp->AfterImgOff();
     }
 }
 
@@ -101,11 +103,13 @@ void Attack_Slash::Move(vec3 Dir, const float AddSpeed)
 void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
 {
     RenderComponent::NotifyType _Notify;
+
     _Notify[5] = [this]()
     {
         bSlashEffectEnd = true;
     };
-    _RenderComp->Anim(true, false, L"spr_dragon_slash", 5, 0.3f, std::move(_Notify));
+
+    _RenderComp->Anim(true, false, L"spr_dragon_slash", 5, 0.35f, std::move(_Notify));
     _RenderComp->bRender = true;
     _CollisionComp->bCollision = true;
 
@@ -115,4 +119,5 @@ void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
 
     D3DXVec3Normalize(&Dir, &Dir);
     _PhysicComp->Rotation.z = atan2f(Dir.y, Dir.x);
+    _RenderComp->AfterImgOn();
 }
