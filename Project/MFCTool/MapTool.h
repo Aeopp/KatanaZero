@@ -55,4 +55,11 @@ public:
 	afx_msg void OnBnClickedCheckWallRide();
 	afx_msg void OnBnClickedCheckTileCanGoDown();
 	virtual BOOL OnInitDialog();
+	
+	CButton _AStar;
+	CButton _Stairs;
+	CButton _Door;
+	afx_msg void OnBnClickedAstar();
+	afx_msg void OnBnClickedStairs();
+	afx_msg void OnBnClickedDoor();
 };

@@ -19,6 +19,7 @@ public:
 	std::wstring LoadMapTexInfoFilePath{}; 
 	std::wstring LoadCollisionTileInfoFilePath{};
 	std::wstring LoadLineInfoFilePath{};
+	std::wstring LoadAStarInfoFilePath{};
 };
 
 

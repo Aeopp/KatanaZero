@@ -160,6 +160,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AStarManager.h" />
     <ClInclude Include="AttackObject.h" />
     <ClInclude Include="AttackSlash.h" />
     <ClInclude Include="Battery.h" />
@@ -221,6 +222,7 @@
     <ClInclude Include="UITimer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AStarManager.cpp" />
     <ClCompile Include="AttackObject.cpp" />
     <ClCompile Include="AttackSlash.cpp" />
     <ClCompile Include="Battery.cpp" />

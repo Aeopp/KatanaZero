@@ -205,7 +205,6 @@ void CollisionTileManager::Update()&
 				bCollision = true;
 
 				 vec3 TilePushDir = *opDir;
-
 				
 				if ( std::abs(TilePushDir.x) < std::abs(TilePushDir.y))
 					TilePushDir.y = 0;
@@ -217,18 +216,23 @@ void CollisionTileManager::Update()&
 					spOwner->_TransformComp->Position += TilePushDir;
 				}
 
+				vec3 TileCenter = math::GetCenter(_CollisionTile);
+				vec3 _CompCenter = math::GetCenter(WorldRectPt);
+				vec3 _Dir = _CompCenter - TileCenter;
+				D3DXVec3Normalize(&_Dir, &_Dir);
+
 				math::Collision::HitInfo _HitInfo{};
 				_HitInfo.PosDistance = D3DXVec3Length(&(*opDir));
 				D3DXVec3Normalize(&(*opDir), &(*opDir));
-				_HitInfo.PosDir = *opDir;
+				_HitInfo.CrossingAreaDir = *opDir;
 				D3DXVec3Normalize(&TilePushDir, &TilePushDir);
 				_HitInfo.Normal = TilePushDir;
 				_HitInfo.Position = math::GetCenter(_CollisionTile);
 				_HitInfo._Target = { };
 				_HitInfo._ID = OBJECT_ID::ETILE;
 				_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
+				_HitInfo.PosDir = _Dir;
 
-			
 				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
 				if (     std::abs ( WorldRectPt[2].y -  _CollisionTile[0].y )  < LandCheckDistance)
 				{
@@ -288,16 +292,23 @@ void CollisionTileManager::Update()&
 					spOwner->_TransformComp->Position += TilePushDir;
 				}
 
+				vec3 TileCenter = math::GetCenter(_CollisionTile);
+				vec3 _CompCenter = math::GetCenter(WorldRectPt);
+				vec3 _Dir = _CompCenter - TileCenter;
+				D3DXVec3Normalize(&_Dir, &_Dir);
+
 				math::Collision::HitInfo _HitInfo{};
 				_HitInfo.PosDistance = D3DXVec3Length(&(*opDir));
 				D3DXVec3Normalize(&(*opDir), &(*opDir));
-				_HitInfo.PosDir = *opDir;
+				_HitInfo.CrossingAreaDir = *opDir;
 				D3DXVec3Normalize(&TilePushDir, &TilePushDir);
 				_HitInfo.Normal = TilePushDir;
 				_HitInfo.Position = math::GetCenter(_CollisionTile);
 				_HitInfo._Target = { };
 				_HitInfo._ID = OBJECT_ID::EDOWNJUMPTILE;
-				_HitInfo._TAG == OBJECT_TAG::ETERRAIN;
+				_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
+				_HitInfo.PosDir = _Dir;
+
 				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
 				if (std::abs(WorldRectPt[2].y - _CollisionTile[0].y) < LandCheckDistance)
 				{

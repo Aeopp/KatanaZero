@@ -21,7 +21,6 @@ void HUD::Initialize() & noexcept
     _RenderComp->_Info.ObjectKey = L"Dragon";
     _RenderComp->_Info.StateKey = L"spr_hud_dragon";
     _RenderComp->_Info._Layer = LAYER::EUI;
-  
 
     ScreenPos.x = 1920.f / 2.f;
     ScreenPos.y = 69.f / 2.f;

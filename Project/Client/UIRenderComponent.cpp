@@ -19,7 +19,7 @@ void UIRenderComponent::Render()
 	const float JoomScale = global::JoomScale;
 	vec3 CameraPos = global::CameraPos;
 
-	matrix MWorld = spOwner->_TransformComp->CalcWorldMatrix(true);
+	matrix MWorld = spOwner->_TransformComp->CalcSTWorldMatrix(true);
 	
 	RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
 							  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };

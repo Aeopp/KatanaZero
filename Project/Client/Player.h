@@ -128,7 +128,7 @@ public :
 	void JumpWallRide();
 private:
 	float CurAttackCoolTime = 0.0f;
-	const float PlayerSpeed = 1500.f;
+	const float PlayerSpeed = 1250.f;
 	std::shared_ptr<class Attack_Slash> _SpAttackSlash{};
 	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};

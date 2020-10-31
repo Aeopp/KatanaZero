@@ -10,6 +10,9 @@
 
 using float_t = float;
 
+
+
+
 class math
 {
 private:
@@ -34,6 +37,21 @@ public:
 	static float lerp(float start, float goal, float goal_time, float dt);
 	static vec3 lerp(const vec3 start, const vec3 goal, float goal_time, float dt);
 	static D3DXCOLOR lerp(D3DXCOLOR start, D3DXCOLOR goal, float goal_time, float dt);
+
+	template<class T>
+	typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+		static inline almost_equal(T x, T y, int ulp)
+	{
+		return std::fabs(x - y) <= std::numeric_limits<T>::epsilon() * std::fabs(x + y) * ulp|| std::fabs(x - y) < (std::numeric_limits<T>::min)();
+	}
+
+	static bool almost_equal(const vec3& lhs, const vec3& rhs)
+	{
+		return
+			math::almost_equal(lhs.x, rhs.x, 1l) &&
+			math::almost_equal(lhs.y, rhs.y, 1l) &&
+			math::almost_equal(lhs.z, rhs.z, 1l);
+	}
 
 	static float Angle360conversion(float degree);
 
@@ -103,13 +121,12 @@ public:
 			// 부딪힌 물체가 나를 바라보는 방향
 			vec3 PushDir{ 1.f,0.f,0.f };
 			vec3 PosDir{};
-			vec3 Dir{ 1.f,0.f,0.f };
-
-			// 부딪힌 물체와 교차하는 영역 만큼의 거리
+			vec3 CrossingAreaDir{};
 			float PosDistance{};
 			// 부딪힌 물체의 중심점
 			vec3 Position{};
 			float PushForce= 100.f;
+			// 부딪힌 물체와 교차하는 영역 만큼의 거리
 			float IntersectAreaScale = 0.f;
 			bool IsLhs = false;
 			// 타겟

@@ -6,7 +6,7 @@
 #include "CollisionLineManager.h"
 #include "Texture_Manager.h"
 #include "GraphicDevice.h"
-
+#include "AStarManager.h"
 
 Scene::~Scene() noexcept
 {
@@ -37,6 +37,7 @@ void Scene::Initialize()
 	RenderManager::instance()._Terrain.LoadTilesCurrentStateKeyOnly(LoadMapTexInfoFilePath);
 	CollisionTileManager::instance().LoadCollisionTile(LoadCollisionTileInfoFilePath);
 	CollisionLineManager::instance().LoadCollisionLine(LoadLineInfoFilePath);
+	AStarManager::instance().Load(LoadAStarInfoFilePath);
 }
 
 void Scene::Release()

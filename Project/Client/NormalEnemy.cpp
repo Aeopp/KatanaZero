@@ -21,12 +21,13 @@ void NormalEnemy::Initialize() & noexcept
 		if (!global::bDebug)return;
 
 		float Radius = DetectionRange;
-		switch (_CurState)
+		switch (_EnemyState)
 		{
 		case NormalEnemy::State::Detecting:
 			Radius = PursuitRange;
 			break;
 		case NormalEnemy::State::Idle:
+		case NormalEnemy::State::Walk:
 			Radius = DetectionRange;
 			break;
 		case NormalEnemy::State::Die:
@@ -74,29 +75,27 @@ void NormalEnemy::LateUpdate()
 {
 	Super::LateUpdate();
 	const float Dt = Time::instance().Delta(); 
-	_DetectionRangeColor = math::lerp(_DetectionRangeColor, _DetectionRangeColorGoal, ColorGoalTime, Dt);
+	_DetectionRangeColor = math::lerp(_DetectionRangeColor, _DetectionRangeColorGoal, _DetectionRangeColorGoalTime, Dt);
 
-	switch (_CurState)
+	switch (_EnemyState)
 	{
 	case NormalEnemy::State::Idle:
+	case NormalEnemy::State::Walk:
 		break;
 	case NormalEnemy::State::Detecting:
-		if (ToTarget.y > 5.f)
+		if (ToTarget.y > 15.f)
 		{
 			_CollisionComp->bDownJump = true;
 		}
+		else
+		{
+			_CollisionComp->bDownJump = false;
+		}
 		break;
 	case NormalEnemy::State::Die:
-
 		break;
 	default:
 		break;
-	}
-
-	// 추격중인데 플레이어가 아래에 존재한다면 라인을 타기위해 아래점프가 가능한 벽과 충돌을 해제
-	if (_CurState !=NormalEnemy::State::Detecting)
-	{
-		_CollisionComp->bDownJump = false;
 	}
 }
 
@@ -104,7 +103,7 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 {
 	Super::Hit(_Target, _CollisionInfo);
 
-	if (_CurState == NormalEnemy::State::Die)
+	if (_EnemyState == NormalEnemy::State::Die)
 	{
 		return;
 	}
@@ -116,7 +115,7 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			_CollisionInfo.PushDir);
 
 		_RenderComp->AfterImgOn();
-		_CurState = NormalEnemy::State::Die;
+		_EnemyState = NormalEnemy::State::Die;
 
 		ObjectManager::instance()._Camera.lock()->CameraShake(
 			_CollisionInfo.PushForce*5, _CollisionInfo.PushDir, 0.3f);
@@ -176,18 +175,13 @@ bool NormalEnemy::IsRangeInnerTarget()
 
 	float Dot = D3DXVec3Dot(&_PhysicComp->Dir, &ToTargetDir);
 	
-	switch (_CurState)
+	switch (_EnemyState)
 	{
 	case NormalEnemy::State::Idle:
+	case NormalEnemy::State::Walk:
 		break;
 	case NormalEnemy::State::Detecting:
-		if (IsTurn(ToTargetDir))
-		{
-			_PhysicComp->Dir = ConvertMoveDir(ToTargetDir);
-			Turn();
-		}
-		else
-			_PhysicComp->Dir = ConvertMoveDir(ToTargetDir);
+	  	_PhysicComp->Dir = ConvertMoveDir(ToTargetDir);
 		break;
 	default:
 		break;
@@ -197,16 +191,21 @@ bool NormalEnemy::IsRangeInnerTarget()
 	bool bIsPlayerSneak = ObjectManager::instance()._Player.lock()->bSneak;
 	ObjectManager::instance()._Player.lock()->bSneak;
 
-	switch (_CurState)
+	// 게으른 순찰상태라면 감지범위 감소
+	float _DetectionRange = bLaziness ?  (DetectionRange*0.5f): DetectionRange;
+	float _NarrowRange = bLaziness ? (NarrowRange*1.f) : NarrowRange;
+
+	switch (_EnemyState)
 	{
 	case NormalEnemy::State::Idle:
+	case NormalEnemy::State::Walk:
 		if (IsSamefloor(TargetLocation))
 		{
 			// 감지범위 이내에 존재하고 바라보는 방향에 있다면 성공
-			IsRangeInner |= ToTargetDistance < DetectionRange && (Dot > 0);
+			IsRangeInner |= ToTargetDistance < _DetectionRange && (Dot > 0.f);
 			// 플레이어가 살금살금 움직이는 중이 아니라면 좀더 좁은범위에 존재한다면 방향과 상관없이 성공
 			if (!bIsPlayerSneak)
-				IsRangeInner |= ToTargetDistance < NarrowRange;
+				IsRangeInner |= ToTargetDistance < _NarrowRange;
 			// 여기서 Y Range 를 조사. 같은 층에 있는지 검출.
 		}
 		break;
@@ -221,29 +220,30 @@ bool NormalEnemy::IsRangeInnerTarget()
 	if (IsRangeInner)
 	{
 		// 감지가 성공하였으니 상태 전환
-		switch (_CurState)
+		switch (_EnemyState)
 		{
 		case NormalEnemy::State::Detecting:
 			break;
 		case NormalEnemy::State::Idle:
+		case NormalEnemy::State::Walk:
 			_DetectionRangeColorGoal = D3DCOLOR_ARGB(255, 255, 0, 0);
-			_CurState = NormalEnemy::State::Detecting;
+			_EnemyState = NormalEnemy::State::Detecting;
 			break;
 		default:
 			break;
 		}
-
 		return true;
 	}
 	else
 	{
-		switch (_CurState)
+		switch (_EnemyState)
 		{
 		case NormalEnemy::State::Detecting:
 			_DetectionRangeColorGoal = D3DCOLOR_ARGB(255, 0, 255, 0);
-			_CurState = NormalEnemy::State::Idle;
+			_EnemyState = NormalEnemy::State::Idle;
 			break;
 		case NormalEnemy::State::Idle:
+		case NormalEnemy::State::Walk:
 			break;
 		default:
 			break;
@@ -252,12 +252,6 @@ bool NormalEnemy::IsRangeInnerTarget()
 
 	return false;
 };
-
-
-bool NormalEnemy::IsTurn(vec3 Dir)
-{
-	return  ((_PhysicComp->Dir.x * Dir.x) < 0.f);
-}
 
 vec3 NormalEnemy::ConvertMoveDir(vec3 Dir)
 {

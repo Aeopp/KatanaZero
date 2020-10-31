@@ -2,6 +2,8 @@
 #include "PhysicTransformComponent.h"
 #include "Time.h"
 #include "math.h"
+#include "Character.h"
+
 // 속도 = 시작속도 + (가속도*시간)
 
 // 가속도를 속도에 반영
@@ -97,7 +99,7 @@ void PhysicTransformComponent::Update()
 			++iter;
 	}
 
-	if (bGravity)
+	if (bGravity &&!bLineMode)
 	{
 		GravityAcceleration += (math::GRAVITY_ACC * Dt);
 		Position += vec3{ 0.f,1.f,0.f }* ( math::GRAVITY + GravityAcceleration) * GravityCoefficient * Dt;
@@ -107,7 +109,4 @@ void PhysicTransformComponent::Update()
 void PhysicTransformComponent::LateUpdate()
 {
 	TransformComponent::LateUpdate();
-
-
-
 }

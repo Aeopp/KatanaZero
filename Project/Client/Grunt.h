@@ -20,6 +20,8 @@ public :
 		Run,
 		Turn,
 		Walk,
+		EnterStair,
+		LeaveStair,
 	};
 private:
 	std::shared_ptr<class Grunt_Slash> _SpAttack;
@@ -33,8 +35,11 @@ public :
 	virtual void Move(vec3 Dir, const float AddSpeed)override;
 	virtual void Die() & override;
 
-	bool bWalk = true;
 public:
+	void EnterStair();
+	void LeaveStair();
+	void EnterStairState();
+	void LeaveStairState();
 	void Attack();
 	void AttackState();
 	void Fall();
@@ -57,5 +62,8 @@ private:
 public:
 	bool bAttackMotionEnd{ false };
 	bool bTurnMotionEnd{ false };
+
+	// NormalEnemy을(를) 통해 상속됨
+	virtual void SetUpInitState(float DirX, int32_t StateID) override;
 };
 

@@ -143,6 +143,7 @@
       <Filter>FileInfo</Filter>
     </ClInclude>
     <ClInclude Include="TupleGlobalHelper.h" />
+    <ClInclude Include="AStarManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCTool.cpp">
@@ -207,6 +208,7 @@
     <ClCompile Include="ExtractionPath.cpp">
       <Filter>FileInfo</Filter>
     </ClCompile>
+    <ClCompile Include="AStarManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MFCTool.ico">

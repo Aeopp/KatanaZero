@@ -13,7 +13,7 @@ public:
 		Replay,
 		ReWind,
 	};
-	static constexpr std::pair<float, float > ClientSize = { 1600,900};
+	static constexpr std::pair<float, float > ClientSize = { 1920,1080};
 	static constexpr std::pair<float, float > TileNums = { 150 ,150};
 	static constexpr std::pair<float, float > TileSize = { 36 ,36 };
 	static constexpr int32_t ClientViewMinLeftTop = (int32_t(((ClientSize.first + ClientSize.second) / 3.7f) / 36)) *TileSize.first;

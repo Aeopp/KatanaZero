@@ -153,6 +153,7 @@ void CMFCToolView::OnDraw(CDC* /*pDC*/)
 	up_Terrain->Render();
 	_CollisionTileManager.DebugRender();
 	_CollisionLineManager.DebugRender();
+	_AStarManager.DebugRender();
 	_ObjectEdit.Render();
 
 	GraphicDevice::instance().RenderEnd();
@@ -297,10 +298,8 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
 	{
-
 		// 마우스 스크린 좌표를 월드 좌표로
 		const vec3 WorldPoint = ClientPosToJoomApplyWorldPosition(point);
-
 
 		if (bRenderTileMode)
 			MousePickPushTile(WorldPoint);
@@ -308,6 +307,11 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 		{
 			_CollisionTileManager.Push(WorldPoint, bTileCanGoDown);
 		}
+		if (bAStarMode)
+		{
+			_AStarManager.PushNodeFromWorldLocation(WorldPoint,bDoor,bStair);
+		}
+
 
 		if (bLineMode)
 		{
@@ -333,6 +337,10 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 			_CollisionTileManager.Erase(WorldPoint, bTileCanGoDown);
 		if (bLineMode)
 			_CollisionLineManager.Erase(WorldPoint, bWallRide);
+		if (bAStarMode)
+		{
+			_AStarManager.EraseNodeFromWorldLocation(WorldPoint);
+		}
 	}
 
 	InvalidateRect(nullptr, FALSE);

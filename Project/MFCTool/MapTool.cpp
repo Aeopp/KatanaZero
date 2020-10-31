@@ -49,6 +49,9 @@ void CMapTool::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK4, CheckBoxObjectMode);
 	DDX_Control(pDX, IDC_CHECK5, CheckBoxWallRide);
 	DDX_Control(pDX, IDC_CHECK6, CheckBoxTileCanGoDown);
+	DDX_Control(pDX, IDC_ASTAR, _AStar);
+	DDX_Control(pDX, IDC_Stairs, _Stairs);
+	DDX_Control(pDX, IDC_Door, _Door);
 }
 
 
@@ -76,6 +79,10 @@ BEGIN_MESSAGE_MAP(CMapTool, CDialog)
 	ON_BN_CLICKED(IDC_RADIO9, &CMapTool::OnMapLayerRadioBtnClickEvent)
 	ON_BN_CLICKED(IDC_CHECK5, &CMapTool::OnBnClickedCheckWallRide)
 	ON_BN_CLICKED(IDC_CHECK6, &CMapTool::OnBnClickedCheckTileCanGoDown)
+	
+	ON_BN_CLICKED(IDC_ASTAR, &CMapTool::OnBnClickedAstar)
+	ON_BN_CLICKED(IDC_Stairs, &CMapTool::OnBnClickedStairs)
+	ON_BN_CLICKED(IDC_Door, &CMapTool::OnBnClickedDoor)
 END_MESSAGE_MAP()
 
 // CMapTool 메시지 처리기입니다.
@@ -258,6 +265,13 @@ void CMapTool::OnBnClickedMapSaveButton()
 
 		pView->_ObjectEdit.SaveCurrentStageObjInfo(FilePath);
 	}
+
+	if (_AStar.GetCheck())
+	{
+		MessageBox(L"AStar Info Save !", L"SAVE", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(FALSE, this);
+		pView->_AStarManager.Save(FilePath);
+	}
 }
 
 
@@ -294,6 +308,13 @@ void CMapTool::OnBnClickedMapLoadButton()
 		MessageBox(L"Object Info Load !", L"LOAD", MB_OK);
 		std::wstring FilePath = FileHelper::GetOperationFilePath(TRUE, this);
 		pView->_ObjectEdit.LoadCurrentStageObjInfo(FilePath);
+	}
+
+	if (_AStar.GetCheck())
+	{
+		MessageBox(L"AStar Info Load !", L"LOAD", MB_OK);
+		std::wstring FilePath = FileHelper::GetOperationFilePath(TRUE, this);
+		pView->_AStarManager.Load(FilePath);
 	}
 }
 
@@ -426,4 +447,31 @@ BOOL CMapTool::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+
+
+void CMapTool::OnBnClickedAstar()
+{
+	auto* pView = GetView();
+	if (!pView)return;
+
+	pView->bAStarMode = _AStar.GetCheck();
+}
+
+
+void CMapTool::OnBnClickedStairs()
+{
+	auto* pView = GetView();
+	if (!pView)return;
+
+	pView->bStair= _Stairs.GetCheck();
+}
+
+
+void CMapTool::OnBnClickedDoor()
+{
+	auto* pView = GetView();
+	if (!pView)return;
+
+	pView->bDoor= _Door.GetCheck();
 }

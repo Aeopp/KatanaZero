@@ -182,3 +182,15 @@ spr_grunt_turn
 Grunt
 spr_grunt_walk
 10
+..\Resource\Texture\Grunt\spr_grunt_lean\%d.png
+Grunt
+spr_grunt_lean
+1
+..\Resource\Texture\Grunt\spr_grunt_enterstair\%d.png
+Grunt
+spr_grunt_enterstair
+8
+..\Resource\Texture\Grunt\spr_grunt_leavestair\%d.png
+Grunt
+spr_grunt_leavestair
+8

@@ -12,9 +12,9 @@
 #include "PhysicTransformComponent.h"
 #include "AttackSlash.h"
 #include "DustCloud.h"
-
 #include "math.h"
 #include "global.h"
+#include "AStarManager.h"
 
 using namespace std;
 
@@ -140,6 +140,17 @@ void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 		bCurWallRideCollision = true;
 		FSM();
 	}
+
+	/*if (_CollisionInfo._ID == OBJECT_ID::ETILE)
+	{
+		if (_CollisionInfo.Normal)
+		{
+			if (math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal))
+			{
+				int i = 0;
+			}
+		}
+	}*/
 }
 void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
@@ -263,7 +274,6 @@ void Player::IdleToRun()
 	_RenderComp->Anim(false, false, L"spr_dragon_idle_to_run", 3, 0.12f , std::move(_Notify));
 
 	_SpDustCloud->_RenderComp->bRender = true;
-
 }
 
 void Player::IdleToRunState()
@@ -511,33 +521,28 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{		
 		if (!object::IsValid(Observer))return;
+		if (_CurrentState == Player::State::Wall_Ride)return;
+
 		bMoveKeyCheck = true;
 		bFrameCurrentCharacterInput = true;
 		const vec3 Dir{ 1.f,0.f,0.f };
-		_PhysicComp->Dir = Dir;
+		
+			_PhysicComp->Dir = Dir;
 	},
 		'D', InputManager::EKEY_STATE::PRESSING));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{ 	
 		if (!object::IsValid(Observer))return;
+		if (_CurrentState == Player::State::Wall_Ride)return;
+
+
 		bMoveKeyCheck = true;
 		bFrameCurrentCharacterInput = true;
 		const vec3 Dir{ -1.f,0.f,0.f };
-		_PhysicComp->Dir = Dir;
+			_PhysicComp->Dir = Dir;
 	},	'A', InputManager::EKEY_STATE::PRESSING));
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
-	{
-		if (!object::IsValid(Observer))return;
-		bFrameCurrentCharacterInput = true;
-	},
-		'D', InputManager::EKEY_STATE::UP));
-
-	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
-	{
-		if (!object::IsValid(Observer))return;
-	}, 'A', InputManager::EKEY_STATE::UP));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
@@ -975,7 +980,7 @@ void Player::WallRideState()
 void Player::Flip()
 {
 	_CurrentState = Player::State::Flip;
-
+	_PhysicComp->Dir.x *= -1.f;
 	RenderComponent::NotifyType _Notify;
 	_Notify[10] = [this]() {
 		bFlipMotionEnd = true;

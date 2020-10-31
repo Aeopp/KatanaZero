@@ -62,7 +62,7 @@ void CollisionManager::Update()
 					_RhsHitInfo.PosDir = Dir;
 					_RhsHitInfo.PosDistance = D3DXVec3Length(&Dis);
 					 
-					_RhsHitInfo.Dir = *oToRhs;
+					_RhsHitInfo.CrossingAreaDir = *oToRhs;
 					_RhsHitInfo.Normal = Normal;
 					_RhsHitInfo.IntersectAreaScale = D3DXVec3Length(&*oToRhs);
 					_RhsHitInfo.Position = math::GetCenter(LhsRect);
@@ -83,7 +83,7 @@ void CollisionManager::Update()
 					D3DXVec3Normalize(&Normal, &Normal);
 
 					math::Collision::HitInfo _LhsHitInfo;
-					_LhsHitInfo.Dir=_RhsHitInfo.Dir * -1.f;
+					_LhsHitInfo.CrossingAreaDir=_RhsHitInfo.CrossingAreaDir * -1.f;
 					_LhsHitInfo.PosDir = Dir * -1.f;
 					_LhsHitInfo.PosDistance = _RhsHitInfo.PosDistance;
 					_LhsHitInfo.IntersectAreaScale=_RhsHitInfo.IntersectAreaScale;

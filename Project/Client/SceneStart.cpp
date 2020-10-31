@@ -20,6 +20,7 @@ void SceneStart::Initialize()
 	LoadMapTexInfoFilePath = L"..\\Data\\Prison\\3rd\\RenderTile.txt"s;
 	LoadCollisionTileInfoFilePath = L"..\\Data\\Prison\\3rd\\Collision.txt"s;
 	LoadLineInfoFilePath = L"..\\Data\\Prison\\3rd\\Line.txt"s;
+	LoadAStarInfoFilePath = L"..\\Data\\Prison\\3rd\\AStar.txt"s;
 
 	auto _Player =ObjectManager::instance().InsertObject<Player>
 		(vec3{ 1180,5433,0.f });
@@ -33,19 +34,21 @@ void SceneStart::Initialize()
 
 	auto _Grunt = ObjectManager::instance().InsertObject<Grunt>
 		(vec3{ 3325,5365,0.f });
+	_Grunt->SetUpInitState(-1.f, 0);
 
 	SceneManageObjs.push_back(_Grunt);
 
 	// TODO:: REMOVE PLZ TEST CODE 
 	{
-		float XDiff = 600.f;
+		/*float XDiff = 300.f;
 		float x = 1876.f;
 		float y = 5456;
 
 		while (true)
 		{
-			ObjectManager::instance().InsertObject<Grunt>
+			auto _Grunt = ObjectManager::instance().InsertObject<Grunt>
 				(vec3{ x,y,0.f });
+			_Grunt->SetUpInitState(-1.f, 0);
 			x += XDiff;
 			if (x > 4300)
 				break;
@@ -55,8 +58,9 @@ void SceneStart::Initialize()
 		y = 5153;
 		while (true)
 		{
-			ObjectManager::instance().InsertObject<Grunt>
+			auto _Grunt = ObjectManager::instance().InsertObject<Grunt>
 				(vec3{ x,y,0.f });
+			_Grunt->SetUpInitState(-1.f, 0);
 			x += XDiff;
 			if (x > 4863)
 				break;
@@ -66,8 +70,9 @@ void SceneStart::Initialize()
 		y = 5153 - 295;
 		while (true)
 		{
-			ObjectManager::instance().InsertObject<Grunt>
+			auto _Grunt = ObjectManager::instance().InsertObject<Grunt>
 				(vec3{ x,y,0.f });
+			_Grunt->SetUpInitState(-1.f, 0);
 			x += XDiff;
 			if (x > 4863)
 				break;
@@ -78,8 +83,9 @@ void SceneStart::Initialize()
 		y = 5153;
 		while (true)
 		{
-			ObjectManager::instance().InsertObject<Grunt>
+			auto _Grunt = ObjectManager::instance().InsertObject<Grunt>
 				(vec3{ x,y,0.f });
+			_Grunt->SetUpInitState(-1.f, 0);
 			x += XDiff;
 			if (x > 4863)
 				break;
@@ -89,17 +95,17 @@ void SceneStart::Initialize()
 		y = 5153 - 295;
 		while (true)
 		{
-			ObjectManager::instance().InsertObject<Grunt>
+			auto _Grunt = ObjectManager::instance().InsertObject<Grunt>
 				(vec3{ x,y,0.f });
+			_Grunt->SetUpInitState(-1.f, 0);
 			x += XDiff;
 			if (x > 4863)
 				break;
-		}
+		}*/
 
 	}
 
 
-	int i = 0;
 
 	Scene::Initialize();
 }

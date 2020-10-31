@@ -8,6 +8,8 @@ class CGraphic_Device;
 
 #include "CollisionTileManager.h"
 #include "CollisionLineManager.h"
+#include "AStarManager.h"
+
 #include <queue>
 #include "ObjectEdit.h"
 
@@ -28,6 +30,9 @@ public:
 // 작업입니다.
 public:
 	ObjectEdit _ObjectEdit;
+	bool bAStarMode = false;
+	bool bDoor = false;
+	bool bStair = false;
 	bool bRenderTileMode = false;
 	bool bCollisionTileMode = false;
 	bool bLineMode = false;
@@ -37,6 +42,7 @@ public:
 
 	CollisionLineManager _CollisionLineManager; 
 	CollisionTileManager _CollisionTileManager;
+	AStarManager _AStarManager;
 	std::unique_ptr<class Terrain> up_Terrain{ nullptr };
 	float Angle = 0.f; 
 	float JoomScale = 1.f;

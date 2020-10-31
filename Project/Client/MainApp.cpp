@@ -10,6 +10,7 @@
 #include "InputManager.h"
 #include "ComponentManager.h"
 #include "Texture_Manager.h"
+#include "AStarManager.h"
 
 HRESULT App::Initialize()
 {
@@ -93,6 +94,7 @@ void App::Render()
 		ComponentManager::instance().Render();
 		RenderManager::instance().Render();
 		CollisionManager::instance().Render();
+		AStarManager::instance().DebugRender();
 		SceneManager::instance().Render();
 		Time::instance().Render();
 	}
