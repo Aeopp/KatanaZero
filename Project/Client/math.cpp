@@ -13,6 +13,30 @@ matrix math::GetCameraJoomMatrix(const float JoomScale, const vec3 & ScreenSize)
 	return MCameraRelativeTranslation*MJoomScale*MScreenReturn;
 }
 
+std::array<vec3, 4ul> math::GetWorldRectPt(matrix MWorld,
+	float Width,float Height)
+{
+	auto LocalPoints = math::GetLocalRect(vec2{ Width,Height });
+	std::array<vec3, 4ul> _WorldRectPt;
+
+	std::transform(
+		std::move_iterator(std::begin(LocalPoints)),
+		std::move_iterator(std::end(LocalPoints) - 1),
+		std::begin(_WorldRectPt),
+		[&MWorld](auto&& LocalPt) {
+		D3DXVec3TransformCoord(&LocalPt, &LocalPt, &MWorld);
+		return LocalPt;
+	});
+
+	LocalPoints.front();
+
+	// 이후에 바텀과 탑을 뒤집기
+	std::swap(_WorldRectPt[0].y, _WorldRectPt[2].y);
+	std::swap(_WorldRectPt[1].y, _WorldRectPt[3].y);
+
+	return _WorldRectPt;
+}
+
 float math::Angle360conversion(float degree)
 {
 	if (degree < 0)
@@ -32,6 +56,8 @@ D3DXCOLOR math::lerp(D3DXCOLOR start, D3DXCOLOR goal, float goal_time, float dt)
 
 	return _color;
 }
+
+
 
 vec3 math::RandVec(std::pair<float, float> Range)
 {

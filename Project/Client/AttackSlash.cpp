@@ -4,6 +4,7 @@
 #include "RenderComponent.h"
 #include "PhysicTransformComponent.h"
 #include "CollisionComponent.h"
+#include "EffectManager.h"
 
 OBJECT_ID::EID Attack_Slash::GetID()
 {
@@ -29,15 +30,32 @@ void Attack_Slash::Initialize() & noexcept
     _TransformComp->Scale *= 1.f;
     _PhysicComp->Mass = 100.f;
 
+    _OldSlash1 = ComponentManager::instance().Insert<RenderComponent>(_This);
+    _OldSlash2 = ComponentManager::instance().Insert<RenderComponent>(_This);
+
     RenderComponent::NotifyType _Notify;
     _Notify[5] = [this]() 
     {
         bSlashEffectEnd = true;
     };
-    _RenderComp->Anim(false, true, L"spr_dragon_slash", 5, 0.3f, std::move(_Notify),
+
+    _RenderComp->Anim(false, true, L"spr_master_slash", 5, 0.3f, std::move(_Notify),
     D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, { 1.f,1.f }, L"Dragon", LAYER::ELAYER::EEFFECT);
     _RenderComp->AfterImgOff(); 
     _RenderComp->bRender = false;
+
+    {
+        _OldSlash1->Anim(false, true, L"spr_oldslash", 13, 0.3f, {},
+            D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, { 1.f,1.f }, L"Dragon", LAYER::ELAYER::EEFFECT);
+        _OldSlash1->AfterImgOff();
+        _OldSlash1->bRender = false;
+
+        _OldSlash2->Anim(false, true, L"spr_oldslash2", 7, 0.3f, {},
+            D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, { 1.f,1.f }, L"Dragon", LAYER::ELAYER::EEFFECT);
+        _OldSlash2->AfterImgOff();
+        _OldSlash2->bRender = false;
+    }
+   
 
     _CollisionComp->bCollision = false;
     _CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
@@ -79,9 +97,21 @@ void Attack_Slash::LateUpdate()
     {
         bSlashEffectEnd = false;
         _RenderComp->bRender = false;
-        _CollisionComp->bCollision = false;
         _RenderComp->_AfterImgVec.clear();
         _RenderComp->AfterImgOff();
+
+        _CollisionComp->bCollision = false;
+        
+
+        {
+            _OldSlash1->bRender = false;
+            _OldSlash1->_AfterImgVec.clear();
+            _OldSlash1->AfterImgOff();
+
+            _OldSlash2->bRender = false;
+            _OldSlash2->_AfterImgVec.clear();
+            _OldSlash2->AfterImgOff();
+        }
     }
 }
 
@@ -93,6 +123,17 @@ void Attack_Slash::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 void Attack_Slash::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
     Super::Hit(_Target, _CollisionInfo);
+
+ /*   if (_CollisionInfo._TAG == OBJECT_TAG::ETAG::ENEMY ||
+        _CollisionInfo._TAG == OBJECT_TAG::ETAG::ENEMY_ATTACK)
+    {
+        auto spEnemy = _CollisionInfo._Target.lock();
+        if (spEnemy)
+        {
+            
+        
+        }
+    }*/
 }
 
 void Attack_Slash::Move(vec3 Dir, const float AddSpeed)
@@ -108,9 +149,22 @@ void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
     {
         bSlashEffectEnd = true;
     };
-
-    _RenderComp->Anim(true, false, L"spr_dragon_slash", 5, 0.35f, std::move(_Notify));
+    _RenderComp->Anim(true, false, L"spr_master_slash", 5, 0.3f, std::move(_Notify));
     _RenderComp->bRender = true;
+    _RenderComp->AfterImgOn();
+
+       if (global::_CurGameState == global::ECurGameState::Slow)
+        {
+            _OldSlash1->Anim(true, false, L"spr_oldslash", 13, 0.3f);
+            _OldSlash1->bRender = true;
+             _OldSlash1->AfterImgOn();
+
+
+            _OldSlash2->Anim(true, false, L"spr_oldslash2", 7, 0.3f);
+            _OldSlash2->bRender = true;
+              _OldSlash2->AfterImgOn();
+        }
+
     _CollisionComp->bCollision = true;
 
     _PhysicComp->Dir = Dir;
@@ -119,5 +173,4 @@ void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
 
     D3DXVec3Normalize(&Dir, &Dir);
     _PhysicComp->Rotation.z = atan2f(Dir.y, Dir.x);
-    _RenderComp->AfterImgOn();
 }

@@ -84,10 +84,10 @@ public:
 	void Clear()
 	{
 		EventList.clear();
-
+		
 		for (auto& [_EventID, Handle] : _HandleMap)
 		{
-			Handle.get().bValid = false;
+				Handle.get().bValid = false;
 		}
 		_HandleMap.clear();
 	}

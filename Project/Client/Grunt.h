@@ -34,7 +34,6 @@ public :
 	virtual void Hit(std::weak_ptr<class object>_Target, math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override;
 	virtual void Die() & override;
-
 public:
 	void EnterStair();
 	void LeaveStair();
@@ -59,10 +58,13 @@ public:
 private:
 	void AnyState();
 	void FSM();
+
+	void FollowRouteProcedure();
 public:
 	bool bAttackMotionEnd{ false };
 	bool bTurnMotionEnd{ false };
 
+	float _Y = 0.f;
 	// NormalEnemy을(를) 통해 상속됨
 	virtual void SetUpInitState(float DirX, int32_t StateID) override;
 };

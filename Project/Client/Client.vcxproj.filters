@@ -210,13 +210,12 @@
     <ClInclude Include="UIItemIcon.h" />
     <ClInclude Include="AttackObject.h" />
     <ClInclude Include="AttackSlash.h" />
-    <ClInclude Include="Effect.h" />
-    <ClInclude Include="DustCloud.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="NormalEnemy.h" />
     <ClInclude Include="Grunt.h" />
     <ClInclude Include="Grunt_Slash.h" />
     <ClInclude Include="AStarManager.h" />
+    <ClInclude Include="EffectManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -342,13 +341,12 @@
     <ClCompile Include="UIItemIcon.cpp" />
     <ClCompile Include="AttackObject.cpp" />
     <ClCompile Include="AttackSlash.cpp" />
-    <ClCompile Include="Effect.cpp" />
-    <ClCompile Include="DustCloud.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="NormalEnemy.cpp" />
     <ClCompile Include="Grunt.cpp" />
     <ClCompile Include="Grunt_Slash.cpp" />
     <ClCompile Include="AStarManager.cpp" />
+    <ClCompile Include="EffectManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

@@ -97,6 +97,12 @@ void CMFCToolView::TileEditPushEvent(const CPoint point)
 		int32_t DrawID = pMyForm->_ObjectTool._DrawID;
 		_ObjectEdit.PushObjectInStage(WorldPoint, DrawID);
 	}
+
+	if (bAStarMode)
+	{
+		_AStarManager.PushNodeFromWorldLocation(WorldPoint, bDoor, bStair, bStairEnd);
+	}
+	
 	
 	InvalidateRect(nullptr, FALSE);
 	pMiniView->InvalidateRect(nullptr, FALSE);
@@ -114,6 +120,8 @@ void CMFCToolView::TileEditEraseEvent(const CPoint point)
 		_CollisionLineManager.Erase(WorldPoint, bWallRide);
 	if (bObjectMode)
 		_ObjectEdit.DeleteObjAtPointLocation(WorldPoint);
+	if (bAStarMode)
+		_AStarManager.EraseNodeFromWorldLocation(WorldPoint);
 
 	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
 	CMyForm*	pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
@@ -309,7 +317,7 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 		}
 		if (bAStarMode)
 		{
-			_AStarManager.PushNodeFromWorldLocation(WorldPoint,bDoor,bStair);
+			_AStarManager.PushNodeFromWorldLocation(WorldPoint,bDoor,bStair, bStairEnd);
 		}
 
 
@@ -348,6 +356,8 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 
 	CScrollView::OnMouseMove(nFlags, point);
 }
+
+
 
 void CMFCToolView::MousePickPushTile(const vec3& WorldPos)
 {

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Grunt.h"
-
 #include "Player.h"
 #include "AStarManager.h"
 #include "Grunt_Slash.h"
@@ -10,6 +9,7 @@
 #include "ComponentManager.h"
 #include "ObjectManager.h"
 #include "Time.h"
+#include "GraphicDevice.h"
 
 using namespace std;
 
@@ -17,17 +17,14 @@ OBJECT_ID::EID Grunt::GetID()
 {
 	return OBJECT_ID::GRUNT;
 }
-
 OBJECT_TAG::ETAG Grunt::GetTag()
 {
 	return Super::GetTag();
 }
-
 std::wstring_view Grunt::GetName() const&
 {
 	return L"Grunt"sv;
 }
-
 
 void Grunt::Initialize() & noexcept
 {
@@ -41,7 +38,7 @@ void Grunt::Initialize() & noexcept
 	
 	_RenderComp->AfterImgOff();
 	_RenderComp->PositionCorrection = vec3{ 0.f,-10.f,0.f };
-
+	
 	_CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
 	_CollisionComp->_CollisionInfo.Height = 35;
 	_CollisionComp->_CollisionInfo.Width = 18;
@@ -55,15 +52,14 @@ void Grunt::Initialize() & noexcept
 
 	_CurrentState = Grunt::State::Idle;
 
-	
 	PursuitRange = 700.f;
 	NarrowRange = 180.f;
-
 
 	_SpAttack = ObjectManager::instance().InsertObject < Grunt_Slash>();
 	_SpAttack->SetOwner(_This);
 	DelayAfterAttack = 0.4f;
 	//_RenderComp->SlowColor = D3DCOLOR_ARGB(255, 255, 0, 0);
+
 }
 
 void Grunt::Update()
@@ -115,13 +111,15 @@ void Grunt::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _C
 }
 
 void Grunt::Move(vec3 Dir, const float AddSpeed)
-{
+{ 
 	Super::Move(Dir  , AddSpeed);
 }
 
 void Grunt::Die()&
 {
 	HurtFly();
+
+	bBlooding = true;
 }
 
 void Grunt::EnterStair()
@@ -219,8 +217,7 @@ void Grunt::FallState()
 void Grunt::HurtFly()
 {
 	_CurrentState = Grunt::State::HurtFly;
-	
-	_RenderComp->Anim(false, false, L"spr_grunt_hurtfly", 2, 0.2f);
+	_RenderComp->Anim(false, false, L"spr_grunt_hurtfly", 2, 0.5f);
 	_PhysicComp->Flying();
 }
 
@@ -228,6 +225,7 @@ void Grunt::HurtFlyState()
 {
 	if (_PhysicComp->bLand)
 	{
+		bBlooding = false;
 		HurtGround();
 	}
 }
@@ -236,18 +234,26 @@ void Grunt::HurtGround()
 {
 	_CurrentState = Grunt::State::HurtGround;
 	RenderComponent::NotifyType _Notify;
+	bBloodingOverHead = true;
+
 	_Notify[16] = [this]()
 	{
-		_RenderComp->bSlowRender = false;
-		//DIE !!
+		_RenderComp->bSlowRender = true;
+		bHurtGroundMotionEnd = true;
 	};
+
+	_Notify[9] = [this](){bBloodingOverHead = false;};
+
 	_RenderComp->Anim(false, false, L"spr_grunt_hurtground",
-		16, 1.f, std::move(_Notify));
+		16, 1.6f, std::move(_Notify));
 }
 
 void Grunt::HurtGroundState()
 {
-
+	if (bHurtGroundMotionEnd)
+	{
+		bHurtGroundMotionEnd = false;
+	}
 }
 
 void Grunt::Idle()
@@ -284,30 +290,31 @@ void Grunt::Run()
 
 void Grunt::RunState()
 {
-	vec3 BeforeDir = _PhysicComp->Dir;
-	bool IsAttackRange= IsRangeInnerTarget();
-	if (D3DXVec3Dot(&BeforeDir, &ToTarget) < 0.f)
-	{
-		_PhysicComp->Dir = ConvertMoveDir(ToTarget);
-		Turn();
-		return;
-	}
+	//bool IsAttackRange= IsRangeInnerTarget();
+	//// 추격중.........
+	//if (IsAttackRange)
+	//{
+	//	if (ToTargetDistance < AttackRange)
+	//	{
+	//		Attack();
+	//		return;
+	//	}
+	//}
+	//// 추격중일때의 감지범위 바깥으로 타겟이 도망감
+	//else
+	//{
+	//		Walk();
+	//		return;
+	//}
 
-	// 추격중.........
-	if (IsAttackRange)
+	vec3 ToTarget = _Target->_TransformComp->Position - _PhysicComp->Position;
+	float ToTargetDistance = D3DXVec3Length(&ToTarget);
+	if (ToTargetDistance < AttackRange)
 	{
-		if (ToTargetDistance < AttackRange)
-		{
-			Attack();
-			return;
-		}
-	}
-	// 추격중일때의 감지범위 바깥으로 타겟이 도망감
-	else
-	{
-			Walk();
-			return;
-	}
+		Attack();
+		return;
+	};
+
 
 	vec3 GoalTargetDiff = GoalPos - _Target->_TransformComp->Position;
 	float Distance = D3DXVec3Length(&GoalTargetDiff);
@@ -315,44 +322,31 @@ void Grunt::RunState()
 	if (GoalPos == vec3{ 0.f,0.f,0.f })
 	{
 		Paths = AStarManager::instance().PathFind(_PhysicComp->Position, _Target->_TransformComp->Position);
+		if (!Paths.empty())
+		{
+			FollowRouteProcedure();
+		}
+		return;
 	}
 	else if (Distance > PathFindCheckMinDistanceMin)
 	{
 		Paths = AStarManager::instance().PathFind(_PhysicComp->Position, _Target->_TransformComp->Position);
+		if (!Paths.empty())
+		{
+			FollowRouteProcedure();
+		}
+		return;
 	}
 
 	if (Paths.empty())return;
-	vec3 ToPath = Paths.back() - _PhysicComp->Position;
-	// 다음 경로는 도어
-	if (std::abs(ToPath.y) > DoorPathCheckMinDistance)
-	{
-		LeaveDoorLocation = Paths.back();
-		LeaveDoorLocation.y -= 30.f;
-		EnterStair();
-		return; 
-	}
 
-	_PhysicComp->Dir=ConvertMoveDir(ToPath);
+	vec3 ToMoveMark = CurMoveMark - _PhysicComp->Position;
+	if (std::abs(ToMoveMark.x)< NextPathCheckMinDistance)
+	{
+		FollowRouteProcedure();
+	}
+	
 	Move(_PhysicComp->Dir, Speed);
-
-	float ToPathDistance = D3DXVec3Length(&ToPath);
-
-	if (ToPathDistance < NextPathCheckMinDistance)
-	{
-		Paths.pop_back();
-	};
-	/*if (IsSamefloor (_Target->_TransformComp->Position))
-	{
-		Paths = AStarManager::instance().PathFind(_PhysicComp->Position, _Target->_TransformComp->Position);
-
-		Move(_PhysicComp->Dir, Speed);
-	}
-	else
-	{
-		Paths = AStarManager::instance().PathFind(_PhysicComp->Position, _Target->_TransformComp->Position);
-
-		Move(_PhysicComp->Dir, Speed);
-	}*/
 }
 
 void Grunt::Turn()
@@ -465,6 +459,42 @@ void Grunt::FSM()
 	}
 
 	AnyState();
+}
+void Grunt::FollowRouteProcedure()
+{
+	CurMoveMark = Paths.back();
+	GoalPos = Paths.front();
+	Paths.pop_back();
+
+	vec3 ToPath = CurMoveMark - _PhysicComp->Position;
+	_Y = ToPath.y;
+	if (ToPath.y > 40.f)
+	{
+		_CollisionComp->bDownJump = true;
+	}
+	else
+	{
+		_CollisionComp->bDownJump = false;
+	}
+
+	if (D3DXVec3Dot(&ConvertMoveDir(_PhysicComp->Dir), &ConvertMoveDir(ToPath)) < 0.f)
+	{
+		_PhysicComp->Dir = ConvertMoveDir(ToPath);
+		Turn();
+		return;
+	}
+
+	if (std::abs(ToPath.y) > DoorPathCheckMinDistance)
+	{
+		LeaveDoorLocation = CurMoveMark;
+		LeaveDoorLocation.y -= 30.f;
+		EnterStair();
+		return;
+	}
+	else
+	{
+		_PhysicComp->Dir = ConvertMoveDir(ToPath);
+	}
 };
 
 void Grunt::SetUpInitState(float DirX, int32_t StateID)

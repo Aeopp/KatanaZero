@@ -11,6 +11,9 @@ public:
 	vec3 Revolution = { 0.f,0.f,0.f };
 	vec3 Dir={ 1.f,0.f,0.f };
 	vec3 CurrentLineDir={ 0.f,0.f,0.f }; 
+	vec3 PastDir = { 0,0,0 };
+	vec3 PastLocation = { 0,0,0 };
+
 	bool bFollowOwner = true;
 	bool bMapSlide = true;
 	bool bLineMode = false;

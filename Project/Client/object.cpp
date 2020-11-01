@@ -42,6 +42,8 @@ void object::LateUpdate()
 		auto spOwner = _Owner.lock();
 		if (!spOwner) bDie = true;
 	}
+	
+	
 }
 
 		

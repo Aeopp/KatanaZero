@@ -11,10 +11,12 @@
 #include "UIItemIcon.h"
 #include "PhysicTransformComponent.h"
 #include "AttackSlash.h"
-#include "DustCloud.h"
+#include "EffectManager.h"
 #include "math.h"
 #include "global.h"
 #include "AStarManager.h"
+#include "EffectManager.h"
+
 
 using namespace std;
 
@@ -73,9 +75,6 @@ void Player::Initialize() & noexcept
 	_SpAttackSlash = ObjectManager::instance().InsertObject<typename Attack_Slash>();
 	_SpAttackSlash->SetOwner(_This);
 
-	_SpDustCloud = ObjectManager::instance().InsertObject<DustCloud>();
-	_SpDustCloud->SetOwner(_This);
-
 	_PhysicComp->bGravity = true;
 
 	_PhysicComp->bFollowOwner = false;
@@ -124,6 +123,8 @@ void Player::LateUpdate()
 	bSneakKeyCheck = false;
 	bCurWallRideCollision = false;
 
+	RollEffectDelta -= Dt;
+	WallRideEffectDelta -= Dt;
 	CurAttackCoolTime -= Dt;
 	InvincibleTime -= Dt;
 };
@@ -138,6 +139,7 @@ void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 		FlipDir = *_CollisionInfo._Variable._Cast<vec3>();
 		D3DXVec3Lerp(&FlipDir, &FlipDir, &UpVec, 0.5f);
 		bCurWallRideCollision = true;
+		CurWallRideLinePos = _CollisionInfo.Position;
 		FSM();
 	}
 
@@ -262,6 +264,9 @@ void Player::IdleState()
 	{
 		PreCrouch();
 	}
+
+	
+
 }
 
 void Player::IdleToRun()
@@ -273,7 +278,37 @@ void Player::IdleToRun()
 	{bIdleToRunMotionEnd = true; };
 	_RenderComp->Anim(false, false, L"spr_dragon_idle_to_run", 3, 0.12f , std::move(_Notify));
 
-	_SpDustCloud->_RenderComp->bRender = true;
+	vec3 InitPos = _PhysicComp->Position + vec3{ 0,15.f,0.f };
+	vec3 InitDir = -_PhysicComp->Dir * 200.f;
+	float XDir = -_PhysicComp->Dir.x;
+
+	Time::instance().TimerRegist(0.07, 0.07, 0.07,
+		[this, InitPos]()
+	{
+		EffectManager::instance().EffectPush(
+			L"Effect", L"spr_stompercloud2",
+			10, 0.05f, 10 * 0.05f + 0.01f, OBJECT_ID::EID::STOMPER_CLOUD,
+			InitPos,
+			vec3{ 0.f,-1.f,0.f }, { -3 * _PhysicComp->Dir.x
+			,3,0.f },
+			false, false, false, false, 0.f, 0.f,
+			255, false, 0.f, 0.f, 0.f, 0);
+		return true;
+	});
+	
+	InitPos.y += 15.f;
+
+	Time::instance().TimerRegist(0.07f, 0.02f, 0.07f + 0.02f * 7,
+		[this, InitPos, InitDir, XDir]()mutable ->bool
+	{
+		vec3 Dir = math::RotationVec(InitDir, math::Rand<float>({ 0,100 }) * -XDir);
+		vec3 Pos = InitPos +  ((vec3{ math::Rand<float>({0.f,1.f}),0,0 }*100) * XDir);
+
+		EffectManager::instance().EffectPush(L"Effect", L"spr_dustcloud",
+			7, 0.05f, 7 * 0.05f + 0.01f, OBJECT_ID::EID::DustCloud, Pos, Dir, { 3,3,0 },
+			false, false, false, false, 0.f, 0.f, 255, false, 0.f, 0.f, 0.f, 0);
+		return false;
+	});
 }
 
 void Player::IdleToRunState()
@@ -390,13 +425,16 @@ void Player::Fall()
 	//State 
 	_RenderComp->Anim(false, true, L"spr_dragon_fall", 4, 0.2f);
 	// // 
-}
+};
 
 void Player::FallState()
 {
 	if (_PhysicComp->bLand&& !_CollisionComp->bDownJump)
 	{
 		Idle(); 
+		EffectManager::instance().EffectPush(L"Effect", L"spr_landcloud",
+			7, 0.05f, 7 * 0.05f + 0.01f, OBJECT_ID::EID::LAND_CLOUD, _PhysicComp->Position + vec3{ 0.f,+15,0.f },
+			{ 0,0,0 }, { 3.5,3.5,3.5 });
 	}	
 	if (bCurWallRideCollision)
 	{
@@ -427,6 +465,10 @@ void Player::Jump()
 		bJumpMotionEnd = true;
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_jump", 4, 0.3f, std::move(_Notify));
+
+	EffectManager::instance().EffectPush(L"Effect", L"spr_jumpcloud", 4, 0.05f,
+		0.05f * 4.f + 0.01f, OBJECT_ID::EID::JUMP_CLOUD, _PhysicComp->Position + vec3{ 0.f,-23.f,0.f },
+		{ 0,0,0 }, { 2.5,2.5,2.5 });
 }
 
 void Player::FSM()
@@ -514,7 +556,9 @@ void Player::KeyBinding() & noexcept
 	{
 		if (!object::IsValid(Observer))return;
 		bFrameCurrentCharacterInput = true;
-		HurtFlyBegin();
+
+		BloodInit(_PhysicComp->Dir);
+
 	},
 		VK_RBUTTON, InputManager::EKEY_STATE::DOWN));
 
@@ -929,6 +973,22 @@ void Player::RollState()
 		Idle();
 	}
 
+	if (RollEffectDelta < 0.f)
+	{
+		RollEffectDelta = 0.015f;
+
+		vec3 Pos = _PhysicComp->Position;
+		Pos.y += 55.f;
+		vec3 Dir;
+		D3DXVec3Lerp(&Dir, &-_PhysicComp->Dir, &vec3{ 0,-1.f,0 }, math::Rand<float>({ 0,1 }));
+		Pos += Dir*20;
+		Dir *= 250;
+		EffectManager::instance().EffectPush(L"Effect", L"spr_dustcloud",
+			7, 0.04f, 7 * 0.04f + 0.01f, OBJECT_ID::EID::DustCloud,
+			Pos, Dir, { 2.3,2.3,0 });
+	}
+	
+
 	Move(_PhysicComp->Dir, 0.f);
 }
 
@@ -956,6 +1016,19 @@ void Player::WallRide()
 	_PhysicComp->Dir.x *= -1.f;
 	_PhysicComp->GravityCoefficient = 0.5f;
 	_RenderComp->Anim(false, false, L"spr_dragon_wallride", 2, 0.2f);
+
+	if (WallRideEffectDelta < 0.f)
+	{
+		float factorX = FlipDir.x < 0.f ? +1 : -1;
+		WallRideEffectDelta = 0.05f;
+		vec3 Pos = _PhysicComp->Position + vec3{ math::Rand<float>({-1,+1}) * 20.f,50,0 };
+		Pos.x += factorX * 20;
+		vec3 Dir = math::RotationVec(FlipDir, math::Rand<float>({ -100,100 })) * 150;
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_dustcloud", 7, 0.06f, 7 * 0.06f + 0.01f, OBJECT_ID::EID::DustCloud, Pos, Dir, { 2.5,2.5,0 });
+	}
+	
+
 }
 void Player::WallRideState()
 {
@@ -976,6 +1049,7 @@ void Player::WallRideState()
 		Fall();
 		return;
 	}
+	
 }
 void Player::Flip()
 {
@@ -988,6 +1062,16 @@ void Player::Flip()
 	_RenderComp->Anim(false, false, L"spr_dragon_flip", 10, 0.4f , std::move(_Notify));
 	_PhysicComp->Move(FlipDir * 1500.f, 100.f, 0.4f);
 	_RenderComp->AfterImgOn();
+
+	float factor = FlipDir.x < 0.f ? -1 : +1;
+	vec3 Dir = FlipDir.x < 0.f ? vec3{ -1.f,0,0 }:vec3{ 1,0,0 };
+	Dir *= 55.f;
+	float RotZ = math::PI / 2.f * factor;
+
+	EffectManager::instance().EffectPush(L"Effect", L"spr_jumpcloud", 4, 0.05f, 0.05f * 4 + 0.01f,
+		OBJECT_ID::EID::JUMP_CLOUD, CurWallRideLinePos + Dir, { 0,0,0 }, { 2.5,2.5,2.5 },false
+	,false,false,false,0,0,255,false,0, RotZ);
+
 }
 void Player::FlipState()
 {

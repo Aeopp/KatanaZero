@@ -19,6 +19,8 @@ public:
 	virtual void Hit(std::weak_ptr<class object>_Target, math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override;
 
+	std::shared_ptr<class RenderComponent> _OldSlash1;
+	std::shared_ptr<class RenderComponent> _OldSlash2;
 public:
 	void AttackStart(vec3 AttackPos, vec3 Dir);
 private:

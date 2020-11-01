@@ -52,6 +52,7 @@ void CMapTool::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ASTAR, _AStar);
 	DDX_Control(pDX, IDC_Stairs, _Stairs);
 	DDX_Control(pDX, IDC_Door, _Door);
+	DDX_Control(pDX, IDC_STAIREND, StairEnd);
 }
 
 
@@ -83,6 +84,7 @@ BEGIN_MESSAGE_MAP(CMapTool, CDialog)
 	ON_BN_CLICKED(IDC_ASTAR, &CMapTool::OnBnClickedAstar)
 	ON_BN_CLICKED(IDC_Stairs, &CMapTool::OnBnClickedStairs)
 	ON_BN_CLICKED(IDC_Door, &CMapTool::OnBnClickedDoor)
+	ON_BN_CLICKED(IDC_STAIREND, &CMapTool::OnBnClickedStairend)
 END_MESSAGE_MAP()
 
 // CMapTool 메시지 처리기입니다.
@@ -474,4 +476,13 @@ void CMapTool::OnBnClickedDoor()
 	if (!pView)return;
 
 	pView->bDoor= _Door.GetCheck();
+}
+
+
+void CMapTool::OnBnClickedStairend()
+{
+	auto* pView = GetView();
+	if (!pView)return;
+
+	pView->bStairEnd = StairEnd.GetCheck();
 }

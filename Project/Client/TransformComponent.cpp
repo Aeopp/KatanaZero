@@ -72,10 +72,22 @@ matrix TransformComponent::CalcSTWorldMatrix(const bool bRender)
 void TransformComponent::Update()
  {
 	 Component::Update();
+
+	
  }
 
 void TransformComponent::LateUpdate()
 {
 	Component::LateUpdate();
 
+	if (PastLocation == vec3{ 0,0,0 })
+	{
+		PastLocation = Position;
+	}
+	else
+	{
+		PastDir = PastLocation - Position;
+		PastLocation = Position;
+		D3DXVec3Normalize(&PastDir, &PastDir);
+	}
 }

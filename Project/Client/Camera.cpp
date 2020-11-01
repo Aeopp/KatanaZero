@@ -50,7 +50,7 @@ void Camera::Update()
 		Shaking(Dt);
 		Goal += _Shake;
 		_Shake = { 0,0 ,0 };
-		global::CameraPos = math::lerp(global::CameraPos, Goal, 1.2f, Time::instance().Delta());
+		global::CameraPos = math::lerp(global::CameraPos, Goal, 1.f, Time::instance().Delta());
 		return;
 	}
 	else
@@ -59,7 +59,7 @@ void Camera::Update()
 		vec3 Goal = CurrentCameraPos;
 		Goal += _Shake;
 		_Shake = { 0,0 ,0 };
-		global::CameraPos = math::lerp(global::CameraPos, Goal, 1.2f, Time::instance().Delta());
+		global::CameraPos = math::lerp(global::CameraPos, Goal, 1.f, Time::instance().Delta());
 		
 		return;
 	}

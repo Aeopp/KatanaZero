@@ -33,6 +33,7 @@ protected:
  
     bool bEnterStairMotionEnd = false;
     bool bLeaveStairMotionEnd = false;
+    bool bHurtGroundMotionEnd = false;
 
     float DetectionRange = 300.f;
     float PursuitRange = 600.f;
@@ -49,7 +50,8 @@ protected:
     bool IsRangeInnerTarget();
     vec3 ToTargetDir{ -1.f,0.f,0.f };
     vec3 AtTheAttackDir{ -1.f,0.f,0.f };
-    
+    vec3 CurMoveMark{ 0.f,0.f,0.f };
+
     vec3 LeaveDoorLocation{ 0.f,0.f,0.f };
     vec3 ToTarget;
     bool bWalk = false;

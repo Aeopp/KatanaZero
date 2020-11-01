@@ -75,6 +75,7 @@ public:
 
 	static matrix GetCameraJoomMatrix(const float JoomScale,
 		/*전체 사이즈 입력(절반아님)*/const vec3& ScreenSize);
+	static std::array<vec3, 4ul> GetWorldRectPt(matrix MWorld,float Width, float Height);
 	class Collision
 	{
 		// 사각형과 원충돌

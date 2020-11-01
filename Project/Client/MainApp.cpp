@@ -11,6 +11,8 @@
 #include "ComponentManager.h"
 #include "Texture_Manager.h"
 #include "AStarManager.h"
+#include "EffectManager.h"
+
 
 HRESULT App::Initialize()
 {
@@ -40,7 +42,13 @@ HRESULT App::Initialize()
 	ObjectManager& ObjectManagerRef = ObjectManager::instance();
 	ObjectManagerRef.Initialize();
 
+	EffectManager::instance().Initialize();
+
 	TextureManager::instance().LoadTexturesFromTexInfoFile(L"..\\Data\\PathInfo.txt"s);
+
+	
+
+
 
 	SceneManager& SceneMgrRef = SceneManager::instance();
 	SceneMgrRef.Initialize();
@@ -75,6 +83,7 @@ void App::Update()
 	ObjectManager::instance().Update();
 	ComponentManager::instance().Update();
 	CollisionManager::instance().Update();
+	EffectManager::instance().Update();
 	SceneManager::instance().Update();
 }
 
@@ -93,6 +102,7 @@ void App::Render()
 	{
 		ComponentManager::instance().Render();
 		RenderManager::instance().Render();
+		
 		CollisionManager::instance().Render();
 		AStarManager::instance().DebugRender();
 		SceneManager::instance().Render();

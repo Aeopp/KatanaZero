@@ -26,7 +26,7 @@ struct NodeInfo
 		None,
 		Door,
 		Stair,
-		DoorStair,
+		StairEnd,
 	};
 
 	NodeIdx _Idx{0,0};
@@ -53,12 +53,13 @@ class AStarManager
 {
 public :
 	void DebugRender();
-	void PushNodeFromWorldLocation(const vec3& WorldLocation,bool bDoor,bool bStair);
+	void PushNodeFromWorldLocation(const vec3& WorldLocation,bool bDoor,bool bStair, bool bStairEnd);
 	void EraseNodeFromWorldLocation(const vec3& WorldLocation);
 	void Clear() & noexcept;
 	void Load(const std::wstring& FilePath);
 	void Save(const std::wstring& FilePath);
 private:
+	const int32_t DoorCheckMin = 30;
 	// 월드 좌표로부터 노드의 로우와 컬럼을 반환
 	D3DXCOLOR GetColorFromNodeOpt(NodeInfo::EMODE _Mode);
 	NodeIdx ConvertNodeIdx(const vec3& WorldLocation);

@@ -122,17 +122,19 @@ private:
 public :	
 	bool bSneak{ false };
 	vec3 FlipDir{0.f,0.f,0.f};
+	vec3 CurWallRideLinePos{ 0,0,0 };
 	bool bCurWallRideCollision{ false };
 	bool bWallJump{ false };
 	float InvincibleTime = 0.f;
 	void JumpWallRide();
 private:
+	float RollEffectDelta = 0.0025f;
+	float WallRideEffectDelta = 0.1f;
 	float CurAttackCoolTime = 0.0f;
 	const float PlayerSpeed = 1250.f;
 	std::shared_ptr<class Attack_Slash> _SpAttackSlash{};
 	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};
 	std::shared_ptr<class UIItemIcon > _SpUIItemIcon{};
-	std::shared_ptr<class DustCloud> _SpDustCloud{};
 };
 

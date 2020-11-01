@@ -11,7 +11,7 @@
 #include "InputManager.h"
 #include "ObjectManager.h"
 #include "Player.h"
-
+#include "EffectManager.h"
 
 // 정적 람다는 가변적인 변수는 절대 캡쳐하지마세요.
 static auto YSort = [](std::shared_ptr<RenderComponent>& Lhs, std::shared_ptr<RenderComponent>& Rhs)
@@ -44,6 +44,8 @@ void RenderManager::Render()
 		else 
 			_RenderComp->Render();
 	}
+
+	EffectManager::instance().Render();
 
 	auto& UIRenderCompVec = ComponentManager::instance().Find<UIRenderComponent>();
 	std::sort(std::begin(UIRenderCompVec), std::end(UIRenderCompVec), UIDepthSort);

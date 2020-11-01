@@ -174,8 +174,7 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="ComponentManager.h" />
     <ClInclude Include="DELEGATE.h" />
-    <ClInclude Include="DustCloud.h" />
-    <ClInclude Include="Effect.h" />
+    <ClInclude Include="EffectManager.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="global.h" />
@@ -236,8 +235,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ComponentManager.cpp" />
     <ClCompile Include="DELEGATE.cpp" />
-    <ClCompile Include="DustCloud.cpp" />
-    <ClCompile Include="Effect.cpp" />
+    <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="global.cpp" />
     <ClCompile Include="GraphicDevice.cpp" />

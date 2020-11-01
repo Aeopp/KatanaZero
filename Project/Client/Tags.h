@@ -7,6 +7,14 @@ namespace OBJECT_ID
 	// 태그 다음 집합
 	enum EID : uint8_t
 	{
+		HIT_EFFECT,
+
+		HIT_IMPACT,
+		STOMPER_CLOUD,
+		JUMP_CLOUD,
+		LAND_CLOUD,
+		SLASH_FX,
+		WHITE_BLOOD,
 		GRUNT_SLASH,
 		GRUNT,
 		DustCloud ,

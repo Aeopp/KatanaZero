@@ -99,14 +99,14 @@ void AStarManager::DebugRender()
 	GraphicDevice::instance().GetSprite()->Begin(D3DXSPRITE_ALPHABLEND);
 }
 
-void AStarManager::PushNodeFromWorldLocation(const vec3& WorldLocation, bool bDoor, bool bStair)
+void AStarManager::PushNodeFromWorldLocation(const vec3& WorldLocation, bool bDoor, bool bStair,bool bStairEnd)
 {
 	NodeInfo _Info;
 	_Info._Idx = ConvertNodeIdx(WorldLocation);
 	_Info.WorldLocation = ConvertWorldLocation(_Info._Idx);
 
-	if (bDoor && bStair)_Info._Mode = NodeInfo::EMODE::DoorStair;
-	else if (bDoor)	_Info._Mode = NodeInfo::EMODE::Door;
+	if (bStairEnd) _Info._Mode = NodeInfo::EMODE::StairEnd;
+	if (bDoor)	_Info._Mode = NodeInfo::EMODE::Door;
 	else if (bStair)_Info._Mode = NodeInfo::EMODE::Stair;
 	else _Info._Mode = NodeInfo::EMODE::None;
 
@@ -150,8 +150,7 @@ void AStarManager::Load(const std::wstring& FilePath)
 		_if >> *_spInfo;
 		_NodeMap[_spInfo->_Idx.Col][_spInfo->_Idx.Row] = (_spInfo);
 
-		if (_spInfo->_Mode == NodeInfo::EMODE::Door ||
-			_spInfo->_Mode == NodeInfo::EMODE::DoorStair)
+		if (_spInfo->_Mode == NodeInfo::EMODE::Door)
 		{
 			_DoorIdxVec.emplace_back(NodeIdx{ _spInfo ->_Idx});
 		}
@@ -195,9 +194,6 @@ D3DXCOLOR AStarManager::GetColorFromNodeOpt(NodeInfo::EMODE _Mode)
 	case NodeInfo::EMODE::Stair:
 		return D3DCOLOR_ARGB(255, 0, 246, 255);
 		break;
-	case NodeInfo::EMODE::DoorStair:
-		return D3DCOLOR_ARGB(255, 255, 255, 255);
-		break;
 	default:
 		break;
 	}
@@ -234,46 +230,56 @@ void AStarManager::MakeGraph()
 }
 void AStarManager::AdjNodePush(NodeInfo& _Info)
 {
-	// 상단
-	auto spInfo=FindNodeFromColRow({ _Info._Idx.Col - 1,_Info._Idx.Row - 1 });
-	if (spInfo)
-		_Info.AdjInfos.push_back(*spInfo);
-	spInfo = FindNodeFromColRow({ _Info._Idx.Col,_Info._Idx.Row - 1 });
-	if (spInfo)
-		_Info.AdjInfos.push_back(*spInfo);
-	spInfo=FindNodeFromColRow({ _Info._Idx.Col + 1,_Info._Idx.Row - 1 });
-	if (spInfo)
-		_Info.AdjInfos.push_back(*spInfo);
+	std::shared_ptr<NodeInfo> spInfo;
 
-	// 중앙
-	spInfo = FindNodeFromColRow({ _Info._Idx.Col - 1,_Info._Idx.Row });
-	if (spInfo)
-		_Info.AdjInfos.push_back(*spInfo);
-	spInfo = FindNodeFromColRow({ _Info._Idx.Col + 1,_Info._Idx.Row });
-	if (spInfo)
-		_Info.AdjInfos.push_back(*spInfo);
+	if (_Info._Mode != NodeInfo::EMODE::Stair)
+	{
+		// 중앙
+		spInfo = FindNodeFromColRow({ _Info._Idx.Col - 1,_Info._Idx.Row });
+		if (spInfo)
+			_Info.AdjInfos.push_back(*spInfo);
+		spInfo = FindNodeFromColRow({ _Info._Idx.Col + 1,_Info._Idx.Row });
+		if (spInfo)
+			_Info.AdjInfos.push_back(*spInfo);
+	}
 
-	// 하단
-	spInfo = FindNodeFromColRow({ _Info._Idx.Col-1,_Info._Idx.Row+1 });
-	if (spInfo)
-		_Info.AdjInfos.push_back(*spInfo);
-	spInfo = FindNodeFromColRow({ _Info._Idx.Col,_Info._Idx.Row +1});
-	if (spInfo)
-		_Info.AdjInfos.push_back(*spInfo);
-	spInfo = FindNodeFromColRow({ _Info._Idx.Col +1,_Info._Idx.Row+1 });
-	if (spInfo)
-		_Info.AdjInfos.push_back(*spInfo); 
+	if (_Info._Mode == NodeInfo::EMODE::Stair || _Info._Mode == NodeInfo::EMODE::StairEnd)
+	{
+		// 상단
+		spInfo = FindNodeFromColRow({ _Info._Idx.Col - 1,_Info._Idx.Row - 1 });
+		if (spInfo)
+			if (spInfo->_Mode == NodeInfo::EMODE::Stair || spInfo->_Mode == NodeInfo::EMODE::StairEnd)
+			_Info.AdjInfos.push_back(*spInfo);
 
-	 // 문이라면 같은 건물의 문인지 검사한 이후에 노드로 연결
-	if (_Info._Mode == NodeInfo::EMODE::Door || _Info._Mode == NodeInfo::EMODE::DoorStair)
+		spInfo = FindNodeFromColRow({ _Info._Idx.Col + 1,_Info._Idx.Row - 1 });
+		if (spInfo)
+			if (spInfo->_Mode == NodeInfo::EMODE::Stair || spInfo->_Mode == NodeInfo::EMODE::StairEnd)
+			_Info.AdjInfos.push_back(*spInfo);
+
+		// 하단
+		spInfo = FindNodeFromColRow({ _Info._Idx.Col - 1,_Info._Idx.Row + 1 });
+		if (spInfo)
+			if (spInfo->_Mode == NodeInfo::EMODE::Stair || spInfo->_Mode == NodeInfo::EMODE::StairEnd)
+			_Info.AdjInfos.push_back(*spInfo);
+
+		spInfo = FindNodeFromColRow({ _Info._Idx.Col + 1,_Info._Idx.Row + 1 });
+		if (spInfo)
+			if ( spInfo->_Mode == NodeInfo::EMODE::Stair || spInfo->_Mode == NodeInfo::EMODE::StairEnd)
+			_Info.AdjInfos.push_back(*spInfo);
+	}
+
+	// 문이라면 같은 건물의 문인지 검사한 이후에 노드로 연결
+	if (_Info._Mode == NodeInfo::EMODE::Door)
 	{
 		for (auto& Idx : _DoorIdxVec)
 		{
-			if (Idx.Col == _Info._Idx.Col)
+			if (std::abs(Idx.Col - _Info._Idx.Col) < DoorCheckMin)
 			{
-				spInfo =FindNodeFromColRow(Idx);
+				spInfo = FindNodeFromColRow(Idx);
 				if (spInfo)
+				{
 					_Info.AdjInfos.push_back(*spInfo);
+				}
 			}
 		}
 	}
@@ -441,12 +447,12 @@ std::vector<vec3> AStarManager::PathFind(const vec3& vStart, const vec3& vGoal)
 }
 float AStarManager::Heuristics(const vec3& Lhs, const vec3& Rhs)
 {
-	/*return (std::max)
+	return (std::max)
 		(std::abs(Lhs.x - Rhs.x),
-		std::abs(Lhs.y - Rhs.y));*/
+		std::abs(Lhs.y - Rhs.y));
 
-	vec3 Dis = Lhs - Rhs;
-	return D3DXVec3LengthSq(&Dis);
+	//vec3 Dis = Lhs - Rhs;
+	//return D3DXVec3LengthSq(&Dis);
 };
 
 

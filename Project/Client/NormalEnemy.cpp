@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-
+#include "EffectManager.h"
 #include "ObjectManager.h"
 #include "Time.h"
 #include "NormalEnemy.h"
@@ -67,8 +67,9 @@ void NormalEnemy::Initialize() & noexcept
 
 	_DetectionRangeColorGoal = D3DCOLOR_ARGB(255, 0, 255, 0);
 
-	_RenderComp->SlowStartColor = D3DCOLOR_ARGB(255, 255, 0, 255);
-	_RenderComp->SlowColor = D3DCOLOR_ARGB(255, 255, 0, 255);
+	_RenderComp->SlowStartColor = D3DCOLOR_ARGB(255, 125, 125, 125);
+	_RenderComp->SlowColor = D3DCOLOR_ARGB(255, 125, 125, 125);
+	_RenderComp->SlowGoalColor = D3DCOLOR_ARGB(0, 0, 0, 0);
 }
 
 void NormalEnemy::LateUpdate()
@@ -83,14 +84,14 @@ void NormalEnemy::LateUpdate()
 	case NormalEnemy::State::Walk:
 		break;
 	case NormalEnemy::State::Detecting:
-		if (ToTarget.y > 15.f)
+		/*if (ToTarget.y > 15.f)
 		{
 			_CollisionComp->bDownJump = true;
 		}
 		else
 		{
 			_CollisionComp->bDownJump = false;
-		}
+		}*/
 		break;
 	case NormalEnemy::State::Die:
 		break;
@@ -113,6 +114,28 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);
+
+		BloodInit(_CollisionInfo.PushDir);
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_slashfx", 5, 0.02f,
+			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, _PhysicComp->Position,
+			{ 0,0,0 }, { 2.9,2.9,0 });
+
+		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT,
+			_PhysicComp->Position + -_CollisionInfo.PushDir*77, 
+			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+			255, false, 0, ImpactRotZ, 0, 0);
+
+		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir*4000);
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, Pos,
+			_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
+			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
+			0, 0);
 
 		_RenderComp->AfterImgOn();
 		_EnemyState = NormalEnemy::State::Die;
@@ -138,8 +161,6 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 				_RenderComp->NormalAfterImgPushDelta *= 1.f;
 				return true;
 			});
-
-		
 
 		Die();
 	}

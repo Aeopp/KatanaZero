@@ -62,4 +62,6 @@ public:
 	afx_msg void OnBnClickedAstar();
 	afx_msg void OnBnClickedStairs();
 	afx_msg void OnBnClickedDoor();
+	CButton StairEnd;
+	afx_msg void OnBnClickedStairend();
 };

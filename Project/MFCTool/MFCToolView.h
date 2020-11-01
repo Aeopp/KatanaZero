@@ -39,6 +39,7 @@ public:
 	bool bWallRide= false;
 	bool bObjectMode = false;
 	bool bTileCanGoDown = false;
+	bool bStairEnd = false;
 
 	CollisionLineManager _CollisionLineManager; 
 	CollisionTileManager _CollisionTileManager;

@@ -11,6 +11,7 @@
 #include "Player.h"
 #include "InputManager.h"
 #include "Time.h"
+#include "EffectManager.h"
 
 void CollisionTileManager::Collision()&
 {
@@ -245,13 +246,10 @@ void CollisionTileManager::Update()&
 						auto _Player =std::dynamic_pointer_cast<Player>(spOwner);
 						_Player->bWallJump = false;
 					}
-			
 			    }
 				spOwner->MapHit(std::move(_HitInfo));
 			}
 		}
-
-
 	}
 
 	// 아래방향 점프가 가능한 타일
@@ -340,7 +338,68 @@ void CollisionTileManager::Update()&
 			// TODO::
 			spPhysicTransform->bDownLand = false;
 		}
+	}
+	
+	for (auto& _Effect : EffectManager::instance().EffectsRef())
+	{
+		if (!_Effect.bPhysic)continue;
+		for (auto& _CollisionTile : _CollisionTileVec)
+		{
+			vec3 EffectPos = _Effect.Pos;
+			vec3 CollisionLeftTop = _CollisionTile.front();
+			vec3 ToLT = EffectPos - CollisionLeftTop;
+			float DistanceSq = D3DXVec3LengthSq(&ToLT);
+			// 거리 제곱이 기준치보다 높아서 충돌 검출 무효
+			// 거리는 제곱근이아닌 제곱으로하기
+			if (DistanceSq > TileCollisionCheckDistanceMinSquare)continue;
 
+			matrix MWorld, MTrans, MRotZ, MScale;
+
+			D3DXMatrixScaling(&MScale, _Effect.Scale.x, _Effect.Scale.y, _Effect.Scale.z);
+			D3DXMatrixRotationZ(&MRotZ, _Effect.RotZ);
+			D3DXMatrixTranslation(&MTrans, _Effect.Pos.x, _Effect.Pos.y, _Effect.Pos.z);
+			MWorld = MScale * MRotZ * MTrans;
+
+			auto WorldRectPt  = math::GetWorldRectPt(MWorld ,_Effect.Width,_Effect.Height);
+			auto opDir = math::Collision::RectAndRect({ WorldRectPt, _CollisionTile }, false);
+
+			if (opDir)
+			{
+				vec3 TilePushDir = *opDir;
+
+				if (std::abs(TilePushDir.x) < std::abs(TilePushDir.y))
+					TilePushDir.y = 0;
+				else
+					TilePushDir.x = 0;
+
+				if (_Effect.bMapSlide)
+				{
+					_Effect.Pos += TilePushDir;
+				}
+
+				if (_Effect.bHitNotify)
+				{
+					vec3 TileCenter = math::GetCenter(_CollisionTile);
+					vec3 _EftCenter = math::GetCenter(WorldRectPt);
+					vec3 _Dir = _EftCenter - TileCenter;
+					D3DXVec3Normalize(&_Dir, &_Dir);
+
+					math::Collision::HitInfo _HitInfo{};
+					_HitInfo.PosDistance = D3DXVec3Length(&(*opDir));
+					D3DXVec3Normalize(&(*opDir), &(*opDir));
+					_HitInfo.CrossingAreaDir = *opDir;
+					D3DXVec3Normalize(&TilePushDir, &TilePushDir);
+					_HitInfo.Normal = TilePushDir;
+					_HitInfo.Position = math::GetCenter(_CollisionTile);
+					_HitInfo._Target = { };
+					_HitInfo._ID = OBJECT_ID::ETILE;
+					_HitInfo._TAG = OBJECT_TAG::ETERRAIN;
+					_HitInfo.PosDir = _Dir;
+
+					EffectManager::instance().HitEvent(_Effect,std::move(_HitInfo));
+				}
+			}
+		}
 	}
 }
 
