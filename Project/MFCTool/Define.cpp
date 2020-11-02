@@ -4,6 +4,7 @@
 
 HWND global::hWND = nullptr;
 bool global::bDebug = true;
+std::pair<float, float> global::WorldMousePos = std::pair<float, float>{ 0,0 };
 
 std::array<vec3, 4ul> global::GetScreenRect()
 {

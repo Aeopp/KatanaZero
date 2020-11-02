@@ -12,6 +12,7 @@
 #include "Texture_Manager.h"
 #include "AStarManager.h"
 #include "EffectManager.h"
+#include "RecordManager.h"
 
 
 HRESULT App::Initialize()
@@ -45,10 +46,6 @@ HRESULT App::Initialize()
 	EffectManager::instance().Initialize();
 
 	TextureManager::instance().LoadTexturesFromTexInfoFile(L"..\\Data\\PathInfo.txt"s);
-
-	
-
-
 
 	SceneManager& SceneMgrRef = SceneManager::instance();
 	SceneMgrRef.Initialize();
@@ -97,6 +94,8 @@ void App::LateUpdate()
 
 void App::Render()
 {
+	RecordManager::instance().Update();
+
 	GraphicDevice::instance().RenderBegin();
 
 	{

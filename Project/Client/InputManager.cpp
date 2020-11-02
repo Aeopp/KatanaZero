@@ -4,8 +4,7 @@
 
 void InputManager::Initialize() & noexcept
 {
-	EventRegist([]() {global::bDebug = !global::bDebug;  ShowCursor(global::bDebug); }, 'P', EKEY_STATE::DOWN)->bFree = true;
-	EventRegist([]() {Time::instance().bTimeInfoRender= !Time::instance().bTimeInfoRender; }, 'O', EKEY_STATE::DOWN)->bFree = true;
+
 }
 
 void InputManager::Update() & noexcept
@@ -71,19 +70,25 @@ void InputManager::Update() & noexcept
 		}
 	}
 
-	if(global::bRePlay)
-	{
-		while (!_InputTable.empty() && _InputTable.front().T <= T)
-		{
-			auto& [Key, State, T] = _InputTable.front();
-			//슬로우는 재현할 필요 없음.
-			if (Key != VK_SHIFT)
-			{
-				_ActionTable[Key].second[std::underlying_type_t<std::decay_t<decltype(State)>>(State)].BroadCast();
-			}
-			_InputTable.pop();
-		}
-	}
+	//if(global::bRePlay)
+	//{
+	//	while (!_InputTable.empty() && _InputTable.front().T <= T)
+	//	{
+	//		auto& [Key, State, T] = _InputTable.front();
+	//		//슬로우는 재현할 필요 없음.
+	//		if (Key != VK_SHIFT)
+	//		{
+	//			_ActionTable[Key].second[std::underlying_type_t<std::decay_t<decltype(State)>>(State)].BroadCast();
+	//		}
+	//		_InputTable.pop();
+	//	}
+	//}
+}
+
+void InputManager::Clear() & noexcept
+{
+	_ActionTable.clear();
+	EventRegistCheckTable.reset();
 }
 
 std::shared_ptr<typename InputManager::DelegateType::MyHandleType>

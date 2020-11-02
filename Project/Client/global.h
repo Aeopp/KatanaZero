@@ -10,8 +10,12 @@ public:
 	enum class ECurGameState : uint8_t
 	{
 		Play,
-		Slow
+		PlaySlow,
+		Replay,
+		ReWind,
 	};
+	
+
 	static constexpr std::pair<float, float > ClientSize = { 1920,1080};
 	static constexpr std::pair<float, float > TileNums = { 150 ,150};
 	static constexpr std::pair<float, float > TileSize = { 36 ,36 };
@@ -31,6 +35,24 @@ public:
 	static inline HWND hWND{ nullptr };
 	static inline bool bDebug{ true };
 	static inline bool bRePlay{ false };
+
+public : 
+	static bool IsSlow()
+	{
+		return  global::ECurGameState::PlaySlow == global::_CurGameState;
+	}
+	static bool IsPlay() {
+		return global::ECurGameState::Play == global::_CurGameState ||
+				global::ECurGameState::PlaySlow == global::_CurGameState;
+	};
+	static bool IsReWind()
+	{
+		return global::ECurGameState::ReWind == global::_CurGameState;
+	}
+	static bool IsReplay()
+	{
+		return global::ECurGameState::Replay == global::_CurGameState;
+	}
 };
 
 

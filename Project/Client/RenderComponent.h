@@ -3,7 +3,7 @@
 #include <optional>
 #include <map>
 #include <deque>
-#include "ReWind.h"
+#include "Record.h"
 
 struct AfterImg
 {
@@ -22,9 +22,9 @@ class RenderComponent : public Component
 public :
 	using NotifyType =std::map<uint8_t, std::function<void()>>;
 	
-	ReWind _ReWind;
+	Record _Record;
 
-	void ReWindRender();
+	void RecordRender();
 	void Render()override;
 	void Update()override;
 	// Y 기준은 오브젝트의 최하단

@@ -1,25 +1,37 @@
 #pragma once
 #include "singleton_interface.h"
+#include "SceneID.h"
+#include <any>
 
 class RecordManager :
     public singleton_interface<RecordManager>
 {
 public :
+    RecordManager();
     friend class Camera;
-    void TimeCameraPosPush( vec3 CameraPos);
-     // 반드시 죽은 당시의 호출해주세요.
-    void DeathRecord();
-    // ReWind 시 업데이트 루프당 한번 호출해주세요.
+    int32_t Timing = 0;
     void Update();
-    void ReWindStart();
 
-    bool bReWind = false;
-    bool bReplay = false;
+    // ReWind 시 업데이트 루프당 한번 호출해주세요.
+    void ReWindStart();
+    void ReWindUpdate();
+    void ReWindRender();
+    void ReWindEnd();
+    ////////////////////
+    void ReplayStart(ESceneID _SceneID);
+    void ReplayEnd();
+    void ReplayUpdate();
+    void RePlayRender();
+
+    bool bPause = false;
+
+    int32_t RewindSpeed = -2;
+    int32_t TimingSpeed = 1;
 private:
+    ESceneID _AtReplayEndChangeSceneID;
     // 매니저가 관리하는 현재 T에 해당하는 (그당시 저장했었던) 카메라 좌표를 반환.
-    vec3 GetCameraPos();
-    float AtDeathT = 0.f;
-    float ReWindT = 0.f;
-    std::vector<std::pair<float, vec3>> _TimeCameraPos;
+                        //Timing  Pos
+    std::map<int32_t,vec3>_TimingCameraPos;
+    std::vector<std::any> _Anys;
 };
 

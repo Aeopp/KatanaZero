@@ -55,7 +55,6 @@ void Attack_Slash::Initialize() & noexcept
         _OldSlash2->AfterImgOff();
         _OldSlash2->bRender = false;
     }
-   
 
     _CollisionComp->bCollision = false;
     _CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
@@ -101,7 +100,6 @@ void Attack_Slash::LateUpdate()
         _RenderComp->AfterImgOff();
 
         _CollisionComp->bCollision = false;
-        
 
         {
             _OldSlash1->bRender = false;
@@ -153,7 +151,7 @@ void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
     _RenderComp->bRender = true;
     _RenderComp->AfterImgOn();
 
-       if (global::_CurGameState == global::ECurGameState::Slow)
+       if (global::_CurGameState == global::ECurGameState::PlaySlow)
         {
             _OldSlash1->Anim(true, false, L"spr_oldslash", 13, 0.3f);
             _OldSlash1->bRender = true;

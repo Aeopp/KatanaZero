@@ -1,6 +1,8 @@
 #pragma once
 #include "singleton_interface.h"
 #include "CollisionComponent.h"
+#include "Record.h"
+
 #include <string_view>
 // 50 - 20       / 50 
 struct EffectInfo
@@ -14,6 +16,7 @@ struct EffectInfo
 	float Height = 0.f;
 	bool bMapSlide = false;
 	bool bHitNotify = false;
+	bool bRecord = false;
 
 	std::wstring ObjKey = L"";
 	std::wstring StateKey = L"";
@@ -50,7 +53,9 @@ public :
 	void Initialize() & noexcept;
 	void Render();
 	void Update();
-
+	void RecordRender();
+	void Clear();
+	void RecordClear();
 	void HitEvent(EffectInfo& _Effect ,
 		math::Collision::HitInfo _HitInfo);
 
@@ -63,6 +68,7 @@ public :
 		float AnimDelta,
 		float MaxT,
 		OBJECT_ID::EID _EffectID,
+		bool bRecord,
 		vec3 Pos,
 		vec3 Dir={ 0,0,0 },
 		vec3 Scale = { 1,1,1 },
@@ -80,6 +86,8 @@ public :
 		uint8_t _StartID = 0
 	);
 	std::set<CollisionComponent::ETag> _EffectCollisionTagSet;
+
+	Record _Record;
 
 	inline std::vector<EffectInfo>& EffectsRef(){return _Effects;}
 private:

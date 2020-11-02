@@ -22,8 +22,14 @@ void SceneStart::Initialize()
 	LoadLineInfoFilePath = L"..\\Data\\Prison\\3rd\\Line.txt"s;
 	LoadAStarInfoFilePath = L"..\\Data\\Prison\\3rd\\AStar.txt"s;
 
+	vec3 PlayerLocation = vec3{ 1180,5433,0.f };
+
 	auto _Player =ObjectManager::instance().InsertObject<Player>
-		(vec3{ 1180,5433,0.f });
+		(PlayerLocation);
+
+	global::CameraPos = PlayerLocation;
+	global::CameraPos.x -= global::ClientSize.first / 2.f;
+	global::CameraPos.y -= global::ClientSize.second / 2.f;
 
 	ObjectManager::instance()._Player = _Player;
 
@@ -40,7 +46,7 @@ void SceneStart::Initialize()
 
 	// TODO:: REMOVE PLZ TEST CODE 
 	{
-	/*	float XDiff = 300.f;
+		float XDiff = 300.f;
 		float x = 1876.f;
 		float y = 5456;
 
@@ -76,7 +82,7 @@ void SceneStart::Initialize()
 			x += XDiff;
 			if (x > 4863)
 				break;
-		}*/
+		}
 
 
 	/*	x = 1645;

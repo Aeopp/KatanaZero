@@ -73,10 +73,7 @@ void RenderManager::Release() & noexcept
 
 void RenderManager::Initialize() & noexcept
 {
-	InputManager::instance().EventRegist([]()
-	{
-		RenderManager::instance()._Terrain.bDebugGridRender = !RenderManager::instance()._Terrain.bDebugGridRender;
-	}, 'I', InputManager::EKEY_STATE::DOWN)->bFree = true;
+
 }
 
 void RenderManager::DebugMouseInfoRender() & noexcept

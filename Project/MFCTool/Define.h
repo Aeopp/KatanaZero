@@ -11,6 +11,8 @@ public:
 	static constexpr int32_t ClientViewMinLeftTop = (int32_t(((ClientSize.first + ClientSize.second) / 3.7f) / 36)) *TileSize.first;
 	static std::array<vec3, 4ul> GetScreenRect();
 	
+	static std::pair<float, float> WorldMousePos;
+
 	static HWND hWND;
 	static bool bDebug;
 };

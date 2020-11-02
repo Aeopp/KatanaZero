@@ -29,6 +29,8 @@ private:
 public:
 	void Initialize() & noexcept; 
 	void Update() & noexcept;
+	void Clear() & noexcept;
+
 	std::shared_ptr<typename InputManager::DelegateType::MyHandleType> 
 		EventRegist(typename DelegateType::EventType NotifyEvent,
 					typename InputManager::VirtualTableKeyDataType VKKey , 
@@ -47,8 +49,6 @@ private:
 					// 매핑 상태 , 이벤트 목록
 	std::unordered_map<VirtualTableKeyDataType,std::pair<EKEY_STATE,std::array<DelegateType,
 	(typename std::underlying_type_t<typename InputManager::EKEY_STATE>)EKEY_STATE::END>>>_ActionTable;
-
-	
 };
 
 // 이벤트 등록할때 KeyPressTable 값을 켜주기

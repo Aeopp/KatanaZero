@@ -216,8 +216,8 @@
     <ClInclude Include="Grunt_Slash.h" />
     <ClInclude Include="AStarManager.h" />
     <ClInclude Include="EffectManager.h" />
-    <ClInclude Include="ReWind.h" />
     <ClInclude Include="RecordManager.h" />
+    <ClInclude Include="Record.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -349,8 +349,8 @@
     <ClCompile Include="Grunt_Slash.cpp" />
     <ClCompile Include="AStarManager.cpp" />
     <ClCompile Include="EffectManager.cpp" />
-    <ClCompile Include="ReWind.cpp" />
     <ClCompile Include="RecordManager.cpp" />
+    <ClCompile Include="Record.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

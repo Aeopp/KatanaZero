@@ -191,7 +191,7 @@
     <ClInclude Include="object.h" />
     <ClInclude Include="RenderComponent.h" />
     <ClInclude Include="RenderManager.h" />
-    <ClInclude Include="ReWind.h" />
+    <ClInclude Include="Record.h" />
     <ClInclude Include="RecordManager.h" />
     <ClInclude Include="Tags.h" />
     <ClInclude Include="ObjectManager.h" />
@@ -255,7 +255,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderComponent.cpp" />
     <ClCompile Include="RenderManager.cpp" />
-    <ClCompile Include="ReWind.cpp" />
+    <ClCompile Include="Record.cpp" />
     <ClCompile Include="RecordManager.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneBoss.cpp" />

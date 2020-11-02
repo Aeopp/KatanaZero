@@ -4,7 +4,6 @@
 
 void ObjectManager::Update()
 {
-
 	for (auto& [Tag, ID_ObjVec] : _ObjectMap)
 	{
 		for (auto& [ID, ObjVec] : ID_ObjVec)

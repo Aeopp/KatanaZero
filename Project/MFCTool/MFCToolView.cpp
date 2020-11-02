@@ -21,6 +21,7 @@
 #include "MiniView.h"
 #include "MyForm.h"
 #include <mutex>
+#include <sstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -163,6 +164,16 @@ void CMFCToolView::OnDraw(CDC* /*pDC*/)
 	_CollisionLineManager.DebugRender();
 	_AStarManager.DebugRender();
 	_ObjectEdit.Render();
+	
+
+	GraphicDevice::instance().GetSprite()->End();
+	RECT _Rt = { 0,600,500,625 };
+	std::wstringstream wss;
+	wss << L"MouseWorldPos X : " << global::WorldMousePos.first << L" Y : " << global::WorldMousePos.second << std::endl;
+
+	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, wss.str().c_str(), wss.str().size(), &_Rt, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
+	
+	GraphicDevice::instance().GetSprite()->Begin(D3DXSPRITE_ALPHABLEND);
 
 	GraphicDevice::instance().RenderEnd();
 }
@@ -303,6 +314,10 @@ void CMFCToolView::OnMouseMove(UINT nFlags, CPoint point)
 	CMainFrame* pMain = dynamic_cast<CMainFrame*>(AfxGetApp()->GetMainWnd());
 	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMain->_SecondSplitter.GetPane(1, 0));
 	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMain->_SecondSplitter.GetPane(0, 0));
+
+	vec3 vMouseWorldPos  = ClientPosToJoomApplyWorldPosition(point);
+	global::WorldMousePos.first = vMouseWorldPos.x;
+	global::WorldMousePos.second = vMouseWorldPos.y;
 
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
 	{

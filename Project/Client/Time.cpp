@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Time.h"
 #include "GraphicDevice.h"
+#include "RecordManager.h"
 #include <iostream>
 #include <sstream>
 #include "MainApp.h"
@@ -34,8 +35,19 @@ void  Time::Update()
 		_T += DeltaTime;
 		Accumulator -= LimitDelta;
 
-		AppRef.Update();
-		AppRef.LateUpdate();
+		if (global::IsPlay())
+		{
+			AppRef.Update();
+			AppRef.LateUpdate();
+		}
+		else if (global::IsReWind())
+		{
+			RecordManager::instance().ReWindUpdate();
+		}
+		else if (global::IsReplay())
+		{
+			RecordManager::instance().ReplayUpdate();
+		}
 	}
 
 	if (SecCheck >= 1000ms)
@@ -47,7 +59,19 @@ void  Time::Update()
 	else
 		++_FPSCount;
 
-	AppRef.Render();
+	
+	if (global::IsPlay())
+	{
+		AppRef.Render();
+	}
+	else if (global::IsReWind())
+	{
+		RecordManager::instance().ReWindRender();
+	}
+	else if (global::IsReplay())
+	{
+		RecordManager::instance().RePlayRender();
+	}
 }
 
 void Time::Render()
@@ -85,7 +109,7 @@ NotifyEventType _NotifyEvent)
 void Time::SlowDownTime()
 {
 	TimeScale = 0.2f;
-	global::_CurGameState = global::ECurGameState::Slow;
+	global::_CurGameState = global::ECurGameState::PlaySlow;
 }
 
 void Time::Return()

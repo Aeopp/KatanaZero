@@ -16,6 +16,7 @@
 #include "global.h"
 #include "AStarManager.h"
 #include "EffectManager.h"
+#include "RenderManager.h"
 
 
 using namespace std;
@@ -181,10 +182,10 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		Time::instance().TimeScale = 0.2f;
 		Time::instance().TimerRegist(0.007f, 0.007f, 0.007f, [this]() {
 		
-			if (global::ECurGameState::Slow != global::_CurGameState)
-			{
-				Time::instance().TimeScale = 1.f;
-			}
+		if (global::ECurGameState::PlaySlow != global::_CurGameState)
+		{
+			Time::instance().TimeScale = 1.f;
+		}
 
 			return true; });
 
@@ -198,9 +199,6 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 			return true;
 		});
 
-		
-
-		
 
 
 		HurtFlyBegin();
@@ -264,9 +262,6 @@ void Player::IdleState()
 	{
 		PreCrouch();
 	}
-
-	
-
 }
 
 void Player::IdleToRun()
@@ -287,7 +282,7 @@ void Player::IdleToRun()
 	{
 		EffectManager::instance().EffectPush(
 			L"Effect", L"spr_stompercloud2",
-			10, 0.05f, 10 * 0.05f + 0.01f, OBJECT_ID::EID::STOMPER_CLOUD,
+			10, 0.05f, 10 * 0.05f + 0.01f, OBJECT_ID::EID::STOMPER_CLOUD, true,
 			InitPos,
 			vec3{ 0.f,-1.f,0.f }, { -3 * _PhysicComp->Dir.x
 			,3,0.f },
@@ -305,7 +300,7 @@ void Player::IdleToRun()
 		vec3 Pos = InitPos +  ((vec3{ math::Rand<float>({0.f,1.f}),0,0 }*100) * XDir);
 
 		EffectManager::instance().EffectPush(L"Effect", L"spr_dustcloud",
-			7, 0.05f, 7 * 0.05f + 0.01f, OBJECT_ID::EID::DustCloud, Pos, Dir, { 3,3,0 },
+			7, 0.05f, 7 * 0.05f + 0.01f, OBJECT_ID::EID::DustCloud, true, Pos, Dir, { 3,3,0 },
 			false, false, false, false, 0.f, 0.f, 255, false, 0.f, 0.f, 0.f, 0);
 		return false;
 	});
@@ -433,7 +428,7 @@ void Player::FallState()
 	{
 		Idle(); 
 		EffectManager::instance().EffectPush(L"Effect", L"spr_landcloud",
-			7, 0.05f, 7 * 0.05f + 0.01f, OBJECT_ID::EID::LAND_CLOUD, _PhysicComp->Position + vec3{ 0.f,+15,0.f },
+			7, 0.05f, 7 * 0.05f + 0.01f, OBJECT_ID::EID::LAND_CLOUD, true, _PhysicComp->Position + vec3{ 0.f,+15,0.f },
 			{ 0,0,0 }, { 3.5,3.5,3.5 });
 	}	
 	if (bCurWallRideCollision)
@@ -467,7 +462,7 @@ void Player::Jump()
 	_RenderComp->Anim(false, false, L"spr_dragon_jump", 4, 0.3f, std::move(_Notify));
 
 	EffectManager::instance().EffectPush(L"Effect", L"spr_jumpcloud", 4, 0.05f,
-		0.05f * 4.f + 0.01f, OBJECT_ID::EID::JUMP_CLOUD, _PhysicComp->Position + vec3{ 0.f,-23.f,0.f },
+		0.05f * 4.f + 0.01f, OBJECT_ID::EID::JUMP_CLOUD, true,_PhysicComp->Position + vec3{ 0.f,-23.f,0.f },
 		{ 0,0,0 }, { 2.5,2.5,2.5 });
 }
 
@@ -551,6 +546,11 @@ void Player::FSM()
 void Player::KeyBinding() & noexcept
 {
 	auto Observer = _This;
+
+	InputManager::instance().EventRegist([]() {global::bDebug = !global::bDebug;  ShowCursor(global::bDebug); }, 'P', InputManager::EKEY_STATE::DOWN)->bFree = true;
+	InputManager::instance().EventRegist([]() {Time::instance().bTimeInfoRender = !Time::instance().bTimeInfoRender; }, 'O', InputManager::EKEY_STATE::DOWN)->bFree = true;
+	InputManager::instance().EventRegist([](){RenderManager::instance()._Terrain.bDebugGridRender = !RenderManager::instance()._Terrain.bDebugGridRender;}, 'I', InputManager::EKEY_STATE::DOWN)->bFree = true;
+
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
@@ -639,6 +639,20 @@ void Player::KeyBinding() & noexcept
 		Time::instance().Return();
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::UP));
+
+	/*_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	{
+		if (!object::IsValid(Observer))return;
+		RecordManager::instance().ReWindStart();
+	},
+		'1', InputManager::EKEY_STATE::DOWN));*/
+
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	{
+		if (!object::IsValid(Observer))return;
+		RecordManager::instance().ReplayStart(ESceneID::EStage1);
+	},
+		'2', InputManager::EKEY_STATE::DOWN));
 
 	//////////
 }
@@ -902,6 +916,10 @@ void Player::HurtGroundState()
 {
 	if (bHurtGroundMotionEnd && bAttackKeyCheck)
 	{
+		// 치명적인 공격을 입은것이라면
+		RecordManager::instance().ReWindStart();
+		return;
+
 		_RenderComp->PositionCorrection.y -= 17;
 		HurtRecover();
 		bHurtGroundMotionEnd = false;
@@ -984,7 +1002,7 @@ void Player::RollState()
 		Pos += Dir*20;
 		Dir *= 250;
 		EffectManager::instance().EffectPush(L"Effect", L"spr_dustcloud",
-			7, 0.04f, 7 * 0.04f + 0.01f, OBJECT_ID::EID::DustCloud,
+			7, 0.04f, 7 * 0.04f + 0.01f, OBJECT_ID::EID::DustCloud, true,
 			Pos, Dir, { 2.3,2.3,0 });
 	}
 	
@@ -1025,7 +1043,7 @@ void Player::WallRide()
 		Pos.x += factorX * 20;
 		vec3 Dir = math::RotationVec(FlipDir, math::Rand<float>({ -100,100 })) * 150;
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_dustcloud", 7, 0.06f, 7 * 0.06f + 0.01f, OBJECT_ID::EID::DustCloud, Pos, Dir, { 2.5,2.5,0 });
+			L"spr_dustcloud", 7, 0.06f, 7 * 0.06f + 0.01f, OBJECT_ID::EID::DustCloud, true, Pos, Dir, { 2.5,2.5,0 });
 	}
 	
 
@@ -1069,7 +1087,7 @@ void Player::Flip()
 	float RotZ = math::PI / 2.f * factor;
 
 	EffectManager::instance().EffectPush(L"Effect", L"spr_jumpcloud", 4, 0.05f, 0.05f * 4 + 0.01f,
-		OBJECT_ID::EID::JUMP_CLOUD, CurWallRideLinePos + Dir, { 0,0,0 }, { 2.5,2.5,2.5 },false
+		OBJECT_ID::EID::JUMP_CLOUD, true, CurWallRideLinePos + Dir, { 0,0,0 }, { 2.5,2.5,2.5 },false
 	,false,false,false,0,0,255,false,0, RotZ);
 
 }

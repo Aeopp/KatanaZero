@@ -14,6 +14,7 @@ public:
 	void Render();
 
 	float Delta();
+	float _T{ 0.f };
 	float T();
 	void SetDelta(const float DeltaTime)&;
 	float TimeScale{ 1.f };
@@ -43,7 +44,7 @@ private:
 	std::chrono::steady_clock::time_point CurrentTime{ std::chrono::high_resolution_clock::now() };
 	uint32_t _FPSCount{ 0 };
 	float DeltaTime{ 0.f };
-	float _T{ 0.f };
+
 	std::chrono::milliseconds DeltaMax = 25ms;
 	// 이벤트 시작여부 , 시작 시간 , 반복 주기 , 종료 시간 , 현재 측정 시간
 	std::list<std::tuple<bool,float, float, float, float, float,NotifyEventType>> _NotifyEvents;

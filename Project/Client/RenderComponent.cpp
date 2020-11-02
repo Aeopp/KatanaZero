@@ -10,20 +10,16 @@
 #include <sstream>
 #include "RecordManager.h"
 
-void RenderComponent::ReWindRender()
+void RenderComponent::RecordRender()
 {
-	_ReWind;
-
+	_Record.Render();
 }
 
 void RenderComponent::Render()
 {
 	if (!bRender)return;
 
-	const float T = Time::instance().T();
 	const float dt = Time::instance().Delta();
-	bool bRewind = RecordManager::instance().bReWind;
-	bool bRewindPush = RecordManager::instance().bReWind && _ReWind.bUpdate;
 
 	Component::Render();
 
@@ -37,9 +33,6 @@ void RenderComponent::Render()
 
 	const float JoomScale = global::JoomScale;
 	vec3 CameraPos = global::CameraPos;
-
-	//spOwner->_TransformComp->Rotation.z = math::PI - 1.f;
-
 	matrix MWorld = spOwner->_TransformComp->CalcWorldMatrix(true);
 
 	MWorld = MWorld * math::GetCameraJoomMatrix(JoomScale, vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
@@ -79,12 +72,6 @@ void RenderComponent::Render()
 					&_srcRT, &__TextureCenter, nullptr,
 					_After._Color);
 
-				if ( bRewindPush) 
-				{
-					_ReWind.Push(T, _After.PastWorld, _Info.ObjectKey, _After.StateKey,
-					_After.ID, spOwner->_TransformComp->Position.y);
-				}
-
 				_After.T += _After.DeltaCoefft * dt;
 				D3DXColorLerp(&_After._Color, &_After._Color, &_After._GoalColor, _After.T);
 
@@ -97,7 +84,7 @@ void RenderComponent::Render()
 			AfterImgPush(MWorld);
 		}
 
-		if (global::ECurGameState::Slow == global::_CurGameState && bSlowRender)
+		if (global::ECurGameState::PlaySlow == global::_CurGameState && bSlowRender)
 		{
 			RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
 					  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
@@ -117,10 +104,21 @@ void RenderComponent::Render()
 				&srcRect, &TextureCenter, nullptr,
 				_Info._Color);
 
-			if (bRewindPush)
+			// 그려지는 상황이므로 푸시
+			if (global::IsPlay())
 			{
-				_ReWind.Push(T, MWorld, _Info.ObjectKey, _Info.StateKey, _Info.CurrentFrame,
-					spOwner->_TransformComp->Position.y);
+				Record::Info _RecordInfo;
+				int32_t CurTiming = RecordManager::instance().Timing; 
+				_RecordInfo.Alpha =           255;
+				_RecordInfo.DrawID=	    _Info.CurrentFrame;
+				_RecordInfo.MWorld=	      MWorld;
+				_RecordInfo.ObjKey=           _Info.ObjectKey;
+				_RecordInfo.StateKey=           _Info.StateKey;
+				_RecordInfo.OwnerY=             spOwner->_TransformComp->Position.y;
+				_RecordInfo.Timing = CurTiming;
+				_RecordInfo._Color = _Info._Color;
+
+				_Record._Infos.insert({ CurTiming  , _RecordInfo});
 			}
 		}
 	}
@@ -141,7 +139,7 @@ void RenderComponent::Render()
 		_RenderAfterEvent();
 	}
 
-	if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
+	/*if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
 	{
 		auto _Player = std::dynamic_pointer_cast<Player>(spOwner);
 		_Player->bCurWallRideCollision;
@@ -152,15 +150,13 @@ void RenderComponent::Render()
 		wss << L"WALL_RIDE : " << _Player->bCurWallRideCollision << L" LANDING : " << _PhysicComp->bLand << L" Flying : " << _PhysicComp->bFly << std::endl;
 		RECT rectRender{ 1400,200,2000,850 };
 		GraphicDevice::instance().GetFont()->DrawTextW(nullptr, wss.str().c_str(), wss.str().size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
-	}
+	}*/
 }
 
 void RenderComponent::Update()
 {
 	Component::Update();
 	const float Dt = Time::instance().Delta();
-
-	_ReWind.Update();
 
 	SlowAfterImgPushCurrentDelta -= Dt;
 	NormalAfterImgPushCurrentDelta -= Dt;
@@ -254,7 +250,7 @@ void RenderComponent::AfterImgPush(matrix MWorld)
 
 	switch (global::_CurGameState)
 	{
-	case global::ECurGameState::Slow:
+	case global::ECurGameState::PlaySlow:
 		if (SlowAfterImgPushCurrentDelta < 0.f && bSlowRender)
 		{
 			SlowAfterImgPushCurrentDelta = SlowAfterImgPushDelta;
@@ -286,18 +282,15 @@ D3DXCOLOR RenderComponent::GetCurGameStateColor()
 	case global::ECurGameState::Play:
 		return _Info._Color;
 		break;	
-	case global::ECurGameState::Slow:
+	case global::ECurGameState::PlaySlow:
 		return SlowStartColor;
+		break;
+	case global::ECurGameState::Replay : 
+		return ReplayColor;
 		break;
 	default:
 		break;
 	}
-
-	if (RecordManager::instance().bReplay)
-	{
-		return ReplayColor;
-	}
-	
 	return _Info._Color;
 }
 

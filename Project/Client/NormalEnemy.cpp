@@ -119,12 +119,12 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 
 		EffectManager::instance().EffectPush(L"Effect",
 			L"spr_slashfx", 5, 0.02f,
-			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, _PhysicComp->Position,
+			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false , _PhysicComp->Position,
 			{ 0,0,0 }, { 2.9,2.9,0 });
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT,
+			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false ,
 			_PhysicComp->Position + -_CollisionInfo.PushDir*77, 
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);
@@ -132,7 +132,7 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir*4000);
 
 		EffectManager::instance().EffectPush(L"Effect",
-			L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, Pos,
+			L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false , Pos,
 			_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
 			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
 			0, 0);
@@ -146,7 +146,7 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			Time::instance().TimeScale = 0.2f;
 			Time::instance().TimerRegist(0.07f, 0.07f, 0.07f, [this]() {
 				
-				if (global::ECurGameState::Slow != global::_CurGameState)
+				if (global::ECurGameState::PlaySlow != global::_CurGameState)
 				{
 					Time::instance().TimeScale = 1.f;
 				}

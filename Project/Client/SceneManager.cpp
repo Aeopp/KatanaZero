@@ -8,6 +8,7 @@
 #include "ObjectManager.h"
 #include "ComponentManager.h"
 #include "Texture_Manager.h"
+#include "EffectManager.h"
 
  void SceneManager::Scene_Change(ESceneID _ESceneID)
 {
@@ -15,6 +16,7 @@
 
 	ObjectManager::instance().Clear();
 	ComponentManager::instance().Clear();
+	EffectManager::instance().Clear();
 
 	/*if (_PreScene != _CurScene)
 	{*/

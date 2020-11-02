@@ -41,9 +41,7 @@ void Camera::Update()
 	CurrentCameraPos.x -= global::ClientSize.first / 2.f;
 	CurrentCameraPos.y -= global::ClientSize.second / 2.f;
 
-	bool bReWind = RecordManager::instance().bReWind;
-
-	if (bMouseFollow &&   (! bReWind) )
+	if (bMouseFollow &&  global::IsPlay()  )
 	{
 		vec3 Goal = global::MousePosScreen;
 		Goal.x -= global::ClientSize.first / 2.f;
@@ -53,21 +51,15 @@ void Camera::Update()
 		Goal += _Shake;
 		_Shake = { 0,0 ,0 };
 		global::CameraPos = math::lerp(global::CameraPos, Goal, 1.f, Time::instance().Delta());
-		RecordManager::instance().TimeCameraPosPush(global::CameraPos);
 		return;
 	}
-	else if (bReWind)
-	{
-		global::CameraPos = RecordManager::instance().GetCameraPos();
-	}
-	else if ( ! bReWind  && !bMouseFollow)
+	else if ( global::IsPlay()  && !bMouseFollow)
 	{
 		Shaking(Dt);
 		vec3 Goal = CurrentCameraPos;
 		Goal += _Shake;
 		_Shake = { 0,0 ,0 };
 		global::CameraPos = math::lerp(global::CameraPos, Goal, 1.f, Time::instance().Delta());
-		
 		return;
 	}
 };

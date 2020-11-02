@@ -7,17 +7,18 @@
 #include "ComponentManager.h"
 #include "RecordManager.h"
 
-
 void EffectManager::Initialize() & noexcept
 {
 	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EEnemy);
 	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EPlayer);
-}
+};
 
 void EffectManager::Render()
 {
 	const float dt = Time::instance().Delta();
 	const float JoomScale = global::JoomScale;
+	const int32_t Timing = RecordManager::instance().Timing;
+
 	vec3 CameraPos = global::CameraPos;
 
 	for (auto& _Effect : _Effects)
@@ -48,6 +49,22 @@ void EffectManager::Render()
 		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 		GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
 			&_srcRT, &Center, nullptr, _Color);
+
+		if (_Effect.bRecord)
+		{
+			Record::Info _Info;
+			_Info.Alpha = 255;
+			_Info.DrawID = _Effect.DrawID;
+			_Info.MWorld = MWorld;
+			_Info.ObjKey = _Effect.ObjKey;
+			_Info.StateKey = _Effect.StateKey;
+			_Info.Timing = Timing;
+			_Info.OwnerY = _Effect.Pos.y;
+			_Info._Color = _Color;
+			_Record._Infos.insert({ Timing ,_Info });
+		}
+
+	
 	}
 };
 
@@ -148,6 +165,22 @@ void EffectManager::Update()
 };
 }
 
+void EffectManager::RecordRender()
+{
+	_Record.Render();
+}
+
+void EffectManager::Clear()
+{
+	_Effects.clear();
+
+}
+
+void EffectManager::RecordClear()
+{
+	_Record._Infos.clear();
+}
+
 void EffectManager::HitEvent(EffectInfo& _Effect, math::Collision::HitInfo _HitInfo)
 {
 
@@ -215,13 +248,13 @@ D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCO
 		break;
 	};
 
-	if (global::_CurGameState == global::ECurGameState::Slow)
+	if (global::IsSlow()) 
 	{
 		_Color.g *= 0.3f;
 		_Color.b *= 0.3f;
 		_Color.r *= 0.3f;
 	}
-	else if (RecordManager::instance().bReplay)
+	else if (global::IsReplay() )
 	{
 		_Color.g *= 0.3f;
 		_Color.b *= 0.3f;
@@ -235,7 +268,7 @@ void EffectManager::EffectPush
 (const std::wstring_view& _ObjKey, 
 	const std::wstring_view& _StateKey, 
 	uint8_t _End, float AnimDelta, 
-	float MaxT, OBJECT_ID::EID _EffectID, 
+	float MaxT, OBJECT_ID::EID _EffectID, bool bRecord,
 	vec3 Pos, vec3 Dir, vec3 Scale, 
 	bool bLoop, bool bPhysic, 
 	bool bMapSlide, bool bHitNotify, 
@@ -267,6 +300,7 @@ void EffectManager::EffectPush
 	_Info.DrawID = _StartID;
 	_Info.Alpha = Alpha; 
 	_Info.bAlphaLerp = bAlphaLerp;
+	_Info.bRecord = bRecord;
 
 	_Effects.emplace_back(std::move(_Info));
 }

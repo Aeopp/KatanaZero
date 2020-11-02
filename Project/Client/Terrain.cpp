@@ -255,7 +255,7 @@ void Terrain::Render()
 				case global::ECurGameState::Play:
 					_GoalRGB = 255;
 					break;
-				case global::ECurGameState::Slow:
+				case global::ECurGameState::PlaySlow:
 					_GoalRGB = 50;
 					break; 
 				default:
