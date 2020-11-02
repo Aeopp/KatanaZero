@@ -255,12 +255,6 @@ void Terrain::Render()
 				case global::ECurGameState::Play:
 					_GoalRGB = 255;
 					break;
-				case global::ECurGameState::Replay:
-					_GoalRGB = 255;
-					break;
-				case global::ECurGameState::ReWind:
-					_GoalRGB = 255;
-					break; 
 				case global::ECurGameState::Slow:
 					_GoalRGB = 50;
 					break; 

@@ -5,6 +5,8 @@
 #include "GraphicDevice.h"
 #include "Texture_Manager.h"
 #include "ComponentManager.h"
+#include "RecordManager.h"
+
 
 void EffectManager::Initialize() & noexcept
 {
@@ -219,7 +221,7 @@ D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCO
 		_Color.b *= 0.3f;
 		_Color.r *= 0.3f;
 	}
-	else if (global::_CurGameState == global::ECurGameState::Replay)
+	else if (RecordManager::instance().bReplay)
 	{
 		_Color.g *= 0.3f;
 		_Color.b *= 0.3f;

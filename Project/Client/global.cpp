@@ -8,3 +8,4 @@ std::array<vec3, 4ul> global::GetScreenRect()
 			vec3{ 0.f,ClientSize.second,0.f } , };
 }
 
+

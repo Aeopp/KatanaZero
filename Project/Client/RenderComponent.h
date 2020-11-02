@@ -3,6 +3,7 @@
 #include <optional>
 #include <map>
 #include <deque>
+#include "ReWind.h"
 
 struct AfterImg
 {
@@ -20,7 +21,10 @@ class RenderComponent : public Component
 {
 public :
 	using NotifyType =std::map<uint8_t, std::function<void()>>;
+	
+	ReWind _ReWind;
 
+	void ReWindRender();
 	void Render()override;
 	void Update()override;
 	// Y 기준은 오브젝트의 최하단
@@ -65,8 +69,6 @@ public :
 	void AfterImgOff();
 	void AfterImgPush(matrix MWorld);
 
-
-
 	static inline D3DXCOLOR ReplayColor = (255, 125, 125, 125);
 
 	D3DXCOLOR PlayStartColor = D3DCOLOR_ARGB(125, 255, 0, 0);
@@ -80,7 +82,6 @@ public :
 	float SlowDeltaCoefft = 0.4f;
 	float SlowAfterImgPushDelta = 0.05f;
 	float NormalAfterImgPushDelta = 0.0125f;
-
 	
 	bool bSlowRender = true;
 	std::function<void()> _RenderAfterEvent;

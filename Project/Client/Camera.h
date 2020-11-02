@@ -27,6 +27,5 @@ private:
 	bool Shaking(float Dt);
 	vec3 _Shake{ 0,0,0 };
 	std::vector<Shake> Shake_Vec{};
-
 };
 

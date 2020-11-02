@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <array>
 #include "Typedef.h"
+#include "RecordManager.h"
 
 class global
 {
@@ -9,9 +10,7 @@ public:
 	enum class ECurGameState : uint8_t
 	{
 		Play,
-		Slow,
-		Replay,
-		ReWind,
+		Slow
 	};
 	static constexpr std::pair<float, float > ClientSize = { 1920,1080};
 	static constexpr std::pair<float, float > TileNums = { 150 ,150};
@@ -19,10 +18,12 @@ public:
 	static constexpr int32_t ClientViewMinLeftTop = (int32_t(((ClientSize.first + ClientSize.second) / 3.7f) / 36)) *TileSize.first;
 	static std::array<vec3, 4ul> GetScreenRect();
 
+	static inline float ReWindDelta = 1.f / 10.f;
 	static inline float JoomScale = 1.f;
-	static inline vec3 CameraPos{ 0.f,0.f,0.f };
+
 	static inline vec3 MousePosScreen{ 0.f,0.f,0.f };
 	static inline vec3 MousePosWorld{ 0.f,0.f,0.f };
+	static inline vec3 CameraPos{ 0.f,0.f,0.f };
 
 	static inline ECurGameState _CurGameState{ ECurGameState::Play};
 	static inline std::chrono::milliseconds DeltaMax = std::chrono::milliseconds(40ul);
@@ -32,10 +33,6 @@ public:
 	static inline bool bRePlay{ false };
 };
 
-
-#define Sword	0x01		//0000 0001
-#define Shoes		0x02		//0000 0010
-#define Shocks		0x04		//0000 0100
 
 #ifdef _AFX
 #define  ERR_MSG(MSG) AfxMessageBox(MSG)

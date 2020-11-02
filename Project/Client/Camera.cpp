@@ -30,6 +30,7 @@ void Camera::Update()
 {
 	// 여기서 널임
 	const float Dt = Time::instance().Delta();
+	const float T = Time::instance().T();
 
 	auto spObj = _Owner.lock();
 	if (!spObj)return;
@@ -40,8 +41,9 @@ void Camera::Update()
 	CurrentCameraPos.x -= global::ClientSize.first / 2.f;
 	CurrentCameraPos.y -= global::ClientSize.second / 2.f;
 
-	if (global::_CurGameState != global::ECurGameState::Replay &&
-		global::_CurGameState != global::ECurGameState::ReWind && bMouseFollow)
+	bool bReWind = RecordManager::instance().bReWind;
+
+	if (bMouseFollow &&   (! bReWind) )
 	{
 		vec3 Goal = global::MousePosScreen;
 		Goal.x -= global::ClientSize.first / 2.f;
@@ -51,9 +53,14 @@ void Camera::Update()
 		Goal += _Shake;
 		_Shake = { 0,0 ,0 };
 		global::CameraPos = math::lerp(global::CameraPos, Goal, 1.f, Time::instance().Delta());
+		RecordManager::instance().TimeCameraPosPush(global::CameraPos);
 		return;
 	}
-	else
+	else if (bReWind)
+	{
+		global::CameraPos = RecordManager::instance().GetCameraPos();
+	}
+	else if ( ! bReWind  && !bMouseFollow)
 	{
 		Shaking(Dt);
 		vec3 Goal = CurrentCameraPos;
@@ -63,8 +70,6 @@ void Camera::Update()
 		
 		return;
 	}
-
-
 };
 
 OBJECT_ID::EID Camera::GetID()

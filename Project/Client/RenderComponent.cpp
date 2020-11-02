@@ -8,17 +8,28 @@
 #include "Player.h"
 #include "PhysicTransformComponent.h"
 #include <sstream>
+#include "RecordManager.h"
+
+void RenderComponent::ReWindRender()
+{
+	_ReWind;
+
+}
 
 void RenderComponent::Render()
 {
 	if (!bRender)return;
 
+	const float T = Time::instance().T();
 	const float dt = Time::instance().Delta();
+	bool bRewind = RecordManager::instance().bReWind;
+	bool bRewindPush = RecordManager::instance().bReWind && _ReWind.bUpdate;
 
 	Component::Render();
 
 	auto spOwner = _Owner.lock();
-	auto spTexInfo = TextureManager::instance().Get_TexInfo(_Info.ObjectKey, _Info.StateKey, _Info.CurrentFrame);
+	auto spTexInfo = TextureManager::instance().Get_TexInfo
+	(_Info.ObjectKey, _Info.StateKey, _Info.CurrentFrame);
 
 	if (!spOwner)return;
 	if (!spOwner->_TransformComp)return;
@@ -58,7 +69,8 @@ void RenderComponent::Render()
 			{
 				auto& _After = *_AfterIter;
 
-				auto TexInfo = TextureManager::instance().Get_TexInfo(_Info.ObjectKey, _After.StateKey, _After.ID);
+				auto TexInfo = TextureManager::instance().
+				Get_TexInfo(_Info.ObjectKey, _After.StateKey, _After.ID);
 				RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width * _Info.SrcScale.x,
 							  TexInfo->ImageInfo.Height * _Info.SrcScale.y };
 				vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
@@ -66,6 +78,12 @@ void RenderComponent::Render()
 				GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
 					&_srcRT, &__TextureCenter, nullptr,
 					_After._Color);
+
+				if ( bRewindPush) 
+				{
+					_ReWind.Push(T, _After.PastWorld, _Info.ObjectKey, _After.StateKey,
+					_After.ID, spOwner->_TransformComp->Position.y);
+				}
 
 				_After.T += _After.DeltaCoefft * dt;
 				D3DXColorLerp(&_After._Color, &_After._Color, &_After._GoalColor, _After.T);
@@ -78,7 +96,6 @@ void RenderComponent::Render()
 			}
 			AfterImgPush(MWorld);
 		}
-		
 
 		if (global::ECurGameState::Slow == global::_CurGameState && bSlowRender)
 		{
@@ -93,10 +110,18 @@ void RenderComponent::Render()
 		{
 			RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
 					  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
-			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
+			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,
+			spTexInfo->ImageInfo.Height / 2.f,0.f };
 			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
-			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
+			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture,
+				&srcRect, &TextureCenter, nullptr,
 				_Info._Color);
+
+			if (bRewindPush)
+			{
+				_ReWind.Push(T, MWorld, _Info.ObjectKey, _Info.StateKey, _Info.CurrentFrame,
+					spOwner->_TransformComp->Position.y);
+			}
 		}
 	}
 
@@ -116,7 +141,6 @@ void RenderComponent::Render()
 		_RenderAfterEvent();
 	}
 
-
 	if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
 	{
 		auto _Player = std::dynamic_pointer_cast<Player>(spOwner);
@@ -135,6 +159,8 @@ void RenderComponent::Update()
 {
 	Component::Update();
 	const float Dt = Time::instance().Delta();
+
+	_ReWind.Update();
 
 	SlowAfterImgPushCurrentDelta -= Dt;
 	NormalAfterImgPushCurrentDelta -= Dt;
@@ -257,10 +283,6 @@ D3DXCOLOR RenderComponent::GetCurGameStateColor()
 
 	switch (global::_CurGameState)
 	{
-	case global::ECurGameState::Replay:
-		// »ÊπÈ ø¨√‚.....
-		return ReplayColor;
-		break;
 	case global::ECurGameState::Play:
 		return _Info._Color;
 		break;	
@@ -271,6 +293,11 @@ D3DXCOLOR RenderComponent::GetCurGameStateColor()
 		break;
 	}
 
+	if (RecordManager::instance().bReplay)
+	{
+		return ReplayColor;
+	}
+	
 	return _Info._Color;
 }
 
@@ -292,3 +319,4 @@ void RenderComponent::AfterCheckingPush(
 		_AfterImgVec.push_back(std::move(_AfterImg));
 	}
 }
+

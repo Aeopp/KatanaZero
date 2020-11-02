@@ -286,27 +286,10 @@ void Grunt::Run()
 	_CurrentState = Grunt::State::Run;
 	_RenderComp->Anim(false, true, L"spr_grunt_run", 10, 0.6f);
 	bLaziness = false;
-}
+};
 
 void Grunt::RunState()
 {
-	//bool IsAttackRange= IsRangeInnerTarget();
-	//// 추격중.........
-	//if (IsAttackRange)
-	//{
-	//	if (ToTargetDistance < AttackRange)
-	//	{
-	//		Attack();
-	//		return;
-	//	}
-	//}
-	//// 추격중일때의 감지범위 바깥으로 타겟이 도망감
-	//else
-	//{
-	//		Walk();
-	//		return;
-	//}
-
 	vec3 ToTarget = _Target->_TransformComp->Position - _PhysicComp->Position;
 	float ToTargetDistance = D3DXVec3Length(&ToTarget);
 	if (ToTargetDistance < AttackRange)
@@ -314,7 +297,6 @@ void Grunt::RunState()
 		Attack();
 		return;
 	};
-
 
 	vec3 GoalTargetDiff = GoalPos - _Target->_TransformComp->Position;
 	float Distance = D3DXVec3Length(&GoalTargetDiff);
@@ -328,7 +310,8 @@ void Grunt::RunState()
 		}
 		return;
 	}
-	else if (Distance > PathFindCheckMinDistanceMin)
+	else if (Distance > PathFindCheckMinDistanceMin &&
+    abs( GoalPos.x - _Target->_TransformComp->Position .x )  > 100.f )  
 	{
 		Paths = AStarManager::instance().PathFind(_PhysicComp->Position, _Target->_TransformComp->Position);
 		if (!Paths.empty())

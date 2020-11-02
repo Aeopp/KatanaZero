@@ -40,7 +40,7 @@ void SceneStart::Initialize()
 
 	// TODO:: REMOVE PLZ TEST CODE 
 	{
-		float XDiff = 300.f;
+	/*	float XDiff = 300.f;
 		float x = 1876.f;
 		float y = 5456;
 
@@ -76,10 +76,10 @@ void SceneStart::Initialize()
 			x += XDiff;
 			if (x > 4863)
 				break;
-		}
+		}*/
 
 
-		x = 1645;
+	/*	x = 1645;
 		y = 5153;
 		while (true)
 		{
@@ -101,7 +101,7 @@ void SceneStart::Initialize()
 			x += XDiff;
 			if (x > 4863)
 				break;
-		}
+		}*/
 
 	}
 

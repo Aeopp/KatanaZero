@@ -104,12 +104,13 @@ public :
 	void Save(const std::wstring& FilePath);
 
 	std::vector<vec3> PathFind(const vec3& vStart, const vec3& vGoal);
+
+	NodeIdx ConvertNodeIdx(const vec3& WorldLocation);
 private:
 	const int32_t DoorCheckMin = 30;
-
 	// 월드 좌표로부터 노드의 로우와 컬럼을 반환
 	D3DXCOLOR GetColorFromNodeOpt(NodeInfo::EMODE _Mode);
-	NodeIdx ConvertNodeIdx(const vec3& WorldLocation);
+
 	vec3 ConvertWorldLocation(const NodeIdx& _NodeIdx);
 	// 인접노드 계산해서 그래프를 구축.
 	void MakeGraph();
