@@ -88,10 +88,29 @@ void RenderComponent::Render()
 		{
 			RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
 					  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
-			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,spTexInfo->ImageInfo.Height / 2.f,0.f };
+			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,
+			spTexInfo->ImageInfo.Height / 2.f,0.f };
 			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
-			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
+			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, 
+			&srcRect, &TextureCenter, nullptr,
 				SlowColor);
+
+			// 그려지는 상황이므로 푸시
+			if (global::IsPlay())
+			{
+				Record::Info _RecordInfo;
+				int32_t CurTiming = RecordManager::instance().Timing;
+				_RecordInfo.Alpha = 255;
+				_RecordInfo.DrawID = _Info.CurrentFrame;
+				_RecordInfo.MWorld = MWorld;
+				_RecordInfo.ObjKey = _Info.ObjectKey;
+				_RecordInfo.StateKey = _Info.StateKey;
+				_RecordInfo.OwnerY = spOwner->_TransformComp->Position.y;
+				_RecordInfo.Timing = CurTiming;
+				_RecordInfo._Color = _Info._Color;
+
+				_Record._Infos.insert({ CurTiming  , _RecordInfo });
+			}
 		}
 		else
 		{
@@ -151,6 +170,8 @@ void RenderComponent::Render()
 		RECT rectRender{ 1400,200,2000,850 };
 		GraphicDevice::instance().GetFont()->DrawTextW(nullptr, wss.str().c_str(), wss.str().size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 	}*/
+
+	
 }
 
 void RenderComponent::Update()
@@ -217,6 +238,8 @@ void RenderComponent::Anim(
 	const std::wstring& ObjKey,
 	LAYER::ELAYER _Layer)
 {
+	if (!global::IsPlay())return;
+
 	if (!SamePlayAgain && StateKey==_Info.StateKey)return;
 
 	_Info.bLoop = bLoop;

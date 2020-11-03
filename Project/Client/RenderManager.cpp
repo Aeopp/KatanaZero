@@ -47,16 +47,20 @@ void RenderManager::Render()
 
 	EffectManager::instance().Render();
 
-	auto& UIRenderCompVec = ComponentManager::instance().Find<UIRenderComponent>();
-	std::sort(std::begin(UIRenderCompVec), std::end(UIRenderCompVec), UIDepthSort);
-
-	for (auto& _UIRenderComp : UIRenderCompVec)
+	if (bUIRender)
 	{
-		if (_UIRenderComp->_Control.bRender)
-			_UIRenderComp->_Control._Render(*_UIRenderComp);
-		else
-			_UIRenderComp->Render();
+		auto& UIRenderCompVec = ComponentManager::instance().Find<UIRenderComponent>();
+		std::sort(std::begin(UIRenderCompVec), std::end(UIRenderCompVec), UIDepthSort);
+
+		for (auto& _UIRenderComp : UIRenderCompVec)
+		{
+			if (_UIRenderComp->_Control.bRender)
+				_UIRenderComp->_Control._Render(*_UIRenderComp);
+			else
+				_UIRenderComp->Render();
+		}
 	}
+	
 
 	DebugMouseInfoRender();
 }

@@ -10,6 +10,8 @@ public :
     RecordManager();
     friend class Camera;
     int32_t Timing = 0;
+    bool bUpdate = true;
+
     void Update();
 
     // ReWind 시 업데이트 루프당 한번 호출해주세요.
@@ -25,8 +27,11 @@ public :
 
     bool bPause = false;
 
+    bool bReplayInit = false;
+
     int32_t RewindSpeed = -2;
     int32_t TimingSpeed = 1;
+    int32_t EndTiming = 0;
 private:
     ESceneID _AtReplayEndChangeSceneID;
     // 매니저가 관리하는 현재 T에 해당하는 (그당시 저장했었던) 카메라 좌표를 반환.

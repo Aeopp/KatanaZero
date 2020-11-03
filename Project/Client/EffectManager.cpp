@@ -15,6 +15,8 @@ void EffectManager::Initialize() & noexcept
 
 void EffectManager::Render()
 {
+	if (!bRender)return;
+
 	const float dt = Time::instance().Delta();
 	const float JoomScale = global::JoomScale;
 	const int32_t Timing = RecordManager::instance().Timing;
@@ -63,8 +65,6 @@ void EffectManager::Render()
 			_Info._Color = _Color;
 			_Record._Infos.insert({ Timing ,_Info });
 		}
-
-	
 	}
 };
 

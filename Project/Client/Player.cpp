@@ -17,7 +17,8 @@
 #include "AStarManager.h"
 #include "EffectManager.h"
 #include "RenderManager.h"
-
+#include "Camera.h"
+#include "Time.h"
 
 using namespace std;
 
@@ -198,8 +199,6 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 			_RenderComp->NormalAfterImgPushDelta *= 1.f;
 			return true;
 		});
-
-
 
 		HurtFlyBegin();
 	};
@@ -444,7 +443,7 @@ void Player::FallState()
 void Player::Jump()
 {
 	_CurrentState = Player::State::Jump;
-
+	
 	_PhysicComp->Flying();
 	const vec3 Dir{ 0.f,-1.f,0.f };
 	SimplePhysics _Physics;
@@ -547,9 +546,19 @@ void Player::KeyBinding() & noexcept
 {
 	auto Observer = _This;
 
-	InputManager::instance().EventRegist([]() {global::bDebug = !global::bDebug;  ShowCursor(global::bDebug); }, 'P', InputManager::EKEY_STATE::DOWN)->bFree = true;
-	InputManager::instance().EventRegist([]() {Time::instance().bTimeInfoRender = !Time::instance().bTimeInfoRender; }, 'O', InputManager::EKEY_STATE::DOWN)->bFree = true;
-	InputManager::instance().EventRegist([](){RenderManager::instance()._Terrain.bDebugGridRender = !RenderManager::instance()._Terrain.bDebugGridRender;}, 'I', InputManager::EKEY_STATE::DOWN)->bFree = true;
+	_Anys.emplace_back(
+	InputManager::instance().EventRegist([]() 
+	{global::bDebug = !global::bDebug;  ShowCursor(global::bDebug); }, 
+		'P', InputManager::EKEY_STATE::DOWN));
+
+	_Anys.emplace_back(
+		InputManager::instance().EventRegist([]() {RenderManager::instance()._Terrain.bDebugGridRender = !RenderManager::instance()._Terrain.bDebugGridRender; }, 'I', InputManager::EKEY_STATE::DOWN));
+
+
+	_Anys.emplace_back(
+		InputManager::instance().EventRegist([]() {Time::instance().bTimeInfoRender = !Time::instance().bTimeInfoRender; }, 'O', InputManager::EKEY_STATE::DOWN)
+	);
+
 
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
@@ -651,10 +660,14 @@ void Player::KeyBinding() & noexcept
 	{
 		if (!object::IsValid(Observer))return;
 		RecordManager::instance().ReplayStart(ESceneID::EStage1);
+		
 	},
 		'2', InputManager::EKEY_STATE::DOWN));
 
+
+	
 	//////////
+	
 }
 
 void Player::JumpState()
@@ -693,7 +706,7 @@ void Player::Attack()
 	_Physics.MaxT = 0.25f;
 	_Physics.T = 0.f;
 	_PhysicComp->Move(std::move(_Physics));
-
+	
 	_SpAttackSlash->AttackStart(Dir *30.f, Dir);
 	
 	_RenderComp->AfterImgOn();
@@ -909,13 +922,25 @@ void Player::HurtGround()
 	_RenderComp->Anim(false, false, L"spr_dragon_hurtground", 6, 0.5f, std::move(_Notify));
 	_RenderComp->PositionCorrection.y += 17 ;
 
-	
+	vec3 ScreenCenter = global::CameraPos;
+	ScreenCenter.x += global::ClientSize.first / 2.f;
+	ScreenCenter.y += global::ClientSize.second / 2.f;
+	ObjectManager::instance()._Camera.lock()->bUpdate = false;
+	ObjectManager::instance().bEnemyUpdate = false;
 
+	RecordManager::instance().bUpdate = false;
+
+	EffectManager::instance().EffectPush(L"Effect", L"NothingBack", 1, 0.2f,
+		FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 });
+
+	EffectManager::instance().EffectPush(L"Effect", L"Nothing", 1, 0.2f,
+		FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 });
 }
 void Player::HurtGroundState()
 {
 	if (bHurtGroundMotionEnd && bAttackKeyCheck)
 	{
+	
 		// 치명적인 공격을 입은것이라면
 		RecordManager::instance().ReWindStart();
 		return;

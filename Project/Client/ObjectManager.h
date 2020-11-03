@@ -12,6 +12,8 @@ public :
 	void Initialize() & noexcept;
 	void Release() & noexcept;
 
+	bool bEnemyUpdate = true;
+
 	void Clear() & noexcept;
 
 	template<typename ObjectType,typename...InitParams>

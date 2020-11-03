@@ -28,8 +28,8 @@ void SceneStart::Initialize()
 		(PlayerLocation);
 
 	global::CameraPos = PlayerLocation;
-	global::CameraPos.x -= global::ClientSize.first / 2.f;
-	global::CameraPos.y -= global::ClientSize.second / 2.f;
+	//global::CameraPos.x -= global::ClientSize.first / 2.f;
+	//global::CameraPos.y -= global::ClientSize.second / 2.f;
 
 	ObjectManager::instance()._Player = _Player;
 

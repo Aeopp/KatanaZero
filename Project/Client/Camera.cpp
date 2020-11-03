@@ -34,6 +34,7 @@ void Camera::Update()
 
 	auto spObj = _Owner.lock();
 	if (!spObj)return;
+	if (!bUpdate)return;
 
 	const vec3 OwnerPosition = spObj->_TransformComp->Position; 
 

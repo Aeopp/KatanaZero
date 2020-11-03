@@ -9,6 +9,9 @@
 #include "InputManager.h"
 #include "GraphicDevice.h"
 #include "SceneManager.h"
+#include "Texture_Manager.h"
+#include "Camera.h"
+#include "ObjectManager.h"
 
 RecordManager::RecordManager()
 {
@@ -31,8 +34,11 @@ RecordManager::RecordManager()
 
 void RecordManager::Update()
 {
-	_TimingCameraPos[Timing] = global::CameraPos;
-	++Timing;
+	if (bUpdate)
+	{
+		_TimingCameraPos[Timing] = global::CameraPos;
+		++Timing;
+	}
 };
 
 void RecordManager::ReWindUpdate()
@@ -50,6 +56,7 @@ void RecordManager::ReWindUpdate()
 
 void RecordManager::ReWindStart()
 {
+	bUpdate = true;
 	global::_CurGameState = global::ECurGameState::ReWind;
 	//	InputManager::instance().Clear();
 };
@@ -58,9 +65,18 @@ void RecordManager::ReWindEnd()
 {
 	global::_CurGameState = global::ECurGameState::Play;
 
+	ObjectManager::instance().bEnemyUpdate = true;
+
 	EffectManager::instance().Clear();
 
-	_TimingCameraPos.clear();
+	if (!_TimingCameraPos.empty())
+	{
+		//auto LastCameraPos = _TimingCameraPos.begin();
+		//global::CameraPos;
+		// = LastCameraPos->second;
+		_TimingCameraPos.clear();
+	};
+	ObjectManager::instance()._Camera.lock()->bUpdate = true;
 	Time::instance()._T = 0;
 	RecordManager::Timing = 0;
 
@@ -69,11 +85,28 @@ void RecordManager::ReWindEnd()
 
 void RecordManager::ReplayStart(ESceneID _SceneID)
 {
+	EffectManager::instance().Clear();
+	RenderManager::instance().bUIRender = false;
+	ObjectManager::instance()._Camera.lock()->bUpdate = false;
+
+	vec3 ScreenCenter = global::CameraPos;
+	ScreenCenter.x += global::ClientSize.first / 2.f;
+	ScreenCenter.y += global::ClientSize.second / 2.f;
+
+	//EffectManager::instance().EffectPush(L"Effect", L"YouCanDoThis",
+	//	2, 2, 2, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 1,1,1 });
+
+	Time::instance().TimerRegist(2.f, 2.f, 2.f, []() {
+		RenderManager::instance().bUIRender = true;
+		ObjectManager::instance()._Camera.lock()->bUpdate = true;
+		RecordManager::instance().bReplayInit = true;
+		return true;
+	});
+
+	_AtReplayEndChangeSceneID = _SceneID;
+	EndTiming = Timing;
+	Timing = 0;
 	global::_CurGameState = global::ECurGameState::Replay;
-
-	_AtReplayEndChangeSceneID = _SceneID; 
-
-	RecordManager::Timing = 0;
 };
 
 void RecordManager::ReplayEnd( )
@@ -82,7 +115,14 @@ void RecordManager::ReplayEnd( )
 
 	EffectManager::instance().Clear();
 
-	_TimingCameraPos.clear();
+	if (!_TimingCameraPos.empty())
+	{
+		auto LastCameraPos = _TimingCameraPos.end();
+		std::advance(LastCameraPos, -1);
+		global::CameraPos = LastCameraPos->second;
+		_TimingCameraPos.clear();
+	}
+	bReplayInit = false;
 	Time::instance()._T = 0;
 	RecordManager::Timing = 0;
 
@@ -90,6 +130,13 @@ void RecordManager::ReplayEnd( )
 }
 void RecordManager::ReplayUpdate()
 {
+	if (!bReplayInit)
+	{
+		InputManager::instance().Update();
+		Time::instance().NotificationCheck();
+		return;
+	};
+	
 	InputManager::instance().Update();
 	if (_TimingCameraPos.empty())
 	{
@@ -113,21 +160,57 @@ void RecordManager::RePlayRender()
 {
 	GraphicDevice::instance().RenderBegin();
 
-	RenderManager::instance()._Terrain.Render();
-
-	auto& RenderCompVec = ComponentManager::instance().Find<RenderComponent>();
-
-	for (auto& _RenderComp : RenderCompVec)
+	if (!bReplayInit)
 	{
-		_RenderComp->RecordRender();
+		auto TexInfo = TextureManager::instance().Get_TexInfo(L"Effect", L"YouCanDoThis", 0);
+		RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width ,
+					  TexInfo->ImageInfo.Height };
+		vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+		matrix MScale, MTrans, MWorld;
+		D3DXMatrixScaling(&MScale, 1, 1, 0);
+		D3DXMatrixTranslation(&MTrans, 1920.f / 2.f, 1080.f / 2.f, 0);
+		MWorld = MScale * MTrans;
+		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+		GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+			&_srcRT, &__TextureCenter, nullptr,
+			D3DCOLOR_ARGB(255,255,255,255));
 	}
+	else
+	{
+		RenderManager::instance()._Terrain.Render();
 
-	EffectManager::instance().RecordRender();
+		auto& RenderCompVec = ComponentManager::instance().Find<RenderComponent>();
 
+		for (auto& _RenderComp : RenderCompVec)
+		{
+			_RenderComp->RecordRender();
+		}
+
+		EffectManager::instance().RecordRender();
+		float diff = EndTiming - Timing;
+		diff /= EndTiming;
+		int32_t Alpha = 180 - (diff * 180);
+
+		D3DXCOLOR _Color = D3DCOLOR_ARGB(Alpha, 255, 255, 255);
+
+		auto TexInfo = TextureManager::instance().Get_TexInfo(L"Effect", L"ReplayBack", 0);
+		RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width ,
+					  TexInfo->ImageInfo.Height };
+		vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+		matrix MScale, MTrans, MWorld;
+		D3DXMatrixScaling(&MScale, 1920, 1080, 0);
+		D3DXMatrixTranslation(&MTrans, 1920.f / 2.f, 1080.f / 2.f, 0);
+		MWorld = MScale * MTrans;
+		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+		GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+			&_srcRT, &__TextureCenter, nullptr,
+			_Color);
+	}
 	Time::instance().Render();
-
 	GraphicDevice::instance().RenderEnd();
 };
+
+
 
 void RecordManager::ReWindRender()
 {

@@ -64,6 +64,9 @@ void Grunt::Initialize() & noexcept
 
 void Grunt::Update()
 {
+	if (!global::IsPlay())return;
+	if ( ! ObjectManager::instance().bEnemyUpdate)return;
+
 	Super::Update();
 
 	FSM();
@@ -71,6 +74,10 @@ void Grunt::Update()
 
 void Grunt::LateUpdate()
 {
+	if (!global::IsPlay())return;
+	if (!ObjectManager::instance().bEnemyUpdate)return;
+
+
 	Super::LateUpdate();
 
 	const float Dt = Time::instance().Delta();
@@ -195,6 +202,7 @@ void Grunt::AttackState()
 
 		Time::instance().TimerRegist(DelayAfterAttack, DelayAfterAttack, DelayAfterAttack, 
 		[this]() {
+			if (!global::IsPlay())return true;
 			if (_EnemyState != NormalEnemy::State::Die)
 			{
 				Run();
@@ -283,6 +291,8 @@ void Grunt::IdleState()
 
 void Grunt::Run()
 {
+	if (!global::IsPlay())return;
+
 	_CurrentState = Grunt::State::Run;
 	_RenderComp->Anim(false, true, L"spr_grunt_run", 10, 0.6f);
 	bLaziness = false;

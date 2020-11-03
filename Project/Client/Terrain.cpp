@@ -264,7 +264,7 @@ void Terrain::Render()
 				}
 				_CurRGB = math::lerp(_CurRGB, _GoalRGB, LerpT, Dt);
 				GraphicDevice::instance().GetSprite()->Draw(sp_TexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
-					D3DCOLOR_ARGB(255,(uint8_t)_CurRGB, (uint8_t)_CurRGB, (uint8_t)_CurRGB));
+					D3DCOLOR_ARGB(255,(uint8_t)_CurRGB, (uint8_t)_CurRGB, (uint8_t)_CurRGB)			);
 			}
 		}
 	}
