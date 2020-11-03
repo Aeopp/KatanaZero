@@ -177,6 +177,7 @@
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Function.h" />
+    <ClInclude Include="Gangster.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="GraphicDevice.h" />
     <ClInclude Include="Grunt.h" />
@@ -239,6 +240,7 @@
     <ClCompile Include="DELEGATE.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="Gangster.cpp" />
     <ClCompile Include="global.cpp" />
     <ClCompile Include="GraphicDevice.cpp" />
     <ClCompile Include="Grunt.cpp" />

@@ -20,6 +20,9 @@ public:
 	virtual OBJECT_TAG::ETAG GetTag()override;
 	virtual std::wstring_view GetName()const& override;
 	
+	vec3 CameraLockLT{ 0,0,0 };
+	vec3 CameraLockRB{ 1,1,1 };
+
 	bool bUpdate = true;
 	bool bMouseFollow = false;
 	void CameraShake(float force, vec3 dir, float duration);

@@ -202,7 +202,7 @@ bool NormalEnemy::IsRangeInnerTarget()
 	case NormalEnemy::State::Walk:
 		break;
 	case NormalEnemy::State::Detecting:
-	  	_PhysicComp->Dir = ConvertMoveDir(ToTargetDir);
+	  	_PhysicComp->Dir = ConvertXAxisDir(ToTargetDir);
 		break;
 	default:
 		break;
@@ -274,7 +274,7 @@ bool NormalEnemy::IsRangeInnerTarget()
 	return false;
 };
 
-vec3 NormalEnemy::ConvertMoveDir(vec3 Dir)
+vec3 NormalEnemy::ConvertXAxisDir(vec3 Dir)
 {
 	D3DXVec3Normalize(&Dir, &Dir);
 

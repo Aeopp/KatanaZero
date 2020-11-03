@@ -24,7 +24,7 @@ void SceneStage1::Initialize()
 	// 	
 	auto _Player =ObjectManager::instance().InsertObject<Player>
 	(vec3{ 1309,3576,0.f });
-	global::CameraPos = vec3{ 1309,3576,0.f };
+	//global::CameraPos = vec3{ 1309,3576,0.f };
 
 	ObjectManager::instance()._Player = _Player;
 	SceneManageObjs.push_back(_Player);

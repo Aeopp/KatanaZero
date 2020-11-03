@@ -8,6 +8,8 @@
 #include "math.h"
 #include "Player.h"
 #include "ObjectManager.h"
+#include "Player.h"
+#include <algorithm>
 
 void Camera::Initialize() & noexcept
 {
@@ -31,12 +33,9 @@ void Camera::Update()
 	// 여기서 널임
 	const float Dt = Time::instance().Delta();
 	const float T = Time::instance().T();
-
-	auto spObj = _Owner.lock();
-	if (!spObj)return;
 	if (!bUpdate)return;
 
-	const vec3 OwnerPosition = spObj->_TransformComp->Position; 
+	const vec3 OwnerPosition = ObjectManager::instance()._Player.lock()->_TransformComp->Position;
 
 	CurrentCameraPos = OwnerPosition;
 	CurrentCameraPos.x -= global::ClientSize.first / 2.f;
@@ -51,7 +50,15 @@ void Camera::Update()
 		Shaking(Dt);
 		Goal += _Shake;
 		_Shake = { 0,0 ,0 };
+
+		Goal.x = std::clamp<float>(Goal.x, CameraLockLT.x, CameraLockRB.x - global::ClientSize.first + global::ClientSize.first * 0.1);
+		Goal.y = std::clamp<float>(Goal.y, CameraLockLT.y, CameraLockRB.y - global::ClientSize.second + global::ClientSize.second * 0.1);
+
+	/*	global::CameraPos.x = std::clamp<float>(Goal.x, CameraLockLT.x, CameraLockRB.x - global::ClientSize.first + global::ClientSize.first * 0.1);
+		global::CameraPos.y = std::clamp<float>(Goal.y, CameraLockLT.y, CameraLockRB.y - global::ClientSize.second + global::ClientSize.second * 0.1);*/
+
 		global::CameraPos = math::lerp(global::CameraPos, Goal, 1.f, Time::instance().Delta());
+
 		return;
 	}
 	else if ( global::IsPlay()  && !bMouseFollow)
@@ -60,6 +67,12 @@ void Camera::Update()
 		vec3 Goal = CurrentCameraPos;
 		Goal += _Shake;
 		_Shake = { 0,0 ,0 };
+
+		Goal.x = std::clamp<float>(Goal.x, CameraLockLT.x, CameraLockRB.x - global::ClientSize.first + global::ClientSize.first * 0.1);
+		Goal.y = std::clamp<float>(Goal.y, CameraLockLT.y, CameraLockRB.y - global::ClientSize.second + global::ClientSize.second * 0.1);
+	/*	global::CameraPos.x = std::clamp<float>(Goal.x, CameraLockLT.x, CameraLockRB.x - global::ClientSize.first + global::ClientSize.first * 0.1);
+		global::CameraPos.y = std::clamp<float>(Goal.y, CameraLockLT.y, CameraLockRB.y - global::ClientSize.second + global::ClientSize.second * 0.1);*/
+
 		global::CameraPos = math::lerp(global::CameraPos, Goal, 1.f, Time::instance().Delta());
 		return;
 	}

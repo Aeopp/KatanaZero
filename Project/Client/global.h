@@ -26,7 +26,7 @@ public:
 
 	static inline vec3 MousePosScreen{ 0.f,0.f,0.f };
 	static inline vec3 MousePosWorld{ 0.f,0.f,0.f };
-	static inline vec3 CameraPos{ 1180,5433.f,0.f };
+	static inline vec3 CameraPos{ 0,0,0.f };
 
 	static inline ECurGameState _CurGameState{ ECurGameState::Play};
 	static inline std::chrono::milliseconds DeltaMax = std::chrono::milliseconds(40ul);

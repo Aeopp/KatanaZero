@@ -218,6 +218,7 @@
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="RecordManager.h" />
     <ClInclude Include="Record.h" />
+    <ClInclude Include="Gangster.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -351,6 +352,7 @@
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="RecordManager.cpp" />
     <ClCompile Include="Record.cpp" />
+    <ClCompile Include="Gangster.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

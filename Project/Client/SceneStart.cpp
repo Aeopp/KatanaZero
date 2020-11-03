@@ -10,6 +10,8 @@
 #include "UITimer.h"
 #include <string_view>
 #include "Grunt.h"
+#include "SceneManager.h"
+#include "Gangster.h"
 
 void SceneStart::Initialize()
 {
@@ -21,24 +23,30 @@ void SceneStart::Initialize()
 	LoadCollisionTileInfoFilePath = L"..\\Data\\Prison\\3rd\\Collision.txt"s;
 	LoadLineInfoFilePath = L"..\\Data\\Prison\\3rd\\Line.txt"s;
 	LoadAStarInfoFilePath = L"..\\Data\\Prison\\3rd\\AStar.txt"s;
+	SceneManager::instance()._NextScene = ESceneID::EStage1;
 
 	vec3 PlayerLocation = vec3{ 1180,5433,0.f };
 
 	auto _Player =ObjectManager::instance().InsertObject<Player>
 		(PlayerLocation);
+	ObjectManager::instance()._Player = _Player;
+	SceneManageObjs.push_back(_Player);
 
-	global::CameraPos = PlayerLocation;
+	auto _Camera = ObjectManager::instance().InsertObject<Camera>();
+	_Camera->CameraLockLT= { 700,4400,0 };
+	_Camera->CameraLockRB = { 5000 ,5600 , 0  };
+	ObjectManager::instance()._Camera = _Camera;
+	SceneManageObjs.push_back(_Camera);
+
+	//global::CameraPos = PlayerLocation;
 	//global::CameraPos.x -= global::ClientSize.first / 2.f;
 	//global::CameraPos.y -= global::ClientSize.second / 2.f;
-
-	ObjectManager::instance()._Player = _Player;
-
-	SceneManageObjs.push_back(_Player);
+	
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Mouse>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<HUD>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<UITimer>());
 
-	auto _Grunt = ObjectManager::instance().InsertObject<Grunt>
+	auto _Grunt = ObjectManager::instance().InsertObject<Gangster>
 		(vec3{ 3325,5365,0.f });
 	_Grunt->SetUpInitState(-1.f, 0);
 
@@ -46,7 +54,7 @@ void SceneStart::Initialize()
 
 	// TODO:: REMOVE PLZ TEST CODE 
 	{
-		float XDiff = 300.f;
+		/*float XDiff = 300.f;
 		float x = 1876.f;
 		float y = 5456;
 
@@ -82,7 +90,7 @@ void SceneStart::Initialize()
 			x += XDiff;
 			if (x > 4863)
 				break;
-		}
+		}*/
 
 
 	/*	x = 1645;

@@ -8,7 +8,7 @@ namespace OBJECT_ID
 	enum EID : uint8_t
 	{
 		HIT_EFFECT,
-
+		GANGSTER,
 		HIT_IMPACT,
 		STOMPER_CLOUD,
 		JUMP_CLOUD,

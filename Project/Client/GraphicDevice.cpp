@@ -73,7 +73,7 @@ HRESULT GraphicDevice::Initialize(const bool bFullScreen)
 	FontInfo.Width = 10;
 	FontInfo.Weight = FW_HEAVY;
 	FontInfo.CharSet = HANGUL_CHARSET;
-	lstrcpy(FontInfo.FaceName, L"∏ﬁ¿Ã«√Ω∫≈‰∏Æ");
+	lstrcpy(FontInfo.FaceName, L"∏º¿∫ ∞ÌµÒ");
 
 	if (FAILED(D3DXCreateFontIndirect(pDevice, &FontInfo, &pFont)))
 	{

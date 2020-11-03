@@ -30,6 +30,10 @@ RecordManager::RecordManager()
 	_Anys.emplace_back(InputManager::instance().EventRegist([this]()
 	{ if (global::IsReplay())   ReplayEnd();   },
 		VK_BACK, InputManager::EKEY_STATE::DOWN));
+
+	/*_Anys.emplace_back(InputManager::instance().EventRegist([this]()
+	{ if (global::IsReWind() && bRewindEnd) { RecordManager::instance().bRewindEnd = false; ReWindEnd(); };   },
+		VK_LBUTTON, InputManager::EKEY_STATE::DOWN));*/
 }
 
 void RecordManager::Update()
@@ -45,18 +49,20 @@ void RecordManager::ReWindUpdate()
 {
 	InputManager::instance().Update();
 
-	if (Timing < 0)
+	Timing += RewindSpeed;
+	if (Timing <= 1)
 	{
+		Timing = 1;
+		//bRewindEnd = true;
 		ReWindEnd();
 	}
 	// TODO :: 여기서 사운드 매니저 호출 배경음만 나오게
 	global::CameraPos = _TimingCameraPos[Timing];
-	Timing += RewindSpeed;
+	
 };
 
 void RecordManager::ReWindStart()
 {
-	bUpdate = true;
 	global::_CurGameState = global::ECurGameState::ReWind;
 	//	InputManager::instance().Clear();
 };
@@ -68,26 +74,39 @@ void RecordManager::ReWindEnd()
 	ObjectManager::instance().bEnemyUpdate = true;
 
 	EffectManager::instance().Clear();
+	EffectManager::instance().RecordClear();
+//	global::CameraPos = _TimingCameraPos[Timing];
 
+	_TimingCameraPos.clear();
 	if (!_TimingCameraPos.empty())
 	{
-		//auto LastCameraPos = _TimingCameraPos.begin();
-		//global::CameraPos;
-		// = LastCameraPos->second;
+		//auto LastCameraPos = _TimingCameraPos.end();
+		//std::advance(LastCameraPos, -100);
+		//global::CameraPos= LastCameraPos->second;
 		_TimingCameraPos.clear();
 	};
+	
 	ObjectManager::instance()._Camera.lock()->bUpdate = true;
 	Time::instance()._T = 0;
-	RecordManager::Timing = 0;
+	
+	RewindSpeed = -2;
+	TimingSpeed = 1;
+	EndTiming = 0;
+	bPause = false;
+	bReplayInit = false;
+	Timing = 0;
+	bUpdate = false;
+
 
 	SceneManager::instance().Scene_Change(SceneManager::instance().GetCurrentSceneID());
 };
 
-void RecordManager::ReplayStart(ESceneID _SceneID)
+void RecordManager::ReplayStart()
 {
 	EffectManager::instance().Clear();
 	RenderManager::instance().bUIRender = false;
 	ObjectManager::instance()._Camera.lock()->bUpdate = false;
+	bUpdate = false;
 
 	vec3 ScreenCenter = global::CameraPos;
 	ScreenCenter.x += global::ClientSize.first / 2.f;
@@ -103,7 +122,6 @@ void RecordManager::ReplayStart(ESceneID _SceneID)
 		return true;
 	});
 
-	_AtReplayEndChangeSceneID = _SceneID;
 	EndTiming = Timing;
 	Timing = 0;
 	global::_CurGameState = global::ECurGameState::Replay;
@@ -114,19 +132,20 @@ void RecordManager::ReplayEnd( )
 	global::_CurGameState = global::ECurGameState::Play;
 
 	EffectManager::instance().Clear();
-
+	EffectManager::instance().RecordClear();
+	_TimingCameraPos.clear();
 	if (!_TimingCameraPos.empty())
 	{
-		auto LastCameraPos = _TimingCameraPos.end();
+		/*auto LastCameraPos = _TimingCameraPos.end();
 		std::advance(LastCameraPos, -1);
-		global::CameraPos = LastCameraPos->second;
+		global::CameraPos = LastCameraPos->second;*/
 		_TimingCameraPos.clear();
 	}
 	bReplayInit = false;
 	Time::instance()._T = 0;
 	RecordManager::Timing = 0;
 
-	SceneManager::instance().Scene_Change(_AtReplayEndChangeSceneID);
+	SceneManager::instance().Scene_Change(SceneManager::instance().GetNextSceneID());
 }
 void RecordManager::ReplayUpdate()
 {
@@ -151,9 +170,9 @@ void RecordManager::ReplayUpdate()
 	global::CameraPos = IsTiming->second;
 	Timing += TimingSpeed;
 
-	if (Timing < 0)
+	if (Timing <=1)
 	{
-		Timing = 0;
+		Timing = 1;
 	}
 }
 void RecordManager::RePlayRender()
@@ -189,7 +208,7 @@ void RecordManager::RePlayRender()
 		EffectManager::instance().RecordRender();
 		float diff = EndTiming - Timing;
 		diff /= EndTiming;
-		int32_t Alpha = 180 - (diff * 180);
+		int32_t Alpha = 160 - (diff * 160);
 
 		D3DXCOLOR _Color = D3DCOLOR_ARGB(Alpha, 255, 255, 255);
 

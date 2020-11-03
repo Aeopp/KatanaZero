@@ -63,9 +63,7 @@ void Player::Initialize() & noexcept
 
 	KeyBinding();
 
-	_SpCamera= ObjectManager::instance().InsertObject<Camera>();
-	_SpCamera->SetOwner(_This);
-	ObjectManager::instance()._Camera = _SpCamera;
+
 
 	// TODO :: 아이템 획득시 배터리에게 통보해주기.
 	_SpBattery = ObjectManager::instance().InsertObject<Battery>();
@@ -106,6 +104,7 @@ void Player::Release() & noexcept
 
 void Player::Update()
 {
+	if (!bInit)return;
 	Super::Update();
 
 	FSM();
@@ -113,6 +112,8 @@ void Player::Update()
 
 void Player::LateUpdate()
 {
+	if (!bInit)return;
+
 	Super::LateUpdate();
 
 	const float Dt = Time::instance().Delta();
@@ -178,7 +179,8 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		_Shake.Vec = (_CollisionInfo.PushDir)*0.5f;
 		_Shake.Coefficient = _CollisionInfo.PushForce* 0.10f;*/
 
-		_SpCamera->CameraShake(1300.f, math::RandVec({ -1,1 }), 0.2f);
+		
+		ObjectManager::instance()._Camera.lock()->CameraShake(1300.f, math::RandVec({ -1,1 }), 0.2f);
 
 		Time::instance().TimeScale = 0.2f;
 		Time::instance().TimerRegist(0.007f, 0.007f, 0.007f, [this]() {
@@ -554,12 +556,9 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(
 		InputManager::instance().EventRegist([]() {RenderManager::instance()._Terrain.bDebugGridRender = !RenderManager::instance()._Terrain.bDebugGridRender; }, 'I', InputManager::EKEY_STATE::DOWN));
 
-
 	_Anys.emplace_back(
 		InputManager::instance().EventRegist([]() {Time::instance().bTimeInfoRender = !Time::instance().bTimeInfoRender; }, 'O', InputManager::EKEY_STATE::DOWN)
 	);
-
-
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
@@ -567,7 +566,6 @@ void Player::KeyBinding() & noexcept
 		bFrameCurrentCharacterInput = true;
 
 		BloodInit(_PhysicComp->Dir);
-
 	},
 		VK_RBUTTON, InputManager::EKEY_STATE::DOWN));
 
@@ -627,6 +625,15 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
+		if (global::IsReWind() && global::IsReplay())return;
+
+		if (!bInit)
+		{
+			bInit = true;
+			RecordManager::instance().bUpdate = true;
+			return;
+		}
+
 		bFrameCurrentCharacterInput = true;
 		bAttackKeyCheck = true;
 		_PhysicComp->Position.z = 0.f;
@@ -659,7 +666,7 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		RecordManager::instance().ReplayStart(ESceneID::EStage1);
+		RecordManager::instance().ReplayStart();
 		
 	},
 		'2', InputManager::EKEY_STATE::DOWN));

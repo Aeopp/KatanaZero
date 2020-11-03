@@ -68,6 +68,18 @@ vec3 math::RandVec(std::pair<float, float> Range)
 	return vec;
 }
 
+vec3 math::ConvertXAxisDir(vec3 Dir)
+{
+	D3DXVec3Normalize(&Dir, &Dir);
+
+	if (Dir.x < 0.f)
+		Dir = vec3{ -1.f,0.f,0.f };
+	else
+		Dir = vec3{ +1.f,0.f,0.f };
+
+	return Dir;
+}
+
 float math::AngleFromVec(vec3 Dir)
 {
 	return std::atan2(Dir.y, Dir.x);

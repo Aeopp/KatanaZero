@@ -1,5 +1,7 @@
 #include "stdafx.h"
-#include "Grunt.h"
+#include "Gangster.h"
+
+
 #include "Player.h"
 #include "AStarManager.h"
 #include "Grunt_Slash.h"
@@ -13,66 +15,69 @@
 
 using namespace std;
 
-OBJECT_ID::EID Grunt::GetID()
+OBJECT_ID::EID Gangster::GetID()
 {
-	return OBJECT_ID::GRUNT;
-}
-OBJECT_TAG::ETAG Grunt::GetTag()
-{
-	return Super::GetTag();
-}
-std::wstring_view Grunt::GetName() const&
-{
-	return L"Grunt"sv;
+    return OBJECT_ID::EID::GANGSTER;
 }
 
-void Grunt::Initialize() & noexcept
+OBJECT_TAG::ETAG Gangster::GetTag()
 {
-	Super::Initialize();
+    return Super::GetTag();
+}
+
+std::wstring_view Gangster::GetName() const&
+{
+    return L"Gangster"sv;
+
+}
+
+void Gangster::Initialize() & noexcept
+{
+    Super::Initialize();
+
 
 	_TransformComp->Scale *= 2.5f;
 	_PhysicComp->Mass = 100.f;
-	
+
 
 	_RenderComp->bRender = true;
-	
+
 	_RenderComp->AfterImgOff();
 	_RenderComp->PositionCorrection = vec3{ 0.f,-10.f,0.f };
-	
+
 	_CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
 	_CollisionComp->_CollisionInfo.Height = 35;
 	_CollisionComp->_CollisionInfo.Width = 18;
 
 	_PhysicComp->bGravity = true;
 
-	Speed = 500.f ;
+	Speed = 500.f;
 	MoveGoalTime = 2.f;
 	DetectionRange = 400.f;
-	AttackRange = 100.f;
+	AttackRange = 500.f;
 
-	_CurrentState = Grunt::State::Idle;
+	_CurrentState = Gangster::State::Idle;
 
 	PursuitRange = 700.f;
 	NarrowRange = 180.f;
-
-	_SpAttack = ObjectManager::instance().InsertObject < Grunt_Slash>();
-	_SpAttack->SetOwner(_This);
+	//TODO::
+	/*_SpAttack = ObjectManager::instance().InsertObject < Grunt_Slash>();
+	_SpAttack->SetOwner(_This);*/
 	DelayAfterAttack = 0.4f;
-	//_RenderComp->SlowColor = D3DCOLOR_ARGB(255, 255, 0, 0);
 
 }
 
-void Grunt::Update()
+void Gangster::Update()
 {
 	if (!global::IsPlay())return;
-	if ( ! ObjectManager::instance().bEnemyUpdate)return;
+	if (!ObjectManager::instance().bEnemyUpdate)return;
 
 	Super::Update();
 
 	FSM();
 }
 
-void Grunt::LateUpdate()
+void Gangster::LateUpdate()
 {
 	if (!global::IsPlay())return;
 	if (!ObjectManager::instance().bEnemyUpdate)return;
@@ -81,27 +86,17 @@ void Grunt::LateUpdate()
 	Super::LateUpdate();
 
 	const float Dt = Time::instance().Delta();
-
-	//bFrameCurrentCharacterInput = false;
-	//bMoveKeyCheck = false;
-	//bJumpKeyCheck = false;
-	//bAttackKeyCheck = false;
-	//bDownKeyCheck = false;
-	//bSneakKeyCheck = false;
-	//bCurWallRideCollision = false;
-
-	//CurAttackCoolTime -= Dt;
 }
 
-void Grunt::MapHit(typename math::Collision::HitInfo _CollisionInfo)
+void Gangster::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 {
 	Super::MapHit(_CollisionInfo);
 
-	if (_CurrentState == Grunt::State::Walk && _CollisionInfo._ID ==OBJECT_ID::ETILE)
+	if (_CurrentState == Gangster::State::Walk && _CollisionInfo._ID == OBJECT_ID::ETILE)
 	{
 		if (
-			( math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal) 
-			  && (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 5.f)))         ||
+			(math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal)
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 5.f))) ||
 			(math::almost_equal(vec3{ -1.f,0.f,0.f }, _CollisionInfo.Normal)
 				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 5.f)))
 			)
@@ -112,46 +107,50 @@ void Grunt::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 	}
 }
 
-void Grunt::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
+void Gangster::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
-	Super::Hit(_Target  , _CollisionInfo );
+	Super::Hit(_Target, _CollisionInfo);
+
+
 }
 
-void Grunt::Move(vec3 Dir, const float AddSpeed)
-{ 
-	Super::Move(Dir  , AddSpeed);
+void Gangster::Move(vec3 Dir, const float AddSpeed)
+{
+	Super::Move(Dir, AddSpeed);
+
 }
 
-void Grunt::Die()&
+void Gangster::Die()&
 {
 	HurtFly();
 
 	bBlooding = true;
+
 }
 
-void Grunt::EnterStair()
+void Gangster::EnterStair()
 {
-	_CurrentState = Grunt::State::EnterStair;
+	_CurrentState = Gangster::State::EnterStair;
 	RenderComponent::NotifyType _Notify;
-	_Notify[8] = [this]()
+	_Notify[6] = [this]()
 	{
 		bEnterStairMotionEnd = true;
-	}; 
-	_RenderComp->Anim(false, false, L"spr_grunt_enterstair", 8, 0.5f, std::move(_Notify));
+	};
+	_RenderComp->Anim(false, false, L"spr_gangster_enterstair", 6, 0.66, std::move(_Notify));
 }
 
-void Grunt::LeaveStair()
+void Gangster::LeaveStair()
 {
-	_CurrentState = Grunt::State::LeaveStair;
+	_CurrentState = Gangster::State::LeaveStair;
 	RenderComponent::NotifyType _Notify;
-	_Notify[8] = [this]()
+	_Notify[6] = [this]()
 	{
 		bLeaveStairMotionEnd = true;
 	};
-	_RenderComp->Anim(false, false, L"spr_grunt_leavestair", 8, 0.5f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_gangster_leavestair", 6, 0.66f, std::move(_Notify));
 }
 
-void Grunt::EnterStairState()
+void Gangster::EnterStairState()
 {
 	if (bEnterStairMotionEnd)
 	{
@@ -161,7 +160,7 @@ void Grunt::EnterStairState()
 	}
 }
 
-void Grunt::LeaveStairState()
+void Gangster::LeaveStairState()
 {
 	if (bLeaveStairMotionEnd)
 	{
@@ -170,26 +169,29 @@ void Grunt::LeaveStairState()
 	}
 }
 
-void Grunt::Attack()
+void Gangster::Attack()
 {
 	constexpr float AttackRich = 20.f;
 
-	_CurrentState = Grunt::State::Attack;
+	_CurrentState = Gangster::State::Attack;
 	RenderComponent::NotifyType _Notify;
-	vec3 ToTarget =_Target->_TransformComp->Position;
+	vec3 ToTarget = _Target->_TransformComp->Position;
 	ToTarget -= _PhysicComp->Position;
-	ToTarget = ConvertXAxisDir(ToTarget);
+	D3DXVec3Normalize(&ToTarget, &ToTarget);
 
-	_Notify[4] = [ToTarget,this]()
-	{
-		bAttackMotionEnd = true;
-		_SpAttack->AttackStart(ToTarget * AttackRich, ToTarget);
-	};
-	_RenderComp->Anim(false, false, L"spr_grunt_attack", 8, 0.6f, std::move(_Notify));
+	// X축 방향만 필요하다면 사용 아니라면 사용 X ToTarget = ConvertXAxisDir(ToTarget);
+	//TODO :: 
+	//_Notify[4] = [ToTarget, this]()
+	//{
+	//	bAttackMotionEnd = true;
+	//	//TODO :: 
+	//	//_SpAttack->AttackStart(ToTarget * AttackRich, ToTarget);
+	//};
+	//_RenderComp->Anim(false, false, L"spr_grunt_attack", 8, 0.6f, std::move(_Notify));
 	AtTheAttackDir = _PhysicComp->Dir;
-};
+}
 
-void Grunt::AttackState()
+void Gangster::AttackState()
 {
 	if (bAttackMotionEnd)
 	{
@@ -204,36 +206,34 @@ void Grunt::AttackState()
 			return;
 		}
 
-		Time::instance().TimerRegist(DelayAfterAttack, DelayAfterAttack, DelayAfterAttack, 
-		[this]() {
+		Time::instance().TimerRegist(DelayAfterAttack, DelayAfterAttack, DelayAfterAttack,
+			[this]() {
 			if (!global::IsPlay())return true;
 			if (_EnemyState != NormalEnemy::State::Die)
 			{
 				Run();
 			}
-			return true; 
+			return true;
 		});
 	}
 }
 
-void Grunt::Fall()
+void Gangster::Fall()
 {
-
 }
 
-void Grunt::FallState()
+void Gangster::FallState()
 {
-
 }
 
-void Grunt::HurtFly()
+void Gangster::HurtFly()
 {
-	_CurrentState = Grunt::State::HurtFly;
-	_RenderComp->Anim(false, false, L"spr_grunt_hurtfly", 2, 0.5f);
+	_CurrentState = Gangster::State::HurtFly;
+	_RenderComp->Anim(false, false, L"spr_gangsterhurtfly", 2, 0.5f);
 	_PhysicComp->Flying();
 }
 
-void Grunt::HurtFlyState()
+void Gangster::HurtFlyState()
 {
 	if (_PhysicComp->bLand)
 	{
@@ -242,25 +242,25 @@ void Grunt::HurtFlyState()
 	}
 }
 
-void Grunt::HurtGround()
+void Gangster::HurtGround()
 {
-	_CurrentState = Grunt::State::HurtGround;
+	_CurrentState = Gangster::State::HurtGround;
 	RenderComponent::NotifyType _Notify;
 	bBloodingOverHead = true;
 
-	_Notify[16] = [this]()
+	_Notify[14] = [this]()
 	{
 		_RenderComp->bSlowRender = true;
 		bHurtGroundMotionEnd = true;
 	};
 
-	_Notify[9] = [this](){bBloodingOverHead = false;};
+	_Notify[8] = [this]() {bBloodingOverHead = false; };
 
-	_RenderComp->Anim(false, false, L"spr_grunt_hurtground",
-		16, 1.6f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_gangsterhurtground",
+		14, 1.8f, std::move(_Notify));
 }
 
-void Grunt::HurtGroundState()
+void Gangster::HurtGroundState()
 {
 	if (bHurtGroundMotionEnd)
 	{
@@ -268,17 +268,16 @@ void Grunt::HurtGroundState()
 	}
 }
 
-void Grunt::Idle()
+void Gangster::Idle()
 {
-	_CurrentState = Grunt::State::Idle;
-	_RenderComp->Anim(false, true, L"spr_grunt_idle", 8, 0.5f);
+	_CurrentState = Gangster::State::Idle;
+	_RenderComp->Anim(false, true, L"spr_gangsteridle", 8, 0.5f);
 }
 
-void Grunt::IdleState()
+void Gangster::IdleState()
 {
 	vec3 BeforeDir = _PhysicComp->Dir;
 	IsDetected = IsRangeInnerTarget();
-	
 
 	if (IsDetected)
 	{
@@ -288,21 +287,21 @@ void Grunt::IdleState()
 			Turn();
 			return;
 		}
-		else 
+		else
 			Run();
 	}
 }
 
-void Grunt::Run()
+void Gangster::Run()
 {
 	if (!global::IsPlay())return;
 
-	_CurrentState = Grunt::State::Run;
-	_RenderComp->Anim(false, true, L"spr_grunt_run", 10, 0.6f);
+	_CurrentState = Gangster::State::Run;
+	_RenderComp->Anim(false, true, L"spr_gangsterrun", 10, 0.6f);
 	bLaziness = false;
-};
+}
 
-void Grunt::RunState()
+void Gangster::RunState()
 {
 	vec3 ToTarget = _Target->_TransformComp->Position - _PhysicComp->Position;
 	float ToTargetDistance = D3DXVec3Length(&ToTarget);
@@ -325,7 +324,7 @@ void Grunt::RunState()
 		return;
 	}
 	else if (Distance > PathFindCheckMinDistanceMin &&
-    abs( GoalPos.x - _Target->_TransformComp->Position .x )  > 100.f )  
+		abs(GoalPos.x - _Target->_TransformComp->Position.x) > 100.f)
 	{
 		Paths = AStarManager::instance().PathFind(_PhysicComp->Position, _Target->_TransformComp->Position);
 		if (!Paths.empty())
@@ -338,25 +337,25 @@ void Grunt::RunState()
 	if (Paths.empty())return;
 
 	vec3 ToMoveMark = CurMoveMark - _PhysicComp->Position;
-	if (std::abs(ToMoveMark.x)< NextPathCheckMinDistance)
+	if (std::abs(ToMoveMark.x) < NextPathCheckMinDistance)
 	{
 		FollowRouteProcedure();
 	}
-	
+
 	Move(_PhysicComp->Dir, Speed);
 }
 
-void Grunt::Turn()
+void Gangster::Turn()
 {
-	_CurrentState = Grunt::State::Turn;
+	_CurrentState = Gangster::State::Turn;
 	RenderComponent::NotifyType _Notify;
-	_Notify[8] = [this]() {
+	_Notify[6] = [this]() {
 		bTurnMotionEnd = true;
 	};
-	_RenderComp->Anim(true, false, L"spr_grunt_turn", 8, 0.45f,std::move(_Notify));
+	_RenderComp->Anim(true, false, L"spr_gangsterturn", 6, 0.53f, std::move(_Notify));
 }
 
-void Grunt::TurnState()
+void Gangster::TurnState()
 {
 	if (bTurnMotionEnd)
 	{
@@ -380,19 +379,18 @@ void Grunt::TurnState()
 	}
 }
 
-void Grunt::Walk()
+void Gangster::Walk()
 {
 	_EnemyState = NormalEnemy::State::Walk;
-	_CurrentState = Grunt::State::Walk;
-	_RenderComp->Anim(false, true, L"spr_grunt_walk",
-		10, 0.68f);
+	_CurrentState = Gangster::State::Walk;
+	_RenderComp->Anim(false, true, L"spr_gangsterwalk",
+		8, 0.84f);
 }
 
-void Grunt::WalkState()
+void Gangster::WalkState()
 {
 	vec3 BeforeDir = _PhysicComp->Dir;
 	IsDetected = IsRangeInnerTarget();
-	
 
 	if (IsDetected)
 	{
@@ -408,47 +406,45 @@ void Grunt::WalkState()
 		}
 	}
 
-	Move(_PhysicComp->Dir, Speed *0.25f);
+	Move(_PhysicComp->Dir, Speed * 0.25f);
 }
 
-
-void Grunt::AnyState()
+void Gangster::AnyState()
 {
-
 }
 
-void Grunt::FSM()
+void Gangster::FSM()
 {
 	switch (_CurrentState)
 	{
-	case Grunt::State::Attack:
+	case Gangster::State::Attack:
 		AttackState();
 		break;
-	case Grunt::State::Fall:
+	case Gangster::State::Fall:
 		FallState();
 		break;
-	case Grunt::State::HurtFly:
+	case Gangster::State::HurtFly:
 		HurtFlyState();
 		break;
-	case Grunt::State::HurtGround:
+	case Gangster::State::HurtGround:
 		HurtGroundState();
 		break;
-	case Grunt::State::Idle:
+	case Gangster::State::Idle:
 		IdleState();
 		break;
-	case Grunt::State::Run:
+	case Gangster::State::Run:
 		RunState();
 		break;
-	case Grunt::State::Turn:
+	case Gangster::State::Turn:
 		TurnState();
 		break;
-	case Grunt::State::Walk:
+	case Gangster::State::Walk:
 		WalkState();
 		break;
-	case Grunt::State::LeaveStair:
+	case Gangster::State::LeaveStair:
 		LeaveStairState();
 		break;
-	case Grunt::State::EnterStair:
+	case Gangster::State::EnterStair:
 		EnterStairState();
 		break;
 	default:
@@ -457,7 +453,8 @@ void Grunt::FSM()
 
 	AnyState();
 }
-void Grunt::FollowRouteProcedure()
+
+void Gangster::FollowRouteProcedure()
 {
 	CurMoveMark = Paths.back();
 	GoalPos = Paths.front();
@@ -492,19 +489,20 @@ void Grunt::FollowRouteProcedure()
 	{
 		_PhysicComp->Dir = ConvertXAxisDir(ToPath);
 	}
-};
+}
 
-void Grunt::SetUpInitState(float DirX, int32_t StateID)
-{
-	// TODO :: 여기서 초기 상태 지정 ..
-	_RenderComp->Anim(false, true, L"spr_grunt_idle",
-		8, 0.5f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, vec2{ 1.f,1.f }, L"Grunt", LAYER::ELAYER::EOBJECT);
+void Gangster::SetUpInitState(float DirX, int32_t StateID)
+{	// TODO :: 여기서 초기 상태 지정 ..
+	_RenderComp->Anim(false, true, L"spr_gangsteridle",
+		8, 0.5f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, vec2{ 1.f,1.f }, 
+	L"Gangster", LAYER::ELAYER::EOBJECT);
 
 	switch (StateID)
 	{
 	case 0:
-		_RenderComp->Anim(false, true, L"spr_grunt_lean",
-			1, 0.5f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, vec2{ 1.f,1.f }, L"Grunt", LAYER::ELAYER::EOBJECT);
+		Idle();
+		/*_RenderComp->Anim(false, true, L"spr_grunt_lean",
+			1, 0.5f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, vec2{ 1.f,1.f }, L"Grunt", LAYER::ELAYER::EOBJECT);*/
 		// 게으른 순찰상태.
 		bLaziness = true;
 		break;
@@ -521,4 +519,4 @@ void Grunt::SetUpInitState(float DirX, int32_t StateID)
 
 	// TOOD :: 여기서 초기 방향 지정 ..... 
 	AtTheAttackDir = _PhysicComp->Dir = vec3{ DirX,0.f,0.f };
-}
+};

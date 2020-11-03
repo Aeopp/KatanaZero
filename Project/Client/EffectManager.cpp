@@ -52,7 +52,7 @@ void EffectManager::Render()
 		GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
 			&_srcRT, &Center, nullptr, _Color);
 
-		if (_Effect.bRecord)
+		if (_Effect.bRecord && global::IsPlay() && RecordManager::instance().bUpdate)
 		{
 			Record::Info _Info;
 			_Info.Alpha = 255;

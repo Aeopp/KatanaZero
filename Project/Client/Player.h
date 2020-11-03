@@ -120,6 +120,7 @@ private:
 	bool bAttackKeyCheck{ false };
 	bool bDownKeyCheck{ false };
 public :	
+	bool bInit = false;
 	bool bSneak{ false };
 	vec3 FlipDir{0.f,0.f,0.f};
 	vec3 CurWallRideLinePos{ 0,0,0 };
@@ -133,7 +134,6 @@ private:
 	float CurAttackCoolTime = 0.0f;
 	const float PlayerSpeed = 1250.f;
 	std::shared_ptr<class Attack_Slash> _SpAttackSlash{};
-	std::shared_ptr<class Camera> _SpCamera{};
 	std::shared_ptr<class Battery> _SpBattery{};
 	std::shared_ptr<class UIItemIcon > _SpUIItemIcon{};
 };

@@ -58,7 +58,7 @@ protected:
 
     float ToTargetDistance = 0.f;
     
-    vec3 ConvertMoveDir(vec3 Dir);
+    vec3 ConvertXAxisDir(vec3 Dir);
 
     virtual void Turn()abstract;
 private:

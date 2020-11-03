@@ -96,7 +96,7 @@ void RenderComponent::Render()
 				SlowColor);
 
 			// 그려지는 상황이므로 푸시
-			if (global::IsPlay())
+			if (global::IsPlay() && RecordManager::instance().bUpdate)
 			{
 				Record::Info _RecordInfo;
 				int32_t CurTiming = RecordManager::instance().Timing;
@@ -124,7 +124,7 @@ void RenderComponent::Render()
 				_Info._Color);
 
 			// 그려지는 상황이므로 푸시
-			if (global::IsPlay())
+			if (global::IsPlay() && RecordManager::instance().bUpdate)
 			{
 				Record::Info _RecordInfo;
 				int32_t CurTiming = RecordManager::instance().Timing; 

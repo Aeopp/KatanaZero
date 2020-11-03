@@ -10,7 +10,7 @@ public :
     RecordManager();
     friend class Camera;
     int32_t Timing = 0;
-    bool bUpdate = true;
+    bool       bUpdate = false;
 
     void Update();
 
@@ -20,12 +20,13 @@ public :
     void ReWindRender();
     void ReWindEnd();
     ////////////////////
-    void ReplayStart(ESceneID _SceneID);
+    void ReplayStart();
     void ReplayEnd();
     void ReplayUpdate();
     void RePlayRender();
 
     bool bPause = false;
+   // bool bRewindEnd = false;
 
     bool bReplayInit = false;
 
@@ -33,7 +34,6 @@ public :
     int32_t TimingSpeed = 1;
     int32_t EndTiming = 0;
 private:
-    ESceneID _AtReplayEndChangeSceneID;
     // 매니저가 관리하는 현재 T에 해당하는 (그당시 저장했었던) 카메라 좌표를 반환.
                         //Timing  Pos
     std::map<int32_t,vec3>_TimingCameraPos;

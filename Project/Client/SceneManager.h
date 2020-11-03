@@ -14,8 +14,9 @@ public:
 	void Initialize();
 	void Release();
 
+	ESceneID GetNextSceneID()const& { return _NextScene; }
 	ESceneID GetCurrentSceneID()const& { return _CurScene; };
-
+	ESceneID _NextScene{ ESceneID::ENone };
 	// SceneType 과 Enum 등의 값을 매핑시켜서 등록해주세요.
 	template<ESceneID TargetID, typename TargetSceneType,
 		typename...Params>
@@ -24,7 +25,7 @@ private:
 	std::shared_ptr<class Scene> sp_scene{};
 	ESceneID _PreScene{ ESceneID::ENone };
 	ESceneID _CurScene{ ESceneID::ENone };
-
+	
 	std::map<ESceneID, std::function<std::shared_ptr<Scene>()>> MakeSceneTypeMap;
 };
 
