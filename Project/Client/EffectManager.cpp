@@ -43,7 +43,7 @@ void EffectManager::Render()
 		else
 			_Color = D3DCOLOR_ARGB(int32_t(float((_Effect.MaxT - _Effect.T) / _Effect.MaxT) * _Effect.Alpha), 255, 255, 255);
 
-		_Color = SwitchColorFromEffectID(_Effect._ID, _Color);
+		_Color = SwitchColorFromEffectID(_Effect.OBJ_ID, _Color);
 
 		auto TexInfo = TextureManager::instance().Get_TexInfo(_Effect.ObjKey, _Effect.StateKey, _Effect.DrawID);
 		RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width , TexInfo->ImageInfo.Height };
@@ -153,7 +153,7 @@ void EffectManager::Update()
 							_HitInfo.Normal = Normal;
 							_HitInfo.Position = _Effect.Pos;
 							_HitInfo._Target = { };
-							_HitInfo._ID = _Effect._ID;
+							_HitInfo._ID = _Effect.OBJ_ID;
 							_HitInfo._TAG = OBJECT_TAG::EEFFECT;
 							_HitInfo.PosDir = _Dir;
 							spOwner->Hit({}, std::move(_HitInfo));
@@ -284,7 +284,7 @@ void EffectManager::EffectPush
 	_Info.End = _End;
 	_Info.AnimDelta = AnimDelta;
 	_Info.MaxT = MaxT;
-	_Info._ID = _EffectID;
+	_Info.OBJ_ID = _EffectID;
 	_Info.Pos = Pos;
 	_Info.Dir = Dir;
 	_Info.Scale = Scale;

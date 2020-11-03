@@ -24,6 +24,8 @@ protected:
     bool IsSamefloor(vec3 TargetPos);
     NormalEnemy::State _EnemyState = NormalEnemy::State::Idle;
     
+
+    std::shared_ptr<class RenderComponent> _FollowRenderComp;
     std::vector<vec3> Paths;
     vec3 GoalPos{ 0.f,0.f,0.f };
     static inline const float PathFindCheckMinDistanceMin = 100.f;

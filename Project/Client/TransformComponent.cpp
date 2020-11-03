@@ -3,18 +3,18 @@
 
 matrix TransformComponent::CalcSRTMatrix(const bool bRender)
 {
-	matrix MScale , MRotation, MTrans;
+	matrix MScale, MRotation, MTrans;
 
 	D3DXMatrixScaling(&MScale, Scale.x, Scale.y, Scale.z);
 	D3DXMatrixRotationZ(&MRotation, Rotation.z);
-	if(bRender)
-		D3DXMatrixTranslation(&MTrans, Position.x-global::CameraPos.x, 
-										Position.y-global::CameraPos.y, Position.z);
-	else 
-		D3DXMatrixTranslation(&MTrans, Position.x , Position.y, Position.z);
+	if (bRender)
+		D3DXMatrixTranslation(&MTrans, Position.x - global::CameraPos.x,
+			Position.y - global::CameraPos.y, Position.z);
+	else
+		D3DXMatrixTranslation(&MTrans, Position.x, Position.y, Position.z);
 
 	return MScale * MRotation * MTrans;
-}
+};
 
 matrix TransformComponent::CalcSRTRMatrix(const bool bRender)
 {
@@ -72,8 +72,6 @@ matrix TransformComponent::CalcSTWorldMatrix(const bool bRender)
 void TransformComponent::Update()
  {
 	 Component::Update();
-
-	
  }
 
 void TransformComponent::LateUpdate()

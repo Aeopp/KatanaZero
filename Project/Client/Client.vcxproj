@@ -164,6 +164,7 @@
     <ClInclude Include="AttackObject.h" />
     <ClInclude Include="AttackSlash.h" />
     <ClInclude Include="Battery.h" />
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="Client.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="Gangster.h" />
+    <ClInclude Include="GangsterAttack.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="GraphicDevice.h" />
     <ClInclude Include="Grunt.h" />
@@ -228,6 +230,7 @@
     <ClCompile Include="AttackObject.cpp" />
     <ClCompile Include="AttackSlash.cpp" />
     <ClCompile Include="Battery.cpp" />
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="Client.cpp" />
@@ -241,6 +244,7 @@
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Gangster.cpp" />
+    <ClCompile Include="GangsterAttack.cpp" />
     <ClCompile Include="global.cpp" />
     <ClCompile Include="GraphicDevice.cpp" />
     <ClCompile Include="Grunt.cpp" />

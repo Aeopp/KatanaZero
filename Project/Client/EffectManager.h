@@ -7,6 +7,8 @@
 // 50 - 20       / 50 
 struct EffectInfo
 {
+	static int32_t MakeID() { static int32_t ID = 0; return ++ID; };
+
 	// 루프 결정
 	bool bLoop = false;
 	// 충돌 판정 허용할지 말지
@@ -44,7 +46,9 @@ struct EffectInfo
 	// 알파를 이펙트 시간에 맞춰 보간할까요 ?? 
 	bool bAlphaLerp = false;
 	int32_t Alpha = 255;
-	OBJECT_ID::EID _ID = OBJECT_ID::EID::ENONE;
+	OBJECT_ID::EID OBJ_ID = OBJECT_ID::EID::ENONE;
+
+	int32_t _ID = EffectInfo::MakeID();
 };
 
 class EffectManager : public singleton_interface<EffectManager>

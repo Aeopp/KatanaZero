@@ -11,11 +11,18 @@
 #include "PhysicTransformComponent.h"
 #include "ObjectManager.h"
 #include "Camera.h"
+#include "ComponentManager.h"
 
 void NormalEnemy::Initialize() & noexcept
 {
 	Super::Initialize();
 
+	_FollowRenderComp = ComponentManager::instance().Insert<RenderComponent>(_This);
+	_FollowRenderComp->bRender = false;
+	_FollowRenderComp->AfterImgOff();
+	_FollowRenderComp->PositionCorrection = vec3{ 0.f,-60.f,0.f };
+	_FollowRenderComp->Anim(true, false, L"follow", 2, 1.2f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 }, L"spr_enemy_follow", LAYER::ELAYER::EOBJECT);
+	
 	_RenderComp->_RenderAfterEvent = [this]() 
 	{	
 		if (!global::bDebug)return;
@@ -108,7 +115,7 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 	{
 		return;
 	}
-	if (_Target.lock()->GetID() == OBJECT_ID::ATTACK_SLASH)
+	if (!_Target.expired() && _Target.lock()->GetID() == OBJECT_ID::ATTACK_SLASH)
 	{
 		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce *3.5f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
@@ -249,6 +256,8 @@ bool NormalEnemy::IsRangeInnerTarget()
 		case NormalEnemy::State::Walk:
 			_DetectionRangeColorGoal = D3DCOLOR_ARGB(255, 255, 0, 0);
 			_EnemyState = NormalEnemy::State::Detecting;
+			_FollowRenderComp->bRender = true;
+			_FollowRenderComp->Anim(true, false, L"follow", 2, 1.2f);
 			break;
 		default:
 			break;

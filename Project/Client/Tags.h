@@ -7,6 +7,7 @@ namespace OBJECT_ID
 	// 태그 다음 집합
 	enum EID : uint8_t
 	{
+		BULLET,
 		HIT_EFFECT,
 		GANGSTER,
 		HIT_IMPACT,

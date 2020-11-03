@@ -17,6 +17,8 @@ public :
 	virtual void Move( vec3 Dir, const float AddSpeed);
 
 	std::shared_ptr<class PhysicTransformComponent> _PhysicComp;
+	
+
 	std::shared_ptr<class RenderComponent> _RenderComp;
 	std::shared_ptr<class CollisionComponent> _CollisionComp;
 protected:

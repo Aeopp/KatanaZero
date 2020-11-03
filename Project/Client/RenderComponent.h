@@ -42,6 +42,7 @@ public :
 		float T = 0.f;
 		std::wstring ObjectKey;
 		std::wstring StateKey;
+
 		//[begin,end)
 		uint8_t End = 0;
 		float AnimSpeed = 1.f;

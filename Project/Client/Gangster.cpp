@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "Gangster.h"
 
-
+#include "RenderComponent.h"
+#include "EffectManager.h"
 #include "Player.h"
 #include "AStarManager.h"
 #include "Grunt_Slash.h"
@@ -12,8 +13,165 @@
 #include "ObjectManager.h"
 #include "Time.h"
 #include "GraphicDevice.h"
+#include "Component.h"
+#include "Texture_Manager.h"
 
 using namespace std;
+auto RunRenderMake = [](float& RotZ)
+{
+	auto GunRender = [&](Component& _Comp) {
+
+		auto& _RenderComp = dynamic_cast<RenderComponent&>(_Comp);
+		if (!_RenderComp.bRender)return;
+
+		const float dt = Time::instance().Delta();
+
+		_RenderComp.Component::Render();
+
+		auto spOwner = _RenderComp._Owner.lock();
+		auto spTexInfo = TextureManager::instance().Get_TexInfo
+		(_RenderComp._Info.ObjectKey, _RenderComp._Info.StateKey, _RenderComp._Info.GetCurFrame());
+
+		if (!spOwner)return;
+		if (!spOwner->_TransformComp)return;
+		if (!spTexInfo)return;
+
+		const float JoomScale = global::JoomScale;
+		vec3 CameraPos = global::CameraPos;
+
+		matrix MWorld,MScale, MRotZ,MTrans  ; //  = spOwner->_TransformComp->CalcWorldMatrix(true);
+		D3DXMatrixScaling(&MScale, spOwner->_TransformComp->Scale.x, spOwner->_TransformComp->Scale.y, spOwner->_TransformComp->Scale.z);
+		D3DXMatrixRotationZ(&MRotZ, RotZ);
+		D3DXMatrixTranslation(&MTrans, spOwner->_TransformComp->Position.x - global::CameraPos.x, spOwner->_TransformComp->Position.y - global::CameraPos.y, spOwner->_TransformComp->Position.z);
+
+		MWorld = MScale * MRotZ * MTrans;
+
+		MWorld = MWorld * math::GetCameraJoomMatrix(JoomScale, vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
+		MWorld._11 *= _RenderComp.AnimDir;
+		MWorld._41 += _RenderComp.PositionCorrection.x;
+		MWorld._42 += _RenderComp.PositionCorrection.y;
+		MWorld._43 += _RenderComp.PositionCorrection.z;
+
+		const auto LocalPoints = math::GetLocalRect(vec2{ (float)spTexInfo->ImageInfo.Width,(float)spTexInfo->ImageInfo.Height });
+
+		bool IsRenderable = false;
+
+		for (const auto& LocalPoint : LocalPoints)
+		{
+			vec3 WorldPoint{ 0,0,0 };
+			D3DXVec3TransformCoord(&WorldPoint, &LocalPoint, &MWorld);
+			IsRenderable |= math::IsPointInnerRect(global::GetScreenRect(), WorldPoint);
+			if (IsRenderable)break;
+		}
+
+		if (IsRenderable)
+		{
+			//if (bAfterRender)
+			{
+				for (auto _AfterIter = begin(_RenderComp._AfterImgVec);
+					_AfterIter != end(_RenderComp._AfterImgVec);)
+				{
+					auto& _After = *_AfterIter;
+
+					auto TexInfo = TextureManager::instance().
+						Get_TexInfo(_RenderComp._Info.ObjectKey, _After.StateKey, _After.ID);
+					RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width * _RenderComp._Info.SrcScale.x,
+								  TexInfo->ImageInfo.Height * _RenderComp._Info.SrcScale.y };
+					vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+					GraphicDevice::instance().GetSprite()->SetTransform(&_After.PastWorld);
+					GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+						&_srcRT, &__TextureCenter, nullptr,
+						_After._Color);
+
+					_After.T += _After.DeltaCoefft * dt;
+					D3DXColorLerp(&_After._Color, &_After._Color, &_After._GoalColor, _After.T);
+
+					if (_After._Color.a < 0)
+					{
+						_AfterIter = _RenderComp._AfterImgVec.erase(_AfterIter);
+					}
+					else ++_AfterIter;
+				}
+				_RenderComp.AfterImgPush(MWorld);
+			}
+
+			if (global::ECurGameState::PlaySlow == global::_CurGameState && _RenderComp.bSlowRender)
+			{
+				RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _RenderComp._Info.SrcScale.x,
+						  spTexInfo->ImageInfo.Height * _RenderComp._Info.SrcScale.y };
+				vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,
+				spTexInfo->ImageInfo.Height / 2.f,0.f };
+				GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+				GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture,
+					&srcRect, &TextureCenter, nullptr,
+					_RenderComp.SlowColor);
+
+				// 그려지는 상황이므로 푸시
+				if (global::IsPlay() && RecordManager::instance().bUpdate)
+				{
+					Record::Info _RecordInfo;
+					int32_t CurTiming = RecordManager::instance().Timing;
+					_RecordInfo.Alpha = 255;
+					_RecordInfo.DrawID = _RenderComp._Info.GetCurFrame();
+					_RecordInfo.MWorld = MWorld;
+					_RecordInfo.ObjKey = _RenderComp._Info.ObjectKey;
+					_RecordInfo.StateKey = _RenderComp._Info.StateKey;
+					_RecordInfo.OwnerY = spOwner->_TransformComp->Position.y;
+					_RecordInfo.Timing = CurTiming;
+					_RecordInfo._Color = _RenderComp._Info._Color;
+
+					_RenderComp._Record._Infos.insert({ CurTiming  , _RecordInfo });
+				}
+			}
+			else
+			{
+				RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _RenderComp._Info.SrcScale.x,
+						  spTexInfo->ImageInfo.Height * _RenderComp._Info.SrcScale.y };
+				vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,
+				spTexInfo->ImageInfo.Height / 2.f,0.f };
+				GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+				GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture,
+					&srcRect, &TextureCenter, nullptr,
+					_RenderComp._Info._Color);
+
+				// 그려지는 상황이므로 푸시
+				if (global::IsPlay() && RecordManager::instance().bUpdate)
+				{
+					Record::Info _RecordInfo;
+					int32_t CurTiming = RecordManager::instance().Timing;
+					_RecordInfo.Alpha = 255;
+					_RecordInfo.DrawID = _RenderComp._Info.GetCurFrame();
+					_RecordInfo.MWorld = MWorld;
+					_RecordInfo.ObjKey = _RenderComp._Info.ObjectKey;
+					_RecordInfo.StateKey = _RenderComp._Info.StateKey;
+					_RecordInfo.OwnerY = spOwner->_TransformComp->Position.y;
+					_RecordInfo.Timing = CurTiming;
+					_RecordInfo._Color = _RenderComp._Info._Color;
+
+					_RenderComp._Record._Infos.insert({ CurTiming  , _RecordInfo });
+				}
+			}
+		}
+
+		auto NotifyEvent = _RenderComp._Info._Nofify.find(_RenderComp._Info.GetCurFrame());
+
+		if (NotifyEvent != std::end(_RenderComp._Info._Nofify))
+		{
+			if (NotifyEvent->second)
+			{
+				// 해당 프레임에 도달하였으니 함수 호출
+				NotifyEvent->second();
+			}
+		}
+
+		if (_RenderComp._RenderAfterEvent)
+		{
+			_RenderComp._RenderAfterEvent();
+		}
+	};
+
+	return GunRender;
+};
 
 OBJECT_ID::EID Gangster::GetID()
 {
@@ -28,17 +186,22 @@ OBJECT_TAG::ETAG Gangster::GetTag()
 std::wstring_view Gangster::GetName() const&
 {
     return L"Gangster"sv;
-
 }
 
 void Gangster::Initialize() & noexcept
 {
     Super::Initialize();
 
+	_SpGun = ComponentManager::instance().Insert<RenderComponent>(_This);
+	_SpGun->bRender = false;
+	_SpGun->AfterImgOff();
+	_SpGun->PositionCorrection = vec3{ 0.f,-0,0.f };
+	_SpGun->Anim(false, false, L"spr_gangstergun", 1, FLT_MAX, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 }, L"Gangster", LAYER::ELAYER::EOBJECT);
+	_SpGun->_Control.bRender = true;
+	_SpGun->_Control._Render = RunRenderMake(GunRotZ);
 
 	_TransformComp->Scale *= 2.5f;
 	_PhysicComp->Mass = 100.f;
-
 
 	_RenderComp->bRender = true;
 
@@ -171,7 +334,8 @@ void Gangster::LeaveStairState()
 
 void Gangster::Attack()
 {
-	constexpr float AttackRich = 20.f;
+	constexpr float AttackRich = 50.f;
+	constexpr float BulletSpeed = 700.f;
 
 	_CurrentState = Gangster::State::Attack;
 	RenderComponent::NotifyType _Notify;
@@ -179,16 +343,32 @@ void Gangster::Attack()
 	ToTarget -= _PhysicComp->Position;
 	D3DXVec3Normalize(&ToTarget, &ToTarget);
 
-	// X축 방향만 필요하다면 사용 아니라면 사용 X ToTarget = ConvertXAxisDir(ToTarget);
-	//TODO :: 
-	//_Notify[4] = [ToTarget, this]()
-	//{
-	//	bAttackMotionEnd = true;
-	//	//TODO :: 
-	//	//_SpAttack->AttackStart(ToTarget * AttackRich, ToTarget);
-	//};
-	//_RenderComp->Anim(false, false, L"spr_grunt_attack", 8, 0.6f, std::move(_Notify));
-	AtTheAttackDir = _PhysicComp->Dir;
+	GunRotZ = atan2f(ToTarget.y, ToTarget.x);
+
+	_SpGun->bRender = true;
+	/* X축 방향만 필요하다면 사용 아니라면 사용 X ToTarget = ConvertXAxisDir(ToTarget);
+	TODO :: */
+	_Notify[7] = [ToTarget, this]()
+	{
+		bAttackMotionEnd = true;
+		//TODO :: 
+		//_SpAttack->AttackStart(ToTarget * AttackRich, ToTarget);
+		vec3 FireLocation = _PhysicComp->Position + (ToTarget * AttackRich);
+
+		int32_t FireEffectImgID = math::Rand<int32_t>({ 0,2 });
+		std::wstring FireEftKey = L"spr_fire_" + std::to_wstring(FireEffectImgID);
+
+		EffectManager::instance().EffectPush(L"Effect", L"spr_bullet",
+			1, (std::numeric_limits<float>::max)(), 10.f, OBJECT_ID::EID::BULLET,
+			true, FireLocation, ToTarget * BulletSpeed, { 1,1,1 }, false,
+			true, false, true, 34, 2, 255, false, 0.f, atan2f(ToTarget.y, ToTarget.x),
+			0);
+
+		EffectManager::instance().EffectPush(L"Effect", FireEftKey, 6, 0.1f, 0.1f * 6 + 0.01f,
+			OBJECT_ID::EID::ENONE, true, FireLocation, { 0,0,0 }, { 2,2,2, });
+	};
+	_RenderComp->Anim(false, false, L"spr_gangsteraim", 7, 0.1f, std::move(_Notify));
+	AtTheAttackDir = ToTarget;
 }
 
 void Gangster::AttackState()
@@ -202,15 +382,17 @@ void Gangster::AttackState()
 		if (D3DXVec3Dot(&AtTheAttackDir, &ToTarget) < 0.f)
 		{
 			_PhysicComp->Dir = ConvertXAxisDir(ToTarget);
+			_SpGun->bRender = false;
 			Turn();
 			return;
-		}
+		};
 
 		Time::instance().TimerRegist(DelayAfterAttack, DelayAfterAttack, DelayAfterAttack,
 			[this]() {
 			if (!global::IsPlay())return true;
 			if (_EnemyState != NormalEnemy::State::Die)
 			{
+				_SpGun->bRender = false;
 				Run();
 			}
 			return true;
@@ -307,6 +489,7 @@ void Gangster::RunState()
 	float ToTargetDistance = D3DXVec3Length(&ToTarget);
 	if (ToTargetDistance < AttackRange)
 	{
+		_SpGun->bRender = true;
 		Attack();
 		return;
 	};

@@ -26,7 +26,7 @@ public:
 private:
 	//TODO :: 여기서 어택객체 
 //	std::shared_ptr<class Grunt_Slash> _SpAttack;
-
+	std::shared_ptr<class RenderComponent> _SpGun;
 	typename Gangster::State _CurrentState{ Gangster::State::Idle };
 public :
 	virtual void Initialize() & noexcept;
@@ -60,7 +60,7 @@ public :
 private:
 	void AnyState();
 	void FSM();
-
+	float GunRotZ = 0.f;
 	void FollowRouteProcedure();
 public:
 	bool bAttackMotionEnd{ false };

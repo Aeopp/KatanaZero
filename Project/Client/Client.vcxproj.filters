@@ -219,6 +219,8 @@
     <ClInclude Include="RecordManager.h" />
     <ClInclude Include="Record.h" />
     <ClInclude Include="Gangster.h" />
+    <ClInclude Include="Bullet.h" />
+    <ClInclude Include="GangsterAttack.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -353,6 +355,8 @@
     <ClCompile Include="RecordManager.cpp" />
     <ClCompile Include="Record.cpp" />
     <ClCompile Include="Gangster.cpp" />
+    <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="GangsterAttack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

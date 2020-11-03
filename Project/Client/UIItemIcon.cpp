@@ -11,6 +11,7 @@ static auto ItemIconRenderMake = [](int8_t& LeftItem, int8_t& RightItem)
 {
 	auto BatteryRender = [&](Component& _Comp)
 	{
+		
 		auto& _UIRenderComp = dynamic_cast<UIRenderComponent&>(_Comp);
 
 		auto spOwner = _UIRenderComp._Owner.lock();
