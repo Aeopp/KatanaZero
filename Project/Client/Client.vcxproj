@@ -179,9 +179,11 @@
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="Gangster.h" />
+    <ClInclude Include="GangsterArm.h" />
     <ClInclude Include="GangsterAttack.h" />
     <ClInclude Include="GangsterGun.h" />
     <ClInclude Include="global.h" />
+    <ClInclude Include="GO.h" />
     <ClInclude Include="GraphicDevice.h" />
     <ClInclude Include="Grunt.h" />
     <ClInclude Include="Grunt_Slash.h" />
@@ -245,9 +247,11 @@
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Gangster.cpp" />
+    <ClCompile Include="GangsterArm.cpp" />
     <ClCompile Include="GangsterAttack.cpp" />
     <ClCompile Include="GangsterGun.cpp" />
     <ClCompile Include="global.cpp" />
+    <ClCompile Include="GO.cpp" />
     <ClCompile Include="GraphicDevice.cpp" />
     <ClCompile Include="Grunt.cpp" />
     <ClCompile Include="Grunt_Slash.cpp" />

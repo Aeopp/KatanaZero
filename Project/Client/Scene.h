@@ -15,9 +15,11 @@ public:
 public:
 	std::vector<std::shared_ptr<class object>>SceneManageObjs;
 
+	void LoadObjectInfo();
 	
 
 	std::wstring CurrentMapStateKey{};
+	std::wstring LoadObjectInfoFilePath{};
 	std::wstring LoadMapTexInfoFilePath{}; 
 	std::wstring LoadCollisionTileInfoFilePath{};
 	std::wstring LoadLineInfoFilePath{};

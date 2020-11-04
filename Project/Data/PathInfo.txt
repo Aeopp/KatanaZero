@@ -402,6 +402,10 @@ spr_gangsterwalk
 Gangster
 spr_gangsterwhip
 6
+..\Resource\Texture\Gangster\spr_arm\%d.png
+Gangster
+spr_arm
+2
 ..\Resource\Texture\spr_enemy_follow\follow\%d.png
 spr_enemy_follow
 follow
@@ -418,3 +422,15 @@ Gunspark1
 Effect
 Gunspark2
 8
+..\Resource\Texture\EditObject\PlaceDisplay\Object%d.png
+EditObject
+PlaceDisplay
+10
+..\Resource\Texture\Go\Go\%d.png
+Go
+Go
+2
+..\Resource\Texture\Itemicons\Itemicons\%d.png
+Itemicons
+Itemicons
+5

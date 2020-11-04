@@ -68,15 +68,26 @@ struct RenderMapObjInfo
 
 struct ObjectInfo
 {
-	enum EObjectID : uint32_t
+	enum ESpawnID : uint32_t
 	{
-		NONE,
+		Explosive,
+		HeadHunter,
+		Grunt,
+		Gangster,
+		Knife,
+		Pomp,
+		Shotgun,
+		Smoke,
+		EndTrigger,
+		Player,
 	};
 	ObjectInfo() = default;
-	ObjectInfo(const uint32_t _ObjectID, const vec3& Position) : _ObjectID{ _ObjectID }, Position{ Position } {};
+	//ObjectInfo(const uint32_t _ObjectID, const vec3& Position) : _ObjectID{ _ObjectID }, Position{ Position } {};
 
 	uint32_t _ObjectID{};
 	vec3 Position{};
+	float XDir = 1;
+	int32_t InitState{ 0 };
 };
 static std::wostream& operator<<(std::wostream& os,
 	const ObjectInfo& _ObjectInfo)
@@ -85,7 +96,10 @@ static std::wostream& operator<<(std::wostream& os,
 
 		// 파일 저장 시작
 		<< _ObjectInfo._ObjectID << std::endl
-		<< _ObjectInfo.Position << std::endl;
+		<< _ObjectInfo.Position << std::endl
+		<< _ObjectInfo.XDir << std::endl
+		<< _ObjectInfo.InitState << std::endl;
+
 	// 파일 저장 끝
 }
 
@@ -96,7 +110,9 @@ static std::wistream& operator >> (std::wistream& is,
 
 	is
 		>> _ObjectInfo._ObjectID
-		>> _ObjectInfo.Position;
+		>> _ObjectInfo.Position
+		>> _ObjectInfo.XDir
+		>> _ObjectInfo.InitState;
 
 	return is;
 };

@@ -82,10 +82,10 @@ void UIItemIcon::Initialize() & noexcept
 		auto spRender = wpRender.lock();
 		if (!spRender)return true;
 
-		ItemIcons.first++;
+		/*ItemIcons.first++;
 		ItemIcons.first %= EItem::End;
 		ItemIcons.second++;
-		ItemIcons.second %=EItem::End;
+		ItemIcons.second %=EItem::End;*/
 
 		return false;
 	});

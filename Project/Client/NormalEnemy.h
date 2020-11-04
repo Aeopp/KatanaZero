@@ -19,10 +19,12 @@ public :
 
     virtual void SetUpInitState(float DirX,int32_t StateID)abstract;
     virtual ~NormalEnemy()noexcept = default;
+
+    NormalEnemy::State _EnemyState = NormalEnemy::State::Idle;
+
 protected:
     static inline std::pair<float, float> IsSamefloorRange{-169.f,+48.f};
     bool IsSamefloor(vec3 TargetPos);
-    NormalEnemy::State _EnemyState = NormalEnemy::State::Idle;
     
 
     std::shared_ptr<class RenderComponent> _FollowRenderComp;

@@ -30,12 +30,24 @@ void CObjectTool::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_LIST1, _ListBox);
 	DDX_Control(pDX, IDC_PICTURE, _Picture);
+	DDX_Control(pDX, IDC_Left_Dir, LeftDir);
+	DDX_Control(pDX, IDC_Init1, InitStateBtns[0]);
+	DDX_Control(pDX, IDC_Init2, InitStateBtns[1]);
+	DDX_Control(pDX, IDC_Init3,  InitStateBtns[2]);
+	DDX_Control(pDX, IDC_Init4,  InitStateBtns[3]);
+	DDX_Control(pDX, IDC_Init5,  InitStateBtns[4]);
 }
 
 
 BEGIN_MESSAGE_MAP(CObjectTool, CDialog)
 	ON_WM_DROPFILES()
 	ON_LBN_SELCHANGE(IDC_LIST1, &CObjectTool::OnLbnSelchangeItemList)
+	ON_BN_CLICKED(IDC_Left_Dir, &CObjectTool::OnBnClickedLeftDir)
+	ON_BN_CLICKED(IDC_Init1, &CObjectTool::OnBnClickedInit1)
+	ON_BN_CLICKED(IDC_Init2, &CObjectTool::OnBnClickedInit2)
+	ON_BN_CLICKED(IDC_Init3, &CObjectTool::OnBnClickedInit3)
+	ON_BN_CLICKED(IDC_Init4, &CObjectTool::OnBnClickedInit4)
+	ON_BN_CLICKED(IDC_Init5, &CObjectTool::OnBnClickedInit5)
 END_MESSAGE_MAP()
 
 
@@ -175,3 +187,70 @@ CMFCToolView *  CObjectTool::GetView() const &
 	return pView;
 }
 
+void CObjectTool::OnBnClickedLeftDir()
+{
+	if (LeftDir.GetCheck())
+	{
+		auto _View= GetView();
+		_View->_ObjectEdit.CurrentXDir = -1;
+
+		// 방향은 -1
+	}
+	else
+	{
+		auto _View = GetView();
+		_View->_ObjectEdit.CurrentXDir = +1;
+		// 방향은 +1 ;
+	}
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CObjectTool::OnBnClickedInit1()
+{
+	InitStateClickedEvent();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CObjectTool::OnBnClickedInit2()
+{
+	InitStateClickedEvent();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CObjectTool::OnBnClickedInit3()
+{
+	InitStateClickedEvent();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CObjectTool::OnBnClickedInit4()
+{
+	InitStateClickedEvent();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CObjectTool::OnBnClickedInit5()
+{
+	InitStateClickedEvent();
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+};
+
+void CObjectTool::InitStateClickedEvent()
+{
+	for (size_t i = 0; i < InitStateBtns.size(); ++i)
+	{
+		if (InitStateBtns[i].GetCheck())
+		{
+
+			int32_t CurState = i + 1;
+			auto _View = GetView();
+			_View->_ObjectEdit.CurrentInitState = CurState; 
+			break;
+		}
+	}
+}

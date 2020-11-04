@@ -26,6 +26,7 @@ public:
 private:
 	//TODO :: 여기서 어택객체 
 //	std::shared_ptr<class Grunt_Slash> _SpAttack;
+	std::shared_ptr<class GangsterArm> _SpArm;
 	std::shared_ptr<class GangsterGun> _SpGun;
 	typename Gangster::State _CurrentState{ Gangster::State::Idle };
 	float AttackCoolTime = 0.3f;
@@ -58,14 +59,16 @@ public :
 	void TurnState();
 	void Walk();
 	void WalkState();
+	void Whip();
+	void WhipState();
 private:
 	void AnyState();
 	void FSM();
 	
 	void FollowRouteProcedure();
 public:
-	bool bAttackMotionEnd{ false };
 	bool bTurnMotionEnd{ false };
+	bool bWhipMotionEnd{ false };
 
 	float GunRotZ = 0.f;
 	float _Y = 0.f;

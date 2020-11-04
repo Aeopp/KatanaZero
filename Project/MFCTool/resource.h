@@ -25,7 +25,10 @@
 #define IDC_RADIO2                      1010
 #define IDC_RADIO3                      1011
 #define IDC_CHECK1                      1012
+#define IDC_Init4                       1012
 #define IDC_BUTTON3                     1013
+#define IDC_RADIO12                     1013
+#define IDC_Init5                       1013
 #define IDC_EDIT6                       1014
 #define IDC_CHECK2                      1015
 #define IDC_CHECK3                      1016
@@ -50,8 +53,11 @@
 #define IDC_ASTAR                       1033
 #define IDC_Stairs                      1034
 #define IDC_Door                        1035
-#define IDC_CHECK7                      1036
 #define IDC_STAIREND                    1036
+#define IDC_Left_Dir                    1037
+#define IDC_Init1                       1038
+#define IDC_Init2                       1039
+#define IDC_Init3                       1040
 
 // Next default values for new objects
 // 
@@ -59,7 +65,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        317
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1037
+#define _APS_NEXT_CONTROL_VALUE         1041
 #define _APS_NEXT_SYMED_VALUE           315
 #endif
 #endif

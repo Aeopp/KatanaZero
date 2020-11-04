@@ -17,6 +17,7 @@
 #include "Component.h"
 #include "Texture_Manager.h"
 #include "GangsterGun.h"
+#include "GangsterArm.h"
 
 using namespace std;
 
@@ -54,8 +55,8 @@ void Gangster::Initialize() & noexcept
 
 	Speed = 500.f;
 	MoveGoalTime = 2.f;
-	DetectionRange = 400.f;
-	AttackRange = 500.f;
+	DetectionRange = 800.f;
+	AttackRange = 800.f;
 
 	_CurrentState = Gangster::State::Idle;
 
@@ -69,6 +70,12 @@ void Gangster::Initialize() & noexcept
 	_SpGun = ObjectManager::instance().InsertObject<GangsterGun>();
 	_SpGun->SetOwner(_This);
 
+	_SpArm = ObjectManager::instance().InsertObject<GangsterArm>();
+	_SpArm->SetOwner(_This);
+
+	IsSamefloorRange = { -120.f,+48.f };
+
+	DetectionRange = AttackRange;
 }
 
 void Gangster::Update()
@@ -120,7 +127,9 @@ void Gangster::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo
 {
 	Super::Hit(_Target, _CollisionInfo);
 
+	_SpArm->_RenderComp->bRender = false;
 
+	_SpGun->_RenderComp->bRender = false;
 }
 
 void Gangster::Move(vec3 Dir, const float AddSpeed)
@@ -145,7 +154,7 @@ void Gangster::EnterStair()
 	{
 		bEnterStairMotionEnd = true;
 	};
-	_RenderComp->Anim(false, false, L"spr_gangster_enterstair", 6, 0.66, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_gangsterenterstair", 6, 0.66, std::move(_Notify));
 }
 
 void Gangster::LeaveStair()
@@ -156,7 +165,7 @@ void Gangster::LeaveStair()
 	{
 		bLeaveStairMotionEnd = true;
 	};
-	_RenderComp->Anim(false, false, L"spr_gangster_leavestair", 6, 0.66f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_gangsterleavestair", 6, 0.66f, std::move(_Notify));
 }
 
 void Gangster::EnterStairState()
@@ -180,40 +189,58 @@ void Gangster::LeaveStairState()
 
 void Gangster::Attack()
 {
+	_RenderComp->PositionCorrection = vec3{ 0.f,-20.f,0.f };
+	AttackCoolTime = 0.4f;
 
 	_CurrentState = Gangster::State::Attack;
 	RenderComponent::NotifyType _Notify;
-	vec3 ToTarget = _Target->_TransformComp->Position;
-	ToTarget -= _PhysicComp->Position;
+	vec3 ToTarget = _Target->_TransformComp->Position - _PhysicComp->Position;
 	D3DXVec3Normalize(&ToTarget, &ToTarget);
 
 	GunRotZ = atan2f(ToTarget.y, ToTarget.x);
 	// ¿©±â¼­ ÃÑ ·»´õ¸µ ÄÒ´Ù
 	_SpGun->GunRenderStart();
-	/* XÃà ¹æÇâ¸¸ ÇÊ¿äÇÏ´Ù¸é »ç¿ë ¾Æ´Ï¶ó¸é »ç¿ë X ToTarget = ConvertXAxisDir(ToTarget);
-	TODO :: */
-	_Notify[7] = [ToTarget, this]()
-	{
-		bAttackMotionEnd = true;
-		//TODO :: 
-		//_SpAttack->AttackStart(ToTarget * AttackRich, ToTarget);
-	
-	};
-	_RenderComp->Anim(false, false, L"spr_gangsteraim", 7, 0.1f, std::move(_Notify));
-	AtTheAttackDir = ToTarget;
+	_SpArm->ArmRenderStart();
+
+	_RenderComp->Anim(false, false, L"spr_gangsteraim", 7, 0.1f);
+	AtTheAttackDir = math::ConvertXAxisDir(ToTarget);
 }
 
 void Gangster::AttackState()
 {
-	if (bAttackMotionEnd)
-	{
-		bAttackMotionEnd = false;
+	vec3 ToTarget = _Target->_PhysicComp->Position - _PhysicComp->Position;
+	float TargetDistance = D3DXVec3Length(&ToTarget);
 
+	if (D3DXVec3Dot(&AtTheAttackDir, &ToTarget) < 0.f)
+	{
+		_PhysicComp->Dir = ConvertXAxisDir(ToTarget);
+		_SpGun->GunRenderEnd();
+		_SpArm->ArmRenderEnd();
+
+		// ¿©±â¼­ ÃÑ ·»´õ¸µ ²ö´Ù
+		Turn();
+		return;
+	};
+
+	if (D3DXVec3Length(&ToTarget) < 70.f)
+	{
+		if ((!_Target->IsInvisible()) && (!_Target->bHurt))
+		{
+			_SpGun->GunRenderEnd();
+			// ¿©±â¼­ ÃÑ ·»´õ¸µ ²ö´Ù
+			_SpArm->ArmRenderEnd();
+			Whip();
+			return;
+		};
+	};
+	
+	if (TargetDistance < AttackRange && IsSamefloor(_Target->_TransformComp->Position))
+	{
 		if (AttackCoolTime < 0.f)
 		{
-			AttackCoolTime = 0.3f;
-			constexpr float AttackRich = 50.f;
-			constexpr float BulletSpeed = 700.f;
+			AttackCoolTime = 0.66f;
+			constexpr float AttackRich = 70.f;
+			constexpr float BulletSpeed = 3000.f;
 
 			vec3 ToTarget = _Target->_TransformComp->Position;
 			ToTarget -= _PhysicComp->Position;
@@ -222,29 +249,28 @@ void Gangster::AttackState()
 
 			int32_t FireEffectImgID = math::Rand<int32_t>({ 0,2 });
 			std::wstring FireEftKey = L"spr_fire_" + std::to_wstring(FireEffectImgID);
+			std::wstring SparkEftKey = L"Gunspark" + std::to_wstring(FireEffectImgID);
 
 			EffectManager::instance().EffectPush(L"Effect", L"spr_bullet",
 				1, (std::numeric_limits<float>::max)(), 10.f, OBJECT_ID::EID::BULLET,
-				true, FireLocation, ToTarget * BulletSpeed, { 1,1,1 }, false,
-				true, false, true, 34, 2, 255, false, 0.f, atan2f(ToTarget.y, ToTarget.x),
+				true, FireLocation, ToTarget * BulletSpeed, { 3,1,1 }, false,
+				true, false, true, 34 , 2, 255, false, 0.f, atan2f(ToTarget.y, ToTarget.x),
 				0);
 
 			EffectManager::instance().EffectPush(L"Effect", FireEftKey, 6, 0.1f, 0.1f * 6 + 0.01f,
-				OBJECT_ID::EID::ENONE, true, FireLocation, { 0,0,0 }, { 2,2,2, });
+				OBJECT_ID::EID::ENONE, true, FireLocation, { 0,0,0 }, { 2,2,2, },
+				false, false, false, false, 0, 0,
+				255, false, 0,
+				atan2f(ToTarget.y, ToTarget.x));
+
+			EffectManager::instance().EffectPush(L"Effect", SparkEftKey, 8, 0.05f,
+				8 * 0.05f + 0.01f, OBJECT_ID::EID::ENONE, true, FireLocation, { 0,0,0 },
+				{ 2,2,1 }, false, false, false, false, 0, 0, 255, false, 0,
+				atan2f(ToTarget.y, ToTarget.x));
 		}
-		
-		vec3 ToTarget = _Target->_PhysicComp->Position - _PhysicComp->Position;
-
-		if (D3DXVec3Dot(&AtTheAttackDir, &ToTarget) < 0.f)
-		{
-			_PhysicComp->Dir = ConvertXAxisDir(ToTarget);
-			_SpGun->GunRenderEnd();
-
-			// ¿©±â¼­ ÃÑ ·»´õ¸µ ²ö´Ù
-			Turn();
-			return;
-		};
-
+	}
+	else
+	{
 		Time::instance().TimerRegist(DelayAfterAttack, DelayAfterAttack, DelayAfterAttack,
 			[this]() {
 			if (!global::IsPlay())return true;
@@ -252,7 +278,7 @@ void Gangster::AttackState()
 			{
 				_SpGun->GunRenderEnd();
 				// ¿©±â¼­ ÃÑ ·»´õ¸µ ²ö´Ù
-
+				_SpArm->ArmRenderEnd();
 				Run();
 			}
 			return true;
@@ -300,6 +326,8 @@ void Gangster::HurtGround()
 
 	_RenderComp->Anim(false, false, L"spr_gangsterhurtground",
 		14, 1.8f, std::move(_Notify));
+
+	_RenderComp->PositionCorrection = { 0,0,0 };
 }
 
 void Gangster::HurtGroundState()
@@ -341,16 +369,22 @@ void Gangster::Run()
 	_CurrentState = Gangster::State::Run;
 	_RenderComp->Anim(false, true, L"spr_gangsterrun", 10, 0.6f);
 	bLaziness = false;
+
+	_RenderComp->PositionCorrection = vec3{ 0.f,-5.f,0.f };
 }
 
 void Gangster::RunState()
 {
 	vec3 ToTarget = _Target->_TransformComp->Position - _PhysicComp->Position;
 	float ToTargetDistance = D3DXVec3Length(&ToTarget);
+
 	if (ToTargetDistance < AttackRange)
 	{
-		Attack();
-		return;
+		if (IsSamefloor(_Target->_TransformComp->Position))
+		{
+			Attack();
+			return;
+		}
 	};
 
 	vec3 GoalTargetDiff = GoalPos - _Target->_TransformComp->Position;
@@ -394,7 +428,8 @@ void Gangster::Turn()
 	_Notify[6] = [this]() {
 		bTurnMotionEnd = true;
 	};
-	_RenderComp->Anim(true, false, L"spr_gangsterturn", 6, 0.53f, std::move(_Notify));
+	_RenderComp->PositionCorrection = { 0,-10.f,0 };
+	_RenderComp->Anim(false, false, L"spr_gangsterturn", 6, 1.f, std::move(_Notify));
 }
 
 void Gangster::TurnState()
@@ -451,6 +486,42 @@ void Gangster::WalkState()
 	Move(_PhysicComp->Dir, Speed * 0.25f);
 }
 
+void Gangster::Whip()
+{
+	_CurrentState = Gangster::State::Whip;
+	RenderComponent::NotifyType _Notify;
+	_RenderComp->PositionCorrection = {0,0,0};
+
+	_Notify[3] = [this]()
+	{
+		if (!_Target->IsInvisible() && !_Target->bHurt)
+		{
+			_Target->HurtGround();
+			_Target->_PhysicComp->Move(_PhysicComp->Dir * 900.f, 30.f, 0.4f, _PhysicComp->Dir, 0);
+		}
+	};
+
+	_Notify[6] = [this]() 
+	{
+		bWhipMotionEnd = true;
+	};
+
+	_RenderComp->Anim(false,false,L"spr_gangsterwhip",
+		6, 0.65f, std::move(_Notify));
+	
+	 // vec3 TargetLocation = _Target->_TransformComp->Position;
+}
+
+void Gangster::WhipState()
+{
+	if (bWhipMotionEnd)
+	{
+		bWhipMotionEnd = false;
+		Attack();
+		return;
+	}
+}
+
 void Gangster::AnyState()
 {
 }
@@ -489,6 +560,9 @@ void Gangster::FSM()
 	case Gangster::State::EnterStair:
 		EnterStairState();
 		break;
+	case Gangster::State::Whip:
+		WhipState();
+		break; 
 	default:
 		break;
 	}
@@ -541,18 +615,15 @@ void Gangster::SetUpInitState(float DirX, int32_t StateID)
 
 	switch (StateID)
 	{
-	case 0:
+	case 1:
+		Walk();
+		break;
+	case 2:
 		Idle();
 		/*_RenderComp->Anim(false, true, L"spr_grunt_lean",
 			1, 0.5f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, vec2{ 1.f,1.f }, L"Grunt", LAYER::ELAYER::EOBJECT);*/
-		// °ÔÀ¸¸¥ ¼øÂû»óÅÂ.
+			// °ÔÀ¸¸¥ ¼øÂû»óÅÂ.
 		bLaziness = true;
-		break;
-	case 1:
-		Idle();
-		break;
-	case 2:
-		Walk();
 		break;
 	default:
 		Idle();

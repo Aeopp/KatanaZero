@@ -115,8 +115,19 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 	{
 		return;
 	}
-	if (!_Target.expired() && _Target.lock()->GetID() == OBJECT_ID::ATTACK_SLASH)
+
+
+	if (!_Target.expired() && _Target.lock()->GetID() == 
+		OBJECT_ID::ATTACK_SLASH||   _CollisionInfo._ID == OBJECT_ID::REFLECT_BULLET)
 	{
+		if (_CollisionInfo._ID == OBJECT_ID::REFLECT_BULLET)
+		{
+			auto _RefEftInfo = _CollisionInfo._Variable._Cast<std::reference_wrapper<EffectInfo>>();
+			_RefEftInfo->get().T = 0.f;
+			_RefEftInfo->get().MaxT = 0.1f;
+			_RefEftInfo->get().bPhysic = false;
+		}
+
 		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce *3.5f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
@@ -144,6 +155,8 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
 			0, 0);
 
+		_FollowRenderComp->bRender = false;
+		
 		_RenderComp->AfterImgOn();
 		_EnemyState = NormalEnemy::State::Die;
 

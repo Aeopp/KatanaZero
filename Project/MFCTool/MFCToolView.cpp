@@ -1,4 +1,3 @@
-
 // MFCToolView.cpp : CMFCToolView 클래스의 구현
 //
 
@@ -39,6 +38,7 @@ BEGIN_MESSAGE_MAP(CMFCToolView, CScrollView)
 	ON_WM_RBUTTONDOWN()
 	ON_WM_KEYDOWN()
 	ON_WM_MOUSEWHEEL()
+
 END_MESSAGE_MAP()
 
 // CMFCToolView 생성/소멸
@@ -71,7 +71,6 @@ void CMFCToolView::TileEditPushEvent(const CPoint point)
 
 	// 마우스 스크린 좌표를 월드 좌표로
 	const vec3 WorldPoint = ClientPosToJoomApplyWorldPosition(point);
-
 
 	if (bRenderTileMode)
 		MousePickPushTile(WorldPoint);
@@ -442,3 +441,4 @@ BOOL CMFCToolView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 	return CScrollView::OnMouseWheel(nFlags, zDelta, pt);
 }
+

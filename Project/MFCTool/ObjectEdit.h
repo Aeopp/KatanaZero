@@ -19,6 +19,9 @@ public:
 	void SaveCurrentStageObjInfo(const std::wstring& FilePath);
 	void LoadCurrentStageObjInfo(const std::wstring& FilePath);
 
+	int32_t CurrentInitState = 0;
+	float CurrentXDir = 1;
+
 	std::wstring CurrentEditStage;
 	//           CurrentStageKey , ObjInfoVec
 	std::map<std::wstring,std::vector<ObjectInfo>> _ObjectInfoMap;

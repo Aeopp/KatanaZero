@@ -18,6 +18,7 @@ public :
     {
         { Tag::EEnemyAttack, {Tag::EPlayer} },
         {Tag::EPlayerAttack ,{Tag::EEnemy } },
+         { Tag::ETrigger,{ Tag::EPlayer} },
        {Tag::EItem  ,{Tag::EEnemy ,Tag::EPlayer} },
     };
 private : 

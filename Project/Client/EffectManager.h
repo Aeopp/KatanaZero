@@ -64,6 +64,7 @@ public :
 		math::Collision::HitInfo _HitInfo);
 
 	bool bRender = true;
+	D3DXCOLOR SwitchColorFromGameState(D3DXCOLOR _Color);
 
 	D3DXCOLOR SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCOLOR _Color);
 

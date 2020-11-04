@@ -57,6 +57,7 @@ void Attack_Slash::Initialize() & noexcept
     }
 
     _CollisionComp->bCollision = false;
+    _CollisionComp->_Tag = CollisionComponent::ETag::EPlayerAttack;
     _CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
     _CollisionComp->_CollisionInfo.Height = 30;
     _CollisionComp->_CollisionInfo.Width = 25;
@@ -122,6 +123,32 @@ void Attack_Slash::Hit(std::weak_ptr<class object> _Target, math::Collision::Hit
 {
     Super::Hit(_Target, _CollisionInfo);
 
+    if (_CollisionInfo._ID == OBJECT_ID::EID::BULLET)
+    {
+        auto _RefEftInfo = _CollisionInfo._Variable._Cast<std::reference_wrapper<EffectInfo>>();
+        if (_ReflectBulletIDs.contains(_RefEftInfo->get()._ID))return;
+
+        vec3 initDir = -_RefEftInfo->get().Dir;
+        D3DXVec3Normalize(&initDir, &initDir);
+
+        constexpr float BulletSpeed = 3000.f;
+
+        EffectManager::instance().EffectPush(L"Effect",L"spr_bulletreflect",
+            5,0.1f,5*0.1f+0.01f,OBJECT_ID::EID::ENONE,true,_CollisionInfo.Position,
+            {}, { 2,2,0 },false,false,false,false,0,0,255,false,0,
+            atan2f(initDir.y, initDir.x));
+
+        EffectManager::instance().EffectPush(L"Effect", L"spr_bullet",
+            1, (std::numeric_limits<float>::max)(), 10.f, OBJECT_ID::EID::REFLECT_BULLET,
+            true, _CollisionInfo.Position, initDir * BulletSpeed, { 3,1,1 }, false,
+            true, false, true, 34, 2, 255, false, 0.f, atan2f(initDir.y, initDir.x),
+            0);
+
+        _RefEftInfo->get().T = FLT_MAX - 1.f;
+        _RefEftInfo->get().bPhysic = false;
+
+         _ReflectBulletIDs.insert(_RefEftInfo->get()._ID);
+    }
  /*   if (_CollisionInfo._TAG == OBJECT_TAG::ETAG::ENEMY ||
         _CollisionInfo._TAG == OBJECT_TAG::ETAG::ENEMY_ATTACK)
     {

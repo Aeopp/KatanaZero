@@ -27,4 +27,9 @@ void UIRenderComponent::Render()
 	GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 	GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture, &srcRect, &TextureCenter, nullptr,
 	  _Info._Color);
+
+	if (_RenderAfterEvent)
+	{
+		_RenderAfterEvent();
+	}
 }

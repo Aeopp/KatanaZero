@@ -1,7 +1,8 @@
 #pragma once
 #include "object.h"
 
-class GangsterGun :
+
+class GangsterArm :
     public object
 {
 public:
@@ -10,13 +11,11 @@ public:
     virtual std::wstring_view GetName()const& override;
     std::shared_ptr<class RenderComponent> _RenderComp;
     std::shared_ptr<class Player> _Target;
-
     using Super = object;
     virtual void Initialize() & noexcept override;
     virtual void Update()override;
-    void GunRenderStart();
-    void GunRenderEnd();
-    void Attack();
+    void ArmRenderStart();
+    void ArmRenderEnd();
 private:
 };
 

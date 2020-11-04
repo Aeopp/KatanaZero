@@ -72,23 +72,35 @@ void Battery::Initialize() & noexcept
 
 	std::weak_ptr<object> wpThis = _This;
 
-	// TODO :: 
-	Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
-		[wpThis,this](){
-			auto spThis =wpThis.lock();
-			if (!spThis)return true;
-			
-			this->Count++;
-			this->Count %= 12;
 
-			return false;
-		});
+	//Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
+	//	[wpThis,this](){
+	//		auto spThis =wpThis.lock();
+	//		if (!spThis)return true;
+	//		
+	//		this->Count++;
+	//		this->Count %= 12;
+
+	//		return false;
+	//	});
 	
 }
 
 void Battery::Update()
 {
 	UI::Update();
+	const float dt  =Time::instance().Delta();
+
+	if (global::IsSlow())
+	{
+		Time = max(0, Time - dt*5);
+		Count = Time;
+	}
+	else 
+	{
+		Time = min(11, Time + dt);
+		Count = Time;
+	}
 }
 
 OBJECT_ID::EID Battery::GetID()

@@ -7,7 +7,9 @@ namespace OBJECT_ID
 	// 태그 다음 집합
 	enum EID : uint8_t
 	{
+		GO,
 		GANGSTER_GUN,
+		REFLECT_BULLET,
 		BULLET,
 		HIT_EFFECT,
 		GANGSTER,
@@ -73,6 +75,7 @@ namespace LAYER
 		ETERRAIN,
 		EOBJECT,
 		EEFFECT,
+		EEFFECT_OVER,
 		EUI,
 		EMOUSE,
 

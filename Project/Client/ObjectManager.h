@@ -24,15 +24,16 @@ public :
 
 	std::weak_ptr<class Camera> _Camera;
 	std::weak_ptr<class Player> _Player;
+
+	std::map<OBJECT_TAG::ETAG, std::map< OBJECT_ID::EID, std::vector<std::shared_ptr<class object>>>>
+		_ObjectMap;
 private:
-	std::map<OBJECT_TAG::ETAG, std::map< OBJECT_ID::EID,std::vector<std::shared_ptr<class object>>>>
-	_ObjectMap;
 };
 
 template<typename ObjectType, typename ...InitParams>
-inline auto ObjectManager::InsertObject(const vec3 InitPos,InitParams&&... _Params)
+inline auto ObjectManager::InsertObject(const vec3 InitPos, InitParams&&... _Params)
 {
-	static_assert(std::is_base_of_v<object, ObjectType>,"Type is not a subtype of base");
+	static_assert(std::is_base_of_v<object, ObjectType>, "Type is not a subtype of base");
 
 	auto sp_Object = std::make_shared<ObjectType>();
 
@@ -46,7 +47,7 @@ inline auto ObjectManager::InsertObject(const vec3 InitPos,InitParams&&... _Para
 	_ObjectMap[sp_Object->GetTag()][sp_Object->GetID()].emplace_back(sp_Object);
 
 	return sp_Object;
-}
+};
 
 template<typename ObjectType>
 inline auto& ObjectManager::FindObject(OBJECT_TAG::ETAG _Tag, OBJECT_ID::EID _ID)

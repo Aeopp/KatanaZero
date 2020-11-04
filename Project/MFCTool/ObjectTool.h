@@ -34,4 +34,15 @@ public:
 public:
 private:
 	class CMFCToolView*   GetView()const&;
+public:
+	CButton LeftDir;
+	std::array<CButton,5ul> InitStateBtns;
+	afx_msg void OnBnClickedLeftDir();
+	afx_msg void OnBnClickedInit1();
+	afx_msg void OnBnClickedInit2();
+	afx_msg void OnBnClickedInit3();
+	afx_msg void OnBnClickedInit4();
+	afx_msg void OnBnClickedInit5();
+private:
+	void InitStateClickedEvent();
 };

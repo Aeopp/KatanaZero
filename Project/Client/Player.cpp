@@ -25,22 +25,22 @@ using namespace std;
 OBJECT_ID::EID Player::GetID()
 {
 	return OBJECT_ID::EPLAYER;
-}
+};
 
 OBJECT_TAG::ETAG Player::GetTag()
 {
 	return Super::GetTag();
-}
+};
 
 std::wstring_view Player::GetName() const&
 {
 	return L"Player"sv;
-}
+};
 
 void Player::Initialize() & noexcept
 {
 	Super::Initialize();
-	
+
 	_TransformComp->Scale *= 2.2f;
 	_PhysicComp->Mass = 100.f;
 	_RenderComp->Anim(false, true,
@@ -54,7 +54,7 @@ void Player::Initialize() & noexcept
 	_RenderComp->NormalAfterImgPushDelta *= 1.5f;
 
 	_CollisionComp->_CollisionInfo._ShapeType =
-	CollisionComponent::CollisionInfo::EShapeType::Rect;
+		CollisionComponent::CollisionInfo::EShapeType::Rect;
 	_CollisionComp->_CollisionInfo.Height = 35;
 	_CollisionComp->_CollisionInfo.Width = 18;
 	_CollisionComp->_Tag = CollisionComponent::ETag::EPlayer;
@@ -75,7 +75,7 @@ void Player::Initialize() & noexcept
 
 	_PhysicComp->bFollowOwner = false;
 
-	Speed= PlayerSpeed;
+	Speed = PlayerSpeed;
 	MoveGoalTime = 2.f;
 	TimeRegist();
 
@@ -84,9 +84,17 @@ void Player::Initialize() & noexcept
 	SlowStartColor = D3DCOLOR_ARGB(125, 0, 0, 255);
 	SlowGoalColor = D3DCOLOR_ARGB(0, 255, 0, 255);*/
 
-	/*_RenderComp->SlowGoalColor = D3DCOLOR_ARGB(0, 255, 0, 255);*/
+	Time::instance().TimerRegist(0.0f, 0.01f, 1.f, [This = _This, this]() {
+		if (This.expired())return true;
+		vec3 Pos = _TransformComp->Position;
+		Pos.x -= global::ClientSize.first / 2.f;
+		Pos.y -= global::ClientSize.second / 2.f;
+		global::CameraPos = Pos;
 
-}
+		return true;
+	});
+	/*_RenderComp->SlowGoalColor = D3DCOLOR_ARGB(0, 255, 0, 255);*/
+};
 
 void Player::LateInitialize() & noexcept
 {
@@ -126,6 +134,14 @@ void Player::LateUpdate()
 	WallRideEffectDelta -= Dt;
 	CurAttackCoolTime -= Dt;
 	InvincibleTime -= Dt;
+
+	if (!_SpBattery->IsUse())
+	{
+		if (global::IsSlow())
+		{
+			Time::instance().Return();
+		}
+	}
 };
 
 void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
@@ -156,18 +172,32 @@ void Player::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
 	Super::Hit(_Target, _CollisionInfo);
-	if (InvincibleTime > 0.f)return;
+	if (IsInvisible())return;
 	if (bHurt)return;
 
-	if (_CollisionInfo._TAG == OBJECT_TAG::ENEMY_ATTACK)
+	if (_CollisionInfo._ID == OBJECT_ID::EID::BULLET)
 	{
+		if (_CurrentState == Player::State::Attack && AtAttackDir.has_value())
+		{
+			vec3 BulletDir = _CollisionInfo.PosDir;
+			float dot = D3DXVec3Dot(&BulletDir, &*AtAttackDir);
+			if (dot < 0.f)
+				return;
+		}
+		_CollisionInfo.PushDir = _CollisionInfo.PosDir;
+		_CollisionInfo.PushForce = 900;
+
 		_CollisionInfo.PushDir.y -= 0.4f;
 
-		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 10.f),
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);
+
 		BloodInit(_CollisionInfo.PushDir);
+
+		bFatal = true;
+
 
 		EffectManager::instance().EffectPush(L"Effect",
 			L"spr_slashfx", 5, 0.02f,
@@ -189,16 +219,76 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
 			0, 0);
 
-		ObjectManager::instance()._Camera.lock()->CameraShake(1300.f, math::RandVec({ -1,1 }), 0.2f);
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			_CollisionInfo.PushForce * 5, _CollisionInfo.PushDir, 0.3f);
 
 		Time::instance().TimeScale = 0.2f;
-		Time::instance().TimerRegist(0.007f, 0.007f, 0.007f, [this]() {
-		
-		if (global::ECurGameState::PlaySlow != global::_CurGameState)
-		{
-			Time::instance().TimeScale = 1.f;
-		}
+		Time::instance().TimerRegist(0.07f, 0.07f, 0.07f, [this]() {
 
+			if (global::ECurGameState::PlaySlow != global::_CurGameState)
+			{
+				Time::instance().TimeScale = 1.f;
+			}
+			return true; });
+
+		_RenderComp->AfterImgOn();
+		_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+		{
+			_RenderComp->AfterImgOff();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+			return true;
+		});
+
+		HurtFlyBegin();
+	}
+	else if (_CollisionInfo._TAG == OBJECT_TAG::ENEMY_ATTACK  )
+	{
+		_CollisionInfo.PushDir.y -= 0.4f;
+
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
+			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
+			0.3f,
+			_CollisionInfo.PushDir);
+
+		BloodInit(_CollisionInfo.PushDir);
+
+		bFatal = true;
+
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_slashfx", 5, 0.02f,
+			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
+			{ 0,0,0 }, { 2.9,2.9,0 });
+
+		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
+			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+			255, false, 0, ImpactRotZ, 0, 0);
+
+		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false, Pos,
+			_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
+			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
+			0, 0);
+
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			_CollisionInfo.PushForce * 5, _CollisionInfo.PushDir, 0.3f);
+
+		Time::instance().TimeScale = 0.2f;
+		Time::instance().TimerRegist(0.07f, 0.07f, 0.07f, [this]() {
+
+			if (global::ECurGameState::PlaySlow != global::_CurGameState)
+			{
+				Time::instance().TimeScale = 1.f;
+			}
 			return true; });
 
 		_RenderComp->AfterImgOn();
@@ -654,14 +744,21 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this,Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		Time::instance().SlowDownTime();
+		if (_SpBattery->IsUse())
+		{
+			Time::instance().SlowDownTime();
+		}
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this ,Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		Time::instance().Return();
+		if (global::IsSlow())
+		{
+			Time::instance().Return();
+		}
+		
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::UP));
 
@@ -676,14 +773,8 @@ void Player::KeyBinding() & noexcept
 	{
 		if (!object::IsValid(Observer))return;
 		RecordManager::instance().ReplayStart();
-		
 	},
 		'2', InputManager::EKEY_STATE::DOWN));
-
-
-	
-	//////////
-	
 }
 
 void Player::JumpState()
@@ -724,7 +815,8 @@ void Player::Attack()
 	_PhysicComp->Move(std::move(_Physics));
 	
 	_SpAttackSlash->AttackStart(Dir *30.f, Dir);
-	
+	AtAttackDir = Dir;
+
 	_RenderComp->AfterImgOn();
 }
 
@@ -931,6 +1023,8 @@ void Player::HurtGround()
 {
 	_CurrentState = Player::State::Hurt_Ground;
 	RenderComponent::NotifyType _Notify;
+	bHurt = true;
+
 	_Notify[6] = [this]() 
 	{
 		bHurtGroundMotionEnd = true; 
@@ -938,19 +1032,22 @@ void Player::HurtGround()
 	_RenderComp->Anim(false, false, L"spr_dragon_hurtground", 6, 0.5f, std::move(_Notify));
 	_RenderComp->PositionCorrection.y += 17 ;
 
-	vec3 ScreenCenter = global::CameraPos;
-	ScreenCenter.x += global::ClientSize.first / 2.f;
-	ScreenCenter.y += global::ClientSize.second / 2.f;
-	ObjectManager::instance()._Camera.lock()->bUpdate = false;
-	ObjectManager::instance().bEnemyUpdate = false;
+	if (bFatal)
+	{
+		vec3 ScreenCenter = global::CameraPos;
+		ScreenCenter.x += global::ClientSize.first / 2.f;
+		ScreenCenter.y += global::ClientSize.second / 2.f;
+		ObjectManager::instance()._Camera.lock()->bUpdate = false;
+		ObjectManager::instance().bEnemyUpdate = false;
 
-	RecordManager::instance().bUpdate = false;
+		RecordManager::instance().bUpdate = false;
 
-	EffectManager::instance().EffectPush(L"Effect", L"NothingBack", 1, 0.2f,
-		FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 });
+		EffectManager::instance().EffectPush(L"Effect", L"NothingBack", 1, 0.2f,
+			FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 });
 
-	EffectManager::instance().EffectPush(L"Effect", L"Nothing", 1, 0.2f,
-		FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 });
+		EffectManager::instance().EffectPush(L"Effect", L"Nothing", 1, 0.2f,
+			FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 });
+	};
 }
 void Player::HurtGroundState()
 {
@@ -958,8 +1055,11 @@ void Player::HurtGroundState()
 	{
 	
 		// 치명적인 공격을 입은것이라면
-		RecordManager::instance().ReWindStart();
-		return;
+		if (bFatal)
+		{
+			RecordManager::instance().ReWindStart();
+			return;
+		}
 
 		_RenderComp->PositionCorrection.y -= 17;
 		HurtRecover();
@@ -976,14 +1076,14 @@ void Player::HurtRecover()
 		bHurtRecoverMotionEnd= true;
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_hurtrecover", 9, 0.7f, move(_Notify));
-	_RenderComp->PositionCorrection.y -= 15;
+	_RenderComp->PositionCorrection.y -= 5;
 };
 
 void Player::HurtRecoverState()
 {
 	if (bHurtRecoverMotionEnd)
 	{
-		_RenderComp->PositionCorrection.y +=15;
+		_RenderComp->PositionCorrection.y +=5;
 		bHurtRecoverMotionEnd = false;
 		bHurt = false;
 		_PhysicComp->ForceClear();
@@ -1046,7 +1146,6 @@ void Player::RollState()
 			7, 0.04f, 7 * 0.04f + 0.01f, OBJECT_ID::EID::DustCloud, true,
 			Pos, Dir, { 2.3,2.3,0 });
 	}
-	
 
 	Move(_PhysicComp->Dir, 0.f);
 }

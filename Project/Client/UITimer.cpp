@@ -31,12 +31,14 @@ void UITimer::Initialize() & noexcept
 	//TODO::
 	Time::instance().TimerRegist(0.f, 1.f, (std::numeric_limits<float>::max)(),
 		[wpRender, this]() {
-
 		auto spRender = wpRender.lock();
 		if (!spRender)return true;
 
-		spRender->_Info.SrcScale.x = (std::max)
-			(spRender->_Info.SrcScale.x - 0.01f,0.f);
+	
+		{
+			spRender->_Info.SrcScale.x = (std::max)
+				(spRender->_Info.SrcScale.x - 0.01f, 0.f);
+		}
 
 		return false;
 	});

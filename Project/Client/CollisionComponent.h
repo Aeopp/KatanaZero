@@ -8,6 +8,7 @@ public:
     enum class ETag : uint8_t
     {
         ENone,
+        ETrigger,
         EEnemy,
         EPlayer,
         EPlayerAttack,

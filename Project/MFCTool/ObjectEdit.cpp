@@ -15,17 +15,17 @@
 ObjectEdit::ObjectEdit()
 {
 	CurrentEditStage = L"Prison";
-}
+};
 
 ObjectEdit::~ObjectEdit()
 {
 	Release();
-}
+};
 
 void ObjectEdit::PushObjectInStage(const vec3 & Position, const uint32_t DrawID)
 {
-	_ObjectInfoMap[CurrentEditStage].emplace_back(DrawID,Position );
-}
+	_ObjectInfoMap[CurrentEditStage].emplace_back(ObjectInfo{ DrawID,Position,CurrentXDir,CurrentInitState });
+};
 
 void ObjectEdit::DeleteObjAtPointLocation(const vec3 & Position)
 {
@@ -44,9 +44,6 @@ void ObjectEdit::Render()
 #ifdef _AFX
 	assert(pView&&__FUNCTION__);
 #endif // _AFX
-	matrix MScale, MWorld;
-	D3DXMatrixScaling(&MScale, 1.f, 1.f, 0.f);
-
 	uint32_t RenderCount = 0;
 
 	uint32_t CurrentStageObjCount = _ObjectInfoMap[CurrentEditStage].size();
@@ -57,8 +54,10 @@ void ObjectEdit::Render()
 	for (auto& CurrentObjInfo : _ObjectInfoMap[CurrentEditStage])
 	{
 		matrix MTrans;
-		auto sp_TexInfo = TextureManager::instance().Get_TexInfo(L"EditObject", L"PlacePicture", CurrentObjInfo._ObjectID);
-
+		auto sp_TexInfo = TextureManager::instance().Get_TexInfo(L"EditObject", L"PlaceDisplay", CurrentObjInfo._ObjectID);
+		matrix MScale, MWorld;
+		
+		D3DXMatrixScaling(&MScale, 2.5f *CurrentObjInfo.XDir, 2.5f, 0.f);
 		if (!sp_TexInfo)continue;
 
 		D3DXMatrixTranslation(&MTrans,

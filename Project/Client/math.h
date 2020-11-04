@@ -30,7 +30,7 @@ public:
 	template<typename Ty>
 	static Ty Rand_Normal(std::pair<Ty, Ty> range);
 
-	vec3 ConvertXAxisDir(vec3 Dir);;
+	static vec3 ConvertXAxisDir(vec3 Dir);;
 	template<typename Ty>
 	static Ty Rand(std::pair<Ty, Ty> range);
 

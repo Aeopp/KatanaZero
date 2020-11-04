@@ -11,6 +11,7 @@ void EffectManager::Initialize() & noexcept
 {
 	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EEnemy);
 	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EPlayer);
+	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EPlayerAttack);
 };
 
 void EffectManager::Render()
@@ -44,6 +45,8 @@ void EffectManager::Render()
 			_Color = D3DCOLOR_ARGB(int32_t(float((_Effect.MaxT - _Effect.T) / _Effect.MaxT) * _Effect.Alpha), 255, 255, 255);
 
 		_Color = SwitchColorFromEffectID(_Effect.OBJ_ID, _Color);
+		D3DXCOLOR RecordColor = _Color;
+		_Color = SwitchColorFromGameState(_Color);
 
 		auto TexInfo = TextureManager::instance().Get_TexInfo(_Effect.ObjKey, _Effect.StateKey, _Effect.DrawID);
 		RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width , TexInfo->ImageInfo.Height };
@@ -62,7 +65,7 @@ void EffectManager::Render()
 			_Info.StateKey = _Effect.StateKey;
 			_Info.Timing = Timing;
 			_Info.OwnerY = _Effect.Pos.y;
-			_Info._Color = _Color;
+			_Info._Color = RecordColor;
 			_Record._Infos.insert({ Timing ,_Info });
 		}
 	}
@@ -115,19 +118,22 @@ void EffectManager::Update()
 			{
 				if (_EffectCollisionTagSet.contains(spCmp->_Tag))
 				{
+					if (!spCmp->bCollision)continue; 
+
 					auto spOwner = spCmp->_Owner.lock();
-					vec3 OwnerPos = spOwner->_TransformComp->Position;
+					auto WorldRectPT = spCmp->GetWorldRectPt();
+					vec3 OwnerPos = math::GetCenter(WorldRectPT);// spOwner->_TransformComp->Position;
 					vec3 ToEffect = OwnerPos - _Effect.Pos;
 					if (500.f > D3DXVec3Length(&ToEffect))
 					{
 						matrix MWorld, MTrans, MRotZ, MScale;
 
 						D3DXMatrixScaling(&MScale, _Effect.Scale.x, _Effect.Scale.y, _Effect.Scale.z);
-						D3DXMatrixRotationZ(&MRotZ, _Effect.RotZ);
+						D3DXMatrixRotationZ(&MRotZ, /*_Effect.RotZ*/0);
 						D3DXMatrixTranslation(&MTrans, _Effect.Pos.x, _Effect.Pos.y, _Effect.Pos.z);
 						MWorld = MScale * MRotZ * MTrans;
 
-						auto WorldRectPT = spCmp->GetWorldRectPt();
+					
 						auto _EffectWorldRectPT = math::GetWorldRectPt(MWorld, _Effect.Width, _Effect.Height);
 
 						auto opDir = math::Collision::RectAndRect({ WorldRectPT ,_EffectWorldRectPT }, false);
@@ -140,6 +146,16 @@ void EffectManager::Update()
 								Normal.y = 0;
 							else
 								Normal.x = 0;
+
+							/*vec3 PushDir;
+							switch (_Effect.OBJ_ID)
+							{
+							case OBJECT_ID::EID::BULLET:
+
+								break;
+							default:
+								break;
+							}*/
 
 							vec3 EffectCenter = math::GetCenter(_EffectWorldRectPT);
 							vec3 CompCenter = math::GetCenter(WorldRectPT);
@@ -156,6 +172,8 @@ void EffectManager::Update()
 							_HitInfo._ID = _Effect.OBJ_ID;
 							_HitInfo._TAG = OBJECT_TAG::EEFFECT;
 							_HitInfo.PosDir = _Dir;
+							_HitInfo._Variable = std::ref(_Effect);
+
 							spOwner->Hit({}, std::move(_HitInfo));
 						}
 					}
@@ -186,6 +204,24 @@ void EffectManager::HitEvent(EffectInfo& _Effect, math::Collision::HitInfo _HitI
 
 }
 
+D3DXCOLOR EffectManager::SwitchColorFromGameState(D3DXCOLOR _Color)
+{
+	if (global::IsSlow())
+	{
+		_Color.g *= 0.3f;
+		_Color.b *= 0.3f;
+		_Color.r *= 0.3f;
+	}
+	else if (global::IsReplay())
+	{
+		_Color.g *= 0.3f;
+		_Color.b *= 0.3f;
+		_Color.r *= 0.3f;
+	}
+
+	return _Color;
+}
+
 D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCOLOR _Color)
 {
 	switch (_EffectID)
@@ -196,7 +232,7 @@ D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCO
 		_Color.b = 255;
 		break;
 	case OBJECT_ID::WHITE_BLOOD:
-		_Color.r = 150;
+		_Color.r = 255;
 		_Color.b = 0;
 		_Color.g = 0;
 		break;
@@ -247,19 +283,6 @@ D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCO
 	default:
 		break;
 	};
-
-	if (global::IsSlow()) 
-	{
-		_Color.g *= 0.3f;
-		_Color.b *= 0.3f;
-		_Color.r *= 0.3f;
-	}
-	else if (global::IsReplay() )
-	{
-		_Color.g *= 0.3f;
-		_Color.b *= 0.3f;
-		_Color.r *= 0.3f;
-	}
 
 	return _Color;
 }

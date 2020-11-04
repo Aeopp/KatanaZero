@@ -222,6 +222,8 @@
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="GangsterAttack.h" />
     <ClInclude Include="GangsterGun.h" />
+    <ClInclude Include="GangsterArm.h" />
+    <ClInclude Include="GO.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -359,6 +361,8 @@
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="GangsterAttack.cpp" />
     <ClCompile Include="GangsterGun.cpp" />
+    <ClCompile Include="GangsterArm.cpp" />
+    <ClCompile Include="GO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

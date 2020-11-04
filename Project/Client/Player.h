@@ -47,6 +47,9 @@ public:
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Hit(std::weak_ptr<class object>_Target, math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override; 
+	bool IsInvisible() { return  _CurrentState == Player::State::Roll || InvincibleTime > 0.f; }
+	void HurtGround();
+	bool bHurt{ false };
 private:
 	void AttackSlash();
 	void TimeRegist();
@@ -89,7 +92,7 @@ private:
 	void HurtFlyBeginState();
 	void HurtFly();
 	void HurtFlyState();
-	void HurtGround();
+
 	void HurtGroundState();
 	void HurtRecover();
 	void HurtRecoverState();
@@ -112,14 +115,17 @@ private :
 private:
 	bool bFrameCurrentCharacterInput = false;
 private:
-	bool bHurt{ false };
+
 private:
+	bool bAttacking{ false };
+
 	bool bSneakKeyCheck{ false };
 	bool bJumpKeyCheck{ false };
 	bool bMoveKeyCheck{ false };
 	bool bAttackKeyCheck{ false };
 	bool bDownKeyCheck{ false };
 public :	
+	bool bFatal = false;
 	bool bInit = false;
 	bool bSneak{ false };
 	vec3 FlipDir{0.f,0.f,0.f};
@@ -129,6 +135,8 @@ public :
 	float InvincibleTime = 0.f;
 	void JumpWallRide();
 private:
+	std::optional<vec3 > AtAttackDir;
+
 	float RollEffectDelta = 0.0025f;
 	float WallRideEffectDelta = 0.1f;
 	float CurAttackCoolTime = 0.0f;
