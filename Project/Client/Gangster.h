@@ -26,8 +26,9 @@ public:
 private:
 	//TODO :: 여기서 어택객체 
 //	std::shared_ptr<class Grunt_Slash> _SpAttack;
-	std::shared_ptr<class RenderComponent> _SpGun;
+	std::shared_ptr<class GangsterGun> _SpGun;
 	typename Gangster::State _CurrentState{ Gangster::State::Idle };
+	float AttackCoolTime = 0.3f;
 public :
 	virtual void Initialize() & noexcept;
 	virtual void Update();
@@ -60,12 +61,13 @@ public :
 private:
 	void AnyState();
 	void FSM();
-	float GunRotZ = 0.f;
+	
 	void FollowRouteProcedure();
 public:
 	bool bAttackMotionEnd{ false };
 	bool bTurnMotionEnd{ false };
 
+	float GunRotZ = 0.f;
 	float _Y = 0.f;
 	// NormalEnemy을(를) 통해 상속됨
 	virtual void SetUpInitState(float DirX, int32_t StateID) override;

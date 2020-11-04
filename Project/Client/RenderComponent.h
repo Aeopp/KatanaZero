@@ -34,7 +34,7 @@ public :
 	{
 	friend class RenderComponent;
 	private:
-		uint8_t CurrentFrame = 0.f;
+		
 	public :
 		inline uint8_t GetCurFrame() { return CurrentFrame; };
 
@@ -42,7 +42,7 @@ public :
 		float T = 0.f;
 		std::wstring ObjectKey;
 		std::wstring StateKey;
-
+		uint8_t CurrentFrame = 0;
 		//[begin,end)
 		uint8_t End = 0;
 		float AnimSpeed = 1.f;

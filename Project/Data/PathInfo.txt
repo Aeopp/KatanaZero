@@ -369,7 +369,7 @@ spr_gangsterfall
 ..\Resource\Texture\Gangster\spr_gangstergun\%d.png
 Gangster
 spr_gangstergun
-1
+2
 ..\Resource\Texture\Gangster\spr_gangsterhurtfly\%d.png
 Gangster
 spr_gangsterhurtfly

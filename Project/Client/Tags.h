@@ -7,6 +7,7 @@ namespace OBJECT_ID
 	// 태그 다음 집합
 	enum EID : uint8_t
 	{
+		GANGSTER_GUN,
 		BULLET,
 		HIT_EFFECT,
 		GANGSTER,
@@ -48,7 +49,6 @@ namespace OBJECT_TAG
 	// 집합
 	enum ETAG : uint8_t
 	{
-		ENEMY,
 		ATTACK,
 		PLAYER_ATTACK,
 		ENEMY_ATTACK,

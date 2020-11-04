@@ -22,7 +22,6 @@
 
 using namespace std;
 
-
 OBJECT_ID::EID Player::GetID()
 {
 	return OBJECT_ID::EPLAYER;
@@ -58,12 +57,9 @@ void Player::Initialize() & noexcept
 	CollisionComponent::CollisionInfo::EShapeType::Rect;
 	_CollisionComp->_CollisionInfo.Height = 35;
 	_CollisionComp->_CollisionInfo.Width = 18;
-
 	_CollisionComp->_Tag = CollisionComponent::ETag::EPlayer;
 
 	KeyBinding();
-
-
 
 	// TODO :: 아이템 획득시 배터리에게 통보해주기.
 	_SpBattery = ObjectManager::instance().InsertObject<Battery>();

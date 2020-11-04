@@ -5,7 +5,7 @@
 
 OBJECT_TAG::ETAG Enemy::GetTag()
 {
-    return OBJECT_TAG::ETAG::ENEMY;
+    return OBJECT_TAG::ETAG::EENEMY;
 }
 
 void Enemy::Initialize() & noexcept

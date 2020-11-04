@@ -7,8 +7,8 @@
 #include "GraphicDevice.h"
 #include "Player.h"
 #include "PhysicTransformComponent.h"
-#include <sstream>
 #include "RecordManager.h"
+#include <sstream>
 
 void RenderComponent::RecordRender()
 {
@@ -170,8 +170,6 @@ void RenderComponent::Render()
 		RECT rectRender{ 1400,200,2000,850 };
 		GraphicDevice::instance().GetFont()->DrawTextW(nullptr, wss.str().c_str(), wss.str().size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
 	}*/
-
-	
 }
 
 void RenderComponent::Update()

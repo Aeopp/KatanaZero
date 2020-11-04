@@ -180,6 +180,7 @@
     <ClInclude Include="Function.h" />
     <ClInclude Include="Gangster.h" />
     <ClInclude Include="GangsterAttack.h" />
+    <ClInclude Include="GangsterGun.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="GraphicDevice.h" />
     <ClInclude Include="Grunt.h" />
@@ -245,6 +246,7 @@
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Gangster.cpp" />
     <ClCompile Include="GangsterAttack.cpp" />
+    <ClCompile Include="GangsterGun.cpp" />
     <ClCompile Include="global.cpp" />
     <ClCompile Include="GraphicDevice.cpp" />
     <ClCompile Include="Grunt.cpp" />
