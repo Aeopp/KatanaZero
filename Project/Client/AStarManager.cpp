@@ -120,6 +120,31 @@ void AStarManager::PushNodeFromWorldLocation(const vec3& WorldLocation, bool bDo
 		);
 };
 
+//
+//D3DXCOLOR AStarManager::GetColorFromNodeOpt(NodeInfo::EMODE _Mode)
+//{
+//	switch (_Mode)
+//	{
+//	case NodeInfo::EMODE::None:
+//		return D3DCOLOR_ARGB(255, 255, 0, 229);
+//		break;
+//	case NodeInfo::EMODE::Door:
+//		return D3DCOLOR_ARGB(255, 0, 85, 255);
+//		break;
+//	case NodeInfo::EMODE::Stair:
+//		return D3DCOLOR_ARGB(255, 0, 246, 255);
+//		break;
+//	case NodeInfo::EMODE::StairEnd:
+//		return D3DCOLOR_ARGB(255, 255, 255, 255);
+//		break;
+//	default:
+//		break;
+//	}
+//
+//	return D3DCOLOR_ARGB(255, 255, 0, 229);
+//}
+
+
 void AStarManager::EraseNodeFromWorldLocation(const vec3& WorldLocation)
 {
 	NodeIdx _Idx = ConvertNodeIdx(WorldLocation);
@@ -193,6 +218,9 @@ D3DXCOLOR AStarManager::GetColorFromNodeOpt(NodeInfo::EMODE _Mode)
 		break;
 	case NodeInfo::EMODE::Stair:
 		return D3DCOLOR_ARGB(255, 0, 246, 255);
+		break;
+	case NodeInfo::EMODE::StairEnd:
+		return D3DCOLOR_ARGB(255, 255, 255, 0 );
 		break;
 	default:
 		break;

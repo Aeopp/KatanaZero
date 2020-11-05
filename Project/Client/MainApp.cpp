@@ -21,7 +21,7 @@ HRESULT App::Initialize()
 
 #pragma region Application Initialize
 	static constexpr bool bAppWindowScreenMode = TRUE;
-	static constexpr uint32_t AppFrameLimit = 144ul;
+	static constexpr uint32_t AppFrameLimit = 60ul;
 
 	GraphicDevice& GraphicDeviceRef = GraphicDevice::instance();
 	GraphicDeviceRef.Initialize(bAppWindowScreenMode);
@@ -50,7 +50,7 @@ HRESULT App::Initialize()
 	SceneManager& SceneMgrRef = SceneManager::instance();
 	SceneMgrRef.Initialize();
 	
-	SceneMgrRef.Scene_Change(ESceneID::EPrison3rd);
+	SceneMgrRef.Scene_Change(ESceneID::EMultiPlayer);
 
 	//TimeRef.TimerRegist(10.f, 10.f, 10.f, [&]()
 	//{

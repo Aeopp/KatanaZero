@@ -16,6 +16,7 @@
 #include "SceneChinaTown1st.h"
 #include "SceneChinaTown2nd.h"
 #include "SceneChinaTown3rd.h"
+#include "SceneChinaTown4th.h"
 
  void SceneManager::Scene_Change(ESceneID _ESceneID)
 {
@@ -68,6 +69,7 @@ void SceneManager::Initialize()
 	SceneRegist<ESceneID::EChinaTown1st, SceneChinaTown1st>();
 	SceneRegist<ESceneID::EChinaTown2nd, SceneChinaTown2nd>();
 	SceneRegist<ESceneID::EChinaTown3rd, SceneChinaTown3rd>();
+	SceneRegist<ESceneID::EChinaTown4th, SceneChinaTown4th>();
 }
 
 void SceneManager::Release()

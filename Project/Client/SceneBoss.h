@@ -3,5 +3,7 @@
 class SceneBoss :
     public Scene
 {
+public:
+    void Initialize()override;
 };
 

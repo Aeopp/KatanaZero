@@ -6,7 +6,7 @@
 class RecordManager :
     public singleton_interface<RecordManager>
 {
-public :
+public:
     RecordManager();
     friend class Camera;
     int32_t Timing = 0;
@@ -26,7 +26,7 @@ public :
     void RePlayRender();
 
     bool bPause = false;
-   // bool bRewindEnd = false;
+    // bool bRewindEnd = false;
 
     bool bReplayInit = false;
 
@@ -36,7 +36,6 @@ public :
 private:
     // 매니저가 관리하는 현재 T에 해당하는 (그당시 저장했었던) 카메라 좌표를 반환.
                         //Timing  Pos
-    std::map<int32_t,vec3>_TimingCameraPos;
+    std::map<int32_t, vec3>_TimingCameraPos;
     std::vector<std::any> _Anys;
 };
-

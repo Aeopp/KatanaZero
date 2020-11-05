@@ -203,6 +203,7 @@
     <ClInclude Include="SceneChinaTown1st.h" />
     <ClInclude Include="SceneChinaTown2nd.h" />
     <ClInclude Include="SceneChinaTown3rd.h" />
+    <ClInclude Include="SceneChinaTown4th.h" />
     <ClInclude Include="SceneMultiPlayer.h" />
     <ClInclude Include="ScenePrison1st.h" />
     <ClInclude Include="ScenePrison2nd.h" />
@@ -280,6 +281,7 @@
     <ClCompile Include="SceneChinaTown1st.cpp" />
     <ClCompile Include="SceneChinaTown2nd.cpp" />
     <ClCompile Include="SceneChinaTown3rd.cpp" />
+    <ClCompile Include="SceneChinaTown4th.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneMultiPlayer.cpp" />
     <ClCompile Include="ScenePrison1st.cpp" />

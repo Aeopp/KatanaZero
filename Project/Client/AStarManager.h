@@ -103,6 +103,9 @@ public :
 	void Load(const std::wstring& FilePath);
 	void Save(const std::wstring& FilePath);
 
+
+	/*D3DXCOLOR  GetColorFromNodeOpt(NodeInfo::EMODE _Mode);*/
+
 	std::vector<vec3> PathFind(const vec3& vStart, const vec3& vGoal);
 
 	NodeIdx ConvertNodeIdx(const vec3& WorldLocation);

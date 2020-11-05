@@ -137,7 +137,7 @@ ChinaTown
 ..\Resource\Texture\Map\Multiplayer\%d.png
 Map
 Multiplayer
-376
+377
 ..\Resource\Texture\Map\Prison\%d.png
 Map
 Prison

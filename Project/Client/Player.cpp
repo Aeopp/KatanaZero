@@ -185,7 +185,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 				return;
 		}
 		_CollisionInfo.PushDir = _CollisionInfo.PosDir;
-		_CollisionInfo.PushForce = 900;
+		_CollisionInfo.PushForce = 700;
 
 		_CollisionInfo.PushDir.y -= 0.4f;
 

@@ -240,7 +240,7 @@ void Gangster::AttackState()
 		{
 			AttackCoolTime = 0.66f;
 			constexpr float AttackRich = 70.f;
-			constexpr float BulletSpeed = 3000.f;
+			constexpr float BulletSpeed = 2000.f;
 
 			vec3 ToTarget = _Target->_TransformComp->Position;
 			ToTarget -= _PhysicComp->Position;

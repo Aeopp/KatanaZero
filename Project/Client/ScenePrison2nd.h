@@ -3,5 +3,9 @@
 class ScenePrison2nd :
     public Scene
 {
+public:
+    void Initialize()override;
+
+
 };
 

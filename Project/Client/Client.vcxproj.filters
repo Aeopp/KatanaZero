@@ -239,6 +239,7 @@
     <ClInclude Include="ScenePrison2nd.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="SceneChinaTown4th.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -393,6 +394,7 @@
     <ClCompile Include="ScenePrison2nd.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="SceneChinaTown4th.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

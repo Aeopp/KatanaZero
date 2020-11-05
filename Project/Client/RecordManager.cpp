@@ -58,7 +58,7 @@ void RecordManager::ReWindUpdate()
 	}
 	// TODO :: 여기서 사운드 매니저 호출 배경음만 나오게
 	global::CameraPos = _TimingCameraPos[Timing];
-	
+
 };
 
 void RecordManager::ReWindStart()
@@ -75,7 +75,7 @@ void RecordManager::ReWindEnd()
 
 	EffectManager::instance().Clear();
 	EffectManager::instance().RecordClear();
-//	global::CameraPos = _TimingCameraPos[Timing];
+	//	global::CameraPos = _TimingCameraPos[Timing];
 
 	_TimingCameraPos.clear();
 	if (!_TimingCameraPos.empty())
@@ -85,10 +85,10 @@ void RecordManager::ReWindEnd()
 		//global::CameraPos= LastCameraPos->second;
 		_TimingCameraPos.clear();
 	};
-	
+
 	ObjectManager::instance()._Camera.lock()->bUpdate = true;
 	Time::instance()._T = 0;
-	
+
 	RewindSpeed = -2;
 	TimingSpeed = 1;
 	EndTiming = 0;
@@ -127,7 +127,7 @@ void RecordManager::ReplayStart()
 	global::_CurGameState = global::ECurGameState::Replay;
 };
 
-void RecordManager::ReplayEnd( )
+void RecordManager::ReplayEnd()
 {
 	global::_CurGameState = global::ECurGameState::Play;
 
@@ -146,6 +146,9 @@ void RecordManager::ReplayEnd( )
 	RecordManager::Timing = 0;
 
 	SceneManager::instance().Scene_Change(SceneManager::instance().GetNextSceneID());
+
+	int i = 0;
+
 }
 void RecordManager::ReplayUpdate()
 {
@@ -155,11 +158,12 @@ void RecordManager::ReplayUpdate()
 		Time::instance().NotificationCheck();
 		return;
 	};
-	
+
 	InputManager::instance().Update();
 	if (_TimingCameraPos.empty())
 	{
-		ReplayEnd();
+		if(global::IsReplay())
+			ReplayEnd();
 	}
 	auto IsTiming = _TimingCameraPos.find(Timing);
 	if (IsTiming == end(_TimingCameraPos))
@@ -170,7 +174,7 @@ void RecordManager::ReplayUpdate()
 	global::CameraPos = IsTiming->second;
 	Timing += TimingSpeed;
 
-	if (Timing <=1)
+	if (Timing <= 1)
 	{
 		Timing = 1;
 	}
@@ -192,7 +196,7 @@ void RecordManager::RePlayRender()
 		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 		GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
 			&_srcRT, &__TextureCenter, nullptr,
-			D3DCOLOR_ARGB(255,255,255,255));
+			D3DCOLOR_ARGB(255, 255, 255, 255));
 	}
 	else
 	{

@@ -3,5 +3,7 @@
 class SceneChinaTown3rd :
     public Scene
 {
+public:
+    void Initialize()override;
 };
 

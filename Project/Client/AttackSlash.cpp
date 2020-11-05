@@ -131,7 +131,7 @@ void Attack_Slash::Hit(std::weak_ptr<class object> _Target, math::Collision::Hit
         vec3 initDir = -_RefEftInfo->get().Dir;
         D3DXVec3Normalize(&initDir, &initDir);
 
-        constexpr float BulletSpeed = 3000.f;
+        constexpr float BulletSpeed = 2000.f;
 
         EffectManager::instance().EffectPush(L"Effect",L"spr_bulletreflect",
             5,0.1f,5*0.1f+0.01f,OBJECT_ID::EID::ENONE,true,_CollisionInfo.Position,
