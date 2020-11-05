@@ -503,9 +503,12 @@ void Grunt::SetUpInitState(float DirX, int32_t StateID)
 	switch (StateID)
 	{
 	case 1:
-		Walk();
+		Idle();
 		break;
 	case 2:
+		Walk();
+		break;
+	case 3:
 		_RenderComp->Anim(false, true, L"spr_grunt_lean",
 			1, 0.5f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0.f, vec2{ 1.f,1.f }, L"Grunt", LAYER::ELAYER::EOBJECT);
 		// 게으른 순찰상태.

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "SceneStart.h"
+#include "ScenePrison3rd.h"
 #include "Texture_Manager.h"
 #include "ObjectManager.h"
 #include "Player.h"
@@ -15,7 +15,7 @@
 #include "GO.h"
 
 
-void SceneStart::Initialize()
+void ScenePrison3rd::Initialize()
 {
 	using namespace std::string_view_literals;
 	using namespace std::string_literals;
@@ -27,7 +27,7 @@ void SceneStart::Initialize()
 	LoadAStarInfoFilePath = L"..\\Data\\Prison\\3rd\\AStar.txt"s;
 	LoadObjectInfoFilePath = L"..\\Data\\Prison\\3rd\\ObjectInfo.txt"s;
 
-	SceneManager::instance()._NextScene = ESceneID::EStage1;
+	SceneManager::instance()._NextScene = ESceneID::EPrison2nd;
 	auto _Camera = ObjectManager::instance().InsertObject<Camera>();
 	_Camera->CameraLockLT= { 700,4400,0 };
 	_Camera->CameraLockRB = { 5000 ,5600 , 0  };

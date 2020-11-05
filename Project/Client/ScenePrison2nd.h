@@ -1,6 +1,6 @@
 #pragma once
 #include "Scene.h"
-class SceneStage2 :
+class ScenePrison2nd :
     public Scene
 {
 };

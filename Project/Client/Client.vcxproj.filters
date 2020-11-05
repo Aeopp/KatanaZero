@@ -132,15 +132,6 @@
     <ClInclude Include="SceneBoss.h">
       <Filter>Scene\SceneBaseTypes</Filter>
     </ClInclude>
-    <ClInclude Include="SceneStage1.h">
-      <Filter>Scene\SceneBaseTypes</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneStage2.h">
-      <Filter>Scene\SceneBaseTypes</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneStart.h">
-      <Filter>Scene\SceneBaseTypes</Filter>
-    </ClInclude>
     <ClInclude Include="Struct.h">
       <Filter>Headers</Filter>
     </ClInclude>
@@ -224,6 +215,30 @@
     <ClInclude Include="GangsterGun.h" />
     <ClInclude Include="GangsterArm.h" />
     <ClInclude Include="GO.h" />
+    <ClInclude Include="ScenePrison3rd.h">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneBunkerMansion.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneChinaTown1st.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneChinaTown2nd.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneChinaTown3rd.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneMultiPlayer.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="ScenePrison1st.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="ScenePrison2nd.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -275,15 +290,6 @@
       <Filter>Render\Texture</Filter>
     </ClCompile>
     <ClCompile Include="SceneBoss.cpp">
-      <Filter>Scene\SceneBaseTypes</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneStage1.cpp">
-      <Filter>Scene\SceneBaseTypes</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneStage2.cpp">
-      <Filter>Scene\SceneBaseTypes</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneStart.cpp">
       <Filter>Scene\SceneBaseTypes</Filter>
     </ClCompile>
     <ClCompile Include="Terrain.cpp" />
@@ -363,6 +369,30 @@
     <ClCompile Include="GangsterGun.cpp" />
     <ClCompile Include="GangsterArm.cpp" />
     <ClCompile Include="GO.cpp" />
+    <ClCompile Include="ScenePrison3rd.cpp">
+      <Filter>Scene\SceneBaseTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneBunkerMansion.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneChinaTown1st.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneChinaTown2nd.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneChinaTown3rd.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneMultiPlayer.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="ScenePrison1st.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="ScenePrison2nd.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

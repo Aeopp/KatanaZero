@@ -1,14 +1,21 @@
 #include "stdafx.h"
 #include "SceneManager.h"
 #include "Scene.h"
-#include "SceneStart.h"
-#include "SceneStage1.h"
-#include "SceneStage2.h"
 #include "SceneBoss.h"
 #include "ObjectManager.h"
 #include "ComponentManager.h"
 #include "Texture_Manager.h"
 #include "EffectManager.h"
+
+#include "ScenePrison1st.h"
+#include "ScenePrison2nd.h"
+#include "ScenePrison3rd.h"
+#include "SceneBoss.h"
+#include "SceneBunkerMansion.h"
+#include "SceneMultiPlayer.h"
+#include "SceneChinaTown1st.h"
+#include "SceneChinaTown2nd.h"
+#include "SceneChinaTown3rd.h"
 
  void SceneManager::Scene_Change(ESceneID _ESceneID)
 {
@@ -52,11 +59,15 @@ void SceneManager::LateUpdate()
 void SceneManager::Initialize()
 {
 	//Scene µî·Ï
-
-	SceneRegist<ESceneID::EStart, SceneStart>();
-	SceneRegist<ESceneID::EStage1, SceneStage1>();
-	SceneRegist<ESceneID::EStage2, SceneStage2>();
+	SceneRegist<ESceneID::EPrison3rd, ScenePrison3rd>();
 	SceneRegist<ESceneID::EBoss, SceneBoss>();
+	SceneRegist<ESceneID::EPrison2nd, ScenePrison2nd>();
+	SceneRegist<ESceneID::EPrison1st,ScenePrison1st>();
+	SceneRegist<ESceneID::EMultiPlayer, SceneMultiPlayer>();
+	SceneRegist<ESceneID::EBunkerMansion,SceneBunkerMansion>();
+	SceneRegist<ESceneID::EChinaTown1st, SceneChinaTown1st>();
+	SceneRegist<ESceneID::EChinaTown2nd, SceneChinaTown2nd>();
+	SceneRegist<ESceneID::EChinaTown3rd, SceneChinaTown3rd>();
 }
 
 void SceneManager::Release()

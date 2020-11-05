@@ -313,6 +313,7 @@ std::vector<vec3> AStarManager::PathFind(const vec3& vStart, const vec3& vGoal)
 
 	_Open.clear();
 	_Close.clear();
+	int32_t Count = 0;
 
 	while (true)
 	{
@@ -321,12 +322,19 @@ std::vector<vec3> AStarManager::PathFind(const vec3& vStart, const vec3& vGoal)
 		{
 			break;
 		}
+		else if (Count >= 300)
+		{
+			Count = 0;
+			return std::vector<vec3>{};
+		}
 		else
 		{
+			++Count;
 			++StartIdx.Row;
 			continue; 
 		}
 	}
+	Count = 0;
 
 	while (true)
 	{
@@ -335,8 +343,14 @@ std::vector<vec3> AStarManager::PathFind(const vec3& vStart, const vec3& vGoal)
 		{
 			break; 
 		}
+		else if (Count >= 300)
+		{
+			Count = 0;
+			return std::vector<vec3>{};
+		}
 		else
 		{
+			++Count;
 			++GoalIdx.Row;
 			continue;
 		}

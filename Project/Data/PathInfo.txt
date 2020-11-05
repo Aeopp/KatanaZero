@@ -425,7 +425,7 @@ Gunspark2
 ..\Resource\Texture\EditObject\PlaceDisplay\Object%d.png
 EditObject
 PlaceDisplay
-10
+17
 ..\Resource\Texture\Go\Go\%d.png
 Go
 Go

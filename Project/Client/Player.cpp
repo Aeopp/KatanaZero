@@ -774,7 +774,7 @@ void Player::KeyBinding() & noexcept
 		if (!object::IsValid(Observer))return;
 		RecordManager::instance().ReplayStart();
 	},
-		'2', InputManager::EKEY_STATE::DOWN));
+		VK_F1, InputManager::EKEY_STATE::DOWN));
 }
 
 void Player::JumpState()

@@ -1,2 +1,3 @@
 #pragma once
-enum class ESceneID { ENone,EStart,EStage1,EStage2,EStage3,EBoss };
+enum class ESceneID { ENone,EPrison3rd,EPrison2nd,EPrison1st,EMultiPlayer,EBoss
+,EBunkerMansion,EChinaTown1st,EChinaTown2nd,EChinaTown3rd};
