@@ -20,6 +20,8 @@ struct EffectInfo
 	bool bHitNotify = false;
 	bool bRecord = false;
 
+	bool bSmoke = false;
+
 	std::wstring ObjKey = L"";
 	std::wstring StateKey = L"";
 	uint8_t DrawID = 0;
@@ -64,7 +66,7 @@ public :
 		math::Collision::HitInfo _HitInfo);
 
 	bool bRender = true;
-	D3DXCOLOR SwitchColorFromGameState(D3DXCOLOR _Color);
+	D3DXCOLOR SwitchColorFromGameState(OBJECT_ID::EID _EffectID, D3DXCOLOR _Color);
 
 	D3DXCOLOR SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCOLOR _Color);
 

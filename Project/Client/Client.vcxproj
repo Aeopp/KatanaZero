@@ -175,6 +175,7 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="ComponentManager.h" />
     <ClInclude Include="DELEGATE.h" />
+    <ClInclude Include="Drum.h" />
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Function.h" />
@@ -189,6 +190,7 @@
     <ClInclude Include="Grunt_Slash.h" />
     <ClInclude Include="HUD.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="MainApp.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="Mouse.h" />
@@ -207,6 +209,7 @@
     <ClInclude Include="SceneMultiPlayer.h" />
     <ClInclude Include="ScenePrison1st.h" />
     <ClInclude Include="ScenePrison2nd.h" />
+    <ClInclude Include="SmokeCloud.h" />
     <ClInclude Include="Tags.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="Player.h" />
@@ -250,6 +253,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ComponentManager.cpp" />
     <ClCompile Include="DELEGATE.cpp" />
+    <ClCompile Include="Drum.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Gangster.cpp" />
@@ -263,6 +267,7 @@
     <ClCompile Include="Grunt_Slash.cpp" />
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -289,6 +294,7 @@
     <ClCompile Include="ScenePrison3rd.cpp" />
     <ClCompile Include="singleton_interface.cpp" />
     <ClCompile Include="Single_Texture.cpp" />
+    <ClCompile Include="SmokeCloud.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

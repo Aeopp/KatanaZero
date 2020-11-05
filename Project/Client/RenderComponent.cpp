@@ -61,9 +61,9 @@ void RenderComponent::Render()
 				_AfterIter != end(_AfterImgVec);)
 			{
 				auto& _After = *_AfterIter;
-
+				
 				auto TexInfo = TextureManager::instance().
-				Get_TexInfo(_Info.ObjectKey, _After.StateKey, _After.ID);
+					Get_TexInfo(_Info.ObjectKey, _After.StateKey, _After.ID);
 				RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width * _Info.SrcScale.x,
 							  TexInfo->ImageInfo.Height * _Info.SrcScale.y };
 				vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
@@ -71,6 +71,7 @@ void RenderComponent::Render()
 				GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
 					&_srcRT, &__TextureCenter, nullptr,
 					_After._Color);
+				
 
 				_After.T += _After.DeltaCoefft * dt;
 				D3DXColorLerp(&_After._Color, &_After._Color, &_After._GoalColor, _After.T);
@@ -81,11 +82,15 @@ void RenderComponent::Render()
 				}
 					else ++_AfterIter;
 			}
-			AfterImgPush(MWorld);
+			if (!spOwner->bSmoke)
+			{
+				AfterImgPush(MWorld);
+			}
 		}
 
 		if (global::ECurGameState::PlaySlow == global::_CurGameState && bSlowRender)
 		{
+
 			RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
 					  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
 			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,
@@ -114,6 +119,11 @@ void RenderComponent::Render()
 		}
 		else
 		{
+			D3DXCOLOR _Color = _Info._Color;
+			if (spOwner->bSmoke)
+			{
+				_Color = D3DCOLOR_ARGB(255, 0, 0, 0);
+			}
 			RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _Info.SrcScale.x,
 					  spTexInfo->ImageInfo.Height * _Info.SrcScale.y };
 			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,
@@ -121,7 +131,7 @@ void RenderComponent::Render()
 			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture,
 				&srcRect, &TextureCenter, nullptr,
-				_Info._Color);
+				_Color);
 
 			// 그려지는 상황이므로 푸시
 			if (global::IsPlay() && RecordManager::instance().bUpdate)
@@ -135,7 +145,7 @@ void RenderComponent::Render()
 				_RecordInfo.StateKey=           _Info.StateKey;
 				_RecordInfo.OwnerY=             spOwner->_TransformComp->Position.y;
 				_RecordInfo.Timing = CurTiming;
-				_RecordInfo._Color = _Info._Color;
+				_RecordInfo._Color = _Color;
 
 				_Record._Infos.insert({ CurTiming  , _RecordInfo});
 			}

@@ -79,3 +79,11 @@ void SceneManager::Release()
 }
 
 
+
+
+std::shared_ptr<class Scene> SceneManager::GetScene()
+{
+	return sp_scene;
+}
+
+

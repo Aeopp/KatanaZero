@@ -21,6 +21,8 @@ public:
 	template<ESceneID TargetID, typename TargetSceneType,
 		typename...Params>
 		void SceneRegist(Params&&... _Params);
+
+	std::shared_ptr<class Scene> GetScene();
 private:
 	std::shared_ptr<class Scene> sp_scene{};
 	ESceneID _PreScene{ ESceneID::ENone };
@@ -28,6 +30,7 @@ private:
 	
 	std::map<ESceneID, std::function<std::shared_ptr<Scene>()>> MakeSceneTypeMap;
 };
+
 
 template <ESceneID TargetID, typename TargetSceneType, typename...Params>
 void SceneManager::SceneRegist(Params&&... _Params)

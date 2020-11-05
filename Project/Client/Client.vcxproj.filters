@@ -240,6 +240,9 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="SceneChinaTown4th.h" />
+    <ClInclude Include="Item.h" />
+    <ClInclude Include="Drum.h" />
+    <ClInclude Include="SmokeCloud.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -395,6 +398,9 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="SceneChinaTown4th.cpp" />
+    <ClCompile Include="Item.cpp" />
+    <ClCompile Include="Drum.cpp" />
+    <ClCompile Include="SmokeCloud.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

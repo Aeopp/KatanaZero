@@ -16,7 +16,7 @@ public:
 	virtual void LateUpdate();
 	virtual void Hit(std::weak_ptr<class object>_Target, math::Collision::HitInfo _CollisionInfo)override;
 public:
-	void AttackStart(vec3 AttackPos, vec3 Dir);
+	
 private:
 	bool bBulletEffectEnd{ false };
 };

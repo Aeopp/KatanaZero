@@ -5,6 +5,7 @@
 #include "PhysicTransformComponent.h"
 #include "CollisionComponent.h"
 #include "EffectManager.h"
+#include "Time.h"
 
 OBJECT_ID::EID Attack_Slash::GetID()
 {
@@ -132,10 +133,15 @@ void Attack_Slash::Hit(std::weak_ptr<class object> _Target, math::Collision::Hit
         D3DXVec3Normalize(&initDir, &initDir);
 
         constexpr float BulletSpeed = 2000.f;
+        /*
+        EffectManager::instance().EffectPush(L"Effect", L"spr_bulletreflect",
+            5, 0.13f, 5 * 0.13f + 0.01f, OBJECT_ID::EID::ENONE, true, _PhysicComp->Position,
+            { 0,0,0 }, { 2.25,2.25,0 }, false, false, false, false, 0, 0, 255, false, 0,
+            0);*/
 
         EffectManager::instance().EffectPush(L"Effect",L"spr_bulletreflect",
-            5,0.1f,5*0.1f+0.01f,OBJECT_ID::EID::ENONE,true,_CollisionInfo.Position,
-            {}, { 2,2,0 },false,false,false,false,0,0,255,false,0,
+            5, 0.13f,5* 0.13f +0.01f,OBJECT_ID::EID::REFLECT,true,_CollisionInfo.Position,
+            {0,0,0}, { 2.25,2.25,0 },false,false,false,false,0,0,255,false,0,
             atan2f(initDir.y, initDir.x));
 
         EffectManager::instance().EffectPush(L"Effect", L"spr_bullet",
@@ -148,6 +154,9 @@ void Attack_Slash::Hit(std::weak_ptr<class object> _Target, math::Collision::Hit
         _RefEftInfo->get().bPhysic = false;
 
          _ReflectBulletIDs.insert(_RefEftInfo->get()._ID);
+
+         // 슬래쉬 공격 끝
+            bSlashEffectEnd = true;
     }
  /*   if (_CollisionInfo._TAG == OBJECT_TAG::ETAG::ENEMY ||
         _CollisionInfo._TAG == OBJECT_TAG::ETAG::ENEMY_ATTACK)
@@ -174,7 +183,7 @@ void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
     {
         bSlashEffectEnd = true;
     };
-    _RenderComp->Anim(true, false, L"spr_master_slash", 5, 0.3f, std::move(_Notify));
+    _RenderComp->Anim(true, false, L"spr_master_slash", 5, 0.20f, std::move(_Notify));
     _RenderComp->bRender = true;
     _RenderComp->AfterImgOn();
 

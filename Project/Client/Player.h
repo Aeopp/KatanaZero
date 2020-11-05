@@ -50,6 +50,9 @@ public:
 	bool IsInvisible() { return  _CurrentState == Player::State::Roll || InvincibleTime > 0.f; }
 	void HurtGround();
 	bool bHurt{ false };
+public:
+	std::shared_ptr<class UIItemIcon > _SpUIItemIcon{};
+
 private:
 	void AttackSlash();
 	void TimeRegist();
@@ -134,6 +137,10 @@ public :
 	bool bWallJump{ false };
 	float InvincibleTime = 0.f;
 	void JumpWallRide();
+
+	bool IsEqItem()const&;;
+
+	void EqItem(std::shared_ptr<class Item> _Item);
 private:
 	std::optional<vec3 > AtAttackDir;
 
@@ -143,6 +150,6 @@ private:
 	const float PlayerSpeed = 1250.f;
 	std::shared_ptr<class Attack_Slash> _SpAttackSlash{};
 	std::shared_ptr<class Battery> _SpBattery{};
-	std::shared_ptr<class UIItemIcon > _SpUIItemIcon{};
+	std::shared_ptr<class Item> _SpCurItem{};
 };
 

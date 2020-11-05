@@ -68,6 +68,7 @@ vec3 math::RandVec(std::pair<float, float> Range)
 	return vec;
 }
 
+
 vec3 math::ConvertXAxisDir(vec3 Dir)
 {
 	D3DXVec3Normalize(&Dir, &Dir);

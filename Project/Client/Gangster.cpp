@@ -267,6 +267,12 @@ void Gangster::AttackState()
 				8 * 0.05f + 0.01f, OBJECT_ID::EID::ENONE, true, FireLocation, { 0,0,0 },
 				{ 2,2,1 }, false, false, false, false, 0, 0, 255, false, 0,
 				atan2f(ToTarget.y, ToTarget.x));
+			std::wstring GunSmokeKey = L"spr_gunsmoke" + std::to_wstring(FireEffectImgID);
+
+			EffectManager::instance().EffectPush(L"GunSmoke", GunSmokeKey, 10,
+				0.1f, 10 * 0.1f + 0.01f, OBJECT_ID::EID::ENONE, true, FireLocation, { 0,0,0 },
+				{ 2,2,2 }, false, false, false, false, 0, 0, 255, false, 0, atan2f(ToTarget.y, ToTarget.x),
+				0, 0);
 		}
 	}
 	else

@@ -23,8 +23,9 @@ public:
 	std::shared_ptr<class RenderComponent> _OldSlash2;
 public:
 	void AttackStart(vec3 AttackPos, vec3 Dir);
-private:
 	bool bSlashEffectEnd{ false };
+private:
+
 
 	std::set<int32_t> _ReflectBulletIDs;
 

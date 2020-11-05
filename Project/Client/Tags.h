@@ -7,6 +7,11 @@ namespace OBJECT_ID
 	// 태그 다음 집합
 	enum EID : uint8_t
 	{
+		SMOKE_CLOUD,
+		REFLECT,
+		DRUM,
+		EXPLOSION,
+		ITEM,
 		GO,
 		GANGSTER_GUN,
 		REFLECT_BULLET,
@@ -51,6 +56,9 @@ namespace OBJECT_TAG
 	// 집합
 	enum ETAG : uint8_t
 	{
+		SMOKE_CLOUD,
+		INTERACTION_OBJECT,
+		ITEM,
 		ATTACK,
 		PLAYER_ATTACK,
 		ENEMY_ATTACK,
@@ -73,7 +81,9 @@ namespace LAYER
 	enum ELAYER : uint8_t
 	{
 		ETERRAIN,
+		EOBJECT_UNDER,
 		EOBJECT,
+		EOBJECT_OVER,
 		EEFFECT,
 		EEFFECT_OVER,
 		EUI,

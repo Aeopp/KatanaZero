@@ -34,7 +34,7 @@ public:
 
 	// 해당 집합에 존재하지 않으면 충돌검사 수행 X
 	const float LandCheckDistance = 10.f;
-	const float TileCollisionCheckDistanceMinSquare = 3000.f;
+	const float TileCollisionCheckDistanceMinSquare = 20000.f;
 	_CollisionTileContainerType& GetCollisionTileContainerRef(const bool bCanGoDown)&;
 private:
 	std::set<typename CollisionComponent::ETag> _CollisionTagSet
@@ -43,6 +43,7 @@ private:
 		CollisionComponent::ETag::EEnemy,
 		CollisionComponent::ETag::ECollisionEffect,
 		CollisionComponent::ETag::EItem,
+		CollisionComponent::ETag::ESmoke_Cloud,
 	};
 };
 

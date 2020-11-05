@@ -35,6 +35,7 @@ public:
 	virtual void Hit(std::weak_ptr<class object>_Target,math::Collision::HitInfo _CollisionInfo);
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo);
 
+	bool bSmoke = false;
 	void LineLanding(const vec3 LineDir);
 	void LineOff();
 };

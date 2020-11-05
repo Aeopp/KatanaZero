@@ -12,6 +12,9 @@ void EffectManager::Initialize() & noexcept
 	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EEnemy);
 	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EPlayer);
 	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EPlayerAttack);
+	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EItem);
+	_EffectCollisionTagSet.insert(CollisionComponent::ETag::EInteractionObject);
+	_EffectCollisionTagSet.insert(CollisionComponent::ETag::ESmoke_Cloud);
 };
 
 void EffectManager::Render()
@@ -45,8 +48,24 @@ void EffectManager::Render()
 			_Color = D3DCOLOR_ARGB(int32_t(float((_Effect.MaxT - _Effect.T) / _Effect.MaxT) * _Effect.Alpha), 255, 255, 255);
 
 		_Color = SwitchColorFromEffectID(_Effect.OBJ_ID, _Color);
+
+		if (_Effect.bSmoke)
+		{
+			_Color.r = 0;
+			_Color.g = 0;
+			_Color.b = 0;
+		}			
+
 		D3DXCOLOR RecordColor = _Color;
-		_Color = SwitchColorFromGameState(_Color);
+
+		_Color = SwitchColorFromGameState(_Effect.OBJ_ID,_Color);
+
+		if (_Effect.bSmoke)
+		{
+			_Color.r = 0;
+			_Color.g = 0;
+			_Color.b = 0;
+		}
 
 		auto TexInfo = TextureManager::instance().Get_TexInfo(_Effect.ObjKey, _Effect.StateKey, _Effect.DrawID);
 		RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width , TexInfo->ImageInfo.Height };
@@ -132,7 +151,6 @@ void EffectManager::Update()
 						D3DXMatrixRotationZ(&MRotZ, /*_Effect.RotZ*/0);
 						D3DXMatrixTranslation(&MTrans, _Effect.Pos.x, _Effect.Pos.y, _Effect.Pos.z);
 						MWorld = MScale * MRotZ * MTrans;
-
 					
 						auto _EffectWorldRectPT = math::GetWorldRectPt(MWorld, _Effect.Width, _Effect.Height);
 
@@ -204,7 +222,7 @@ void EffectManager::HitEvent(EffectInfo& _Effect, math::Collision::HitInfo _HitI
 
 }
 
-D3DXCOLOR EffectManager::SwitchColorFromGameState(D3DXCOLOR _Color)
+D3DXCOLOR EffectManager::SwitchColorFromGameState(OBJECT_ID::EID _EffectID, D3DXCOLOR _Color)
 {
 	if (global::IsSlow())
 	{
@@ -219,6 +237,94 @@ D3DXCOLOR EffectManager::SwitchColorFromGameState(D3DXCOLOR _Color)
 		_Color.r *= 0.3f;
 	}
 
+	switch (_EffectID)
+	{
+	case OBJECT_ID::REFLECT:
+		_Color.r = 255;
+		_Color.b = 255;
+		_Color.g = 255;
+		break;
+	case OBJECT_ID::WHITE_BLOOD:
+		_Color.r = 255;
+		_Color.b = 0;
+		_Color.g = 0;
+		break;
+	case OBJECT_ID::SLASH_FX:
+		_Color.r = 255;
+		_Color.g = 255;
+		_Color.b = 255;
+		break;
+	case OBJECT_ID::EXPLOSION:
+		break;
+	case OBJECT_ID::ITEM:
+		break;
+	case OBJECT_ID::GO:
+		break;
+	case OBJECT_ID::GANGSTER_GUN:
+		break;
+	case OBJECT_ID::REFLECT_BULLET:
+		break;
+	case OBJECT_ID::BULLET:
+		break;
+	case OBJECT_ID::HIT_EFFECT:
+		break;
+	case OBJECT_ID::GANGSTER:
+		break;
+	case OBJECT_ID::HIT_IMPACT:
+		break;
+	case OBJECT_ID::STOMPER_CLOUD:
+		break;
+	case OBJECT_ID::JUMP_CLOUD:
+		break;
+	case OBJECT_ID::LAND_CLOUD:
+		break;
+	case OBJECT_ID::GRUNT_SLASH:
+		break;
+	case OBJECT_ID::GRUNT:
+		break;
+	case OBJECT_ID::DustCloud:
+		break;
+	case OBJECT_ID::Effect:
+		break;
+	case OBJECT_ID::ATTACK:
+		break;
+	case OBJECT_ID::ATTACK_SLASH:
+		break;
+	case OBJECT_ID::ELINE:
+		break;
+	case OBJECT_ID::ETILE:
+		break;
+	case OBJECT_ID::EDOWNJUMPTILE:
+		break;
+	case OBJECT_ID::EWALLRIDELINE:
+		break;
+	case OBJECT_ID::EPLAYER:
+		break;
+	case OBJECT_ID::CHARACTER:
+		break;
+	case OBJECT_ID::CAMERA:
+		break;
+	case OBJECT_ID::UI_TIMER:
+		break;
+	case OBJECT_ID::UI_ITEMICONS:
+		break;
+	case OBJECT_ID::HUD:
+		break;
+	case OBJECT_ID::BATTERY:
+		break;
+	case OBJECT_ID::MOUSE:
+		break;
+	case OBJECT_ID::EENEMY1:
+		break;
+	case OBJECT_ID::EENEMY2:
+		break;
+	case OBJECT_ID::EENEMY3:
+		break;
+	case OBJECT_ID::ENONE:
+		break;
+	default:
+		break;
+	}
 	return _Color;
 }
 
@@ -235,6 +341,11 @@ D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCO
 		_Color.r = 255;
 		_Color.b = 0;
 		_Color.g = 0;
+		break;
+	case OBJECT_ID::REFLECT:
+		_Color.r = 255;
+		_Color.b = 255;
+		_Color.g = 255;
 		break;
 	case OBJECT_ID::GRUNT_SLASH:
 		break;

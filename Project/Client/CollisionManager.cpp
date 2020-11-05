@@ -31,10 +31,12 @@ void CollisionManager::Update()
 				auto IsFind = _TagMatchMap.find(_CollisionCompLhs->_Tag);
 				if (IsFind == end(_TagMatchMap))continue;
 				if (!IsFind->second.contains(_CollisionCompRhs->_Tag))continue;
-				// // 
-
+				
 				auto LhsRect =_CollisionCompLhs->GetWorldRectPt();
 				auto RhsRect = _CollisionCompRhs->GetWorldRectPt();
+
+				vec3 Distance = LhsRect[0] - RhsRect[0];
+				if (D3DXVec3LengthSq(&Distance) > DistanceCheckMinSq)continue;
 
 				auto oToRhs = math::Collision::RectAndRect({ LhsRect, RhsRect }, false);
 
@@ -90,7 +92,7 @@ void CollisionManager::Update()
 					_LhsHitInfo.Normal = Normal;
 					_LhsHitInfo.Position = math::GetCenter(RhsRect);
 					_LhsHitInfo._ID = RhsOwner->GetID();
-					_LhsHitInfo._TAG = LhsOwner->GetTag();
+					_LhsHitInfo._TAG = RhsOwner->GetTag();
 					_LhsHitInfo._Target = RhsOwner;
 					_LhsHitInfo.IsLhs = true;
 					_LhsHitInfo.PushForce = _CollisionCompRhs->PushForce;

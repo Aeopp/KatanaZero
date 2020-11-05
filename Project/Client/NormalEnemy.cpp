@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "Item.h"
 #include "EffectManager.h"
 #include "ObjectManager.h"
 #include "Time.h"
@@ -74,6 +75,10 @@ void NormalEnemy::Initialize() & noexcept
 
 	_DetectionRangeColorGoal = D3DCOLOR_ARGB(255, 0, 255, 0);
 
+	_RenderComp->SlowDeltaCoefft = 0.05f;
+	_RenderComp->AfterDeltaCoefft = 0.07f;
+	
+
 	_RenderComp->SlowStartColor = D3DCOLOR_ARGB(255, 125, 125, 125);
 	_RenderComp->SlowColor = D3DCOLOR_ARGB(255, 125, 125, 125);
 	_RenderComp->SlowGoalColor = D3DCOLOR_ARGB(0, 0, 0, 0);
@@ -116,8 +121,122 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 		return;
 	}
 
+	if (_CollisionInfo._ID==OBJECT_ID::EID::EXPLOSION)
+	{
+		_CollisionInfo.PushDir = { 0,-1,0 };
+		_CollisionInfo.PushDir += _CollisionInfo.PosDir;
+		D3DXVec3Normalize(&_CollisionInfo.PushDir, &_CollisionInfo.PushDir);
 
-	if (!_Target.expired() && _Target.lock()->GetID() == 
+		_CollisionInfo.PushForce = 500.f;
+
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
+			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
+			0.3f,
+			_CollisionInfo.PushDir);
+
+		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
+			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+			255, false, 0, ImpactRotZ, 0, 0);
+
+		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false, Pos,
+			_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
+			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
+			0, 0);
+
+		_FollowRenderComp->bRender = false;
+
+		_RenderComp->AfterImgOn();
+		 _EnemyState = NormalEnemy::State::Die;
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			4000.f, _CollisionInfo.PushDir, 0.3f);
+
+		Time::instance().TimeScale = 0.2f;
+		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]() {
+
+			if (global::ECurGameState::PlaySlow != global::_CurGameState)
+			{
+				Time::instance().TimeScale = 1.f;
+			}
+			return true; });
+
+		_RenderComp->AfterImgOn();
+		_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+		{
+			_RenderComp->AfterImgOff();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+			return true;
+		});
+
+		Die();
+		return;
+	}
+	else if (_CollisionInfo._ID == OBJECT_ID::ITEM)
+	{
+		auto _Item = std::dynamic_pointer_cast<Item>(_CollisionInfo._Target.lock());
+
+		if (_Item->_ItemID == EItem::Knife)
+		{
+			_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
+				_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
+				0.3f,
+				_CollisionInfo.PushDir);
+
+			float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
+			EffectManager::instance().EffectPush(L"Effect",
+				L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+				_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
+				{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+				255, false, 0, ImpactRotZ, 0, 0);
+
+			vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
+
+			EffectManager::instance().EffectPush(L"Effect",
+				L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false, Pos,
+				_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
+				, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
+				0, 0);
+
+			_FollowRenderComp->bRender = false;
+
+			_RenderComp->AfterImgOn();
+			//_EnemyState = NormalEnemy::State::Die;
+
+			ObjectManager::instance()._Camera.lock()->CameraShake(
+				2333.f, _CollisionInfo.PushDir, 0.20f);
+
+			Time::instance().TimeScale = 0.2f;
+			Time::instance().TimerRegist(0.05f, 0.05f, 0.05f, [this]() {
+
+				if (global::ECurGameState::PlaySlow != global::_CurGameState)
+				{
+					Time::instance().TimeScale = 1.f;
+				}
+				return true; });
+
+			_RenderComp->AfterImgOn();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+			Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+			{
+				_RenderComp->AfterImgOff();
+				_RenderComp->NormalAfterImgPushDelta *= 1.f;
+				return true;
+			});
+
+			Die();
+		}
+		return;
+	}
+	else if (!_Target.expired() && _Target.lock()->GetID() == 
 		OBJECT_ID::ATTACK_SLASH||   _CollisionInfo._ID == OBJECT_ID::REFLECT_BULLET)
 	{
 		if (_CollisionInfo._ID == OBJECT_ID::REFLECT_BULLET)

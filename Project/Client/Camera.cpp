@@ -43,17 +43,18 @@ void Camera::Update()
 
 	if (bMouseFollow &&  global::IsPlay()  )
 	{
+		
 		vec3 Goal = global::MousePosScreen;
+		Goal = CurrentCameraPos + Goal * 0.8f;
 		Goal.x -= global::ClientSize.first / 2.f;
 		Goal.y -= global::ClientSize.second / 2.f;
-		Goal = CurrentCameraPos + Goal * 0.8f;
-		Shaking(Dt);
-		Goal += _Shake;
-		_Shake = { 0,0 ,0 };
 
 		Goal.x = std::clamp<float>(Goal.x, CameraLockLT.x, CameraLockRB.x - global::ClientSize.first + global::ClientSize.first * 0.1);
 		Goal.y = std::clamp<float>(Goal.y, CameraLockLT.y, CameraLockRB.y - global::ClientSize.second + global::ClientSize.second * 0.1);
-
+	
+		Shaking(Dt);
+		Goal += _Shake;
+		_Shake = { 0,0 ,0 };
 	/*	global::CameraPos.x = std::clamp<float>(Goal.x, CameraLockLT.x, CameraLockRB.x - global::ClientSize.first + global::ClientSize.first * 0.1);
 		global::CameraPos.y = std::clamp<float>(Goal.y, CameraLockLT.y, CameraLockRB.y - global::ClientSize.second + global::ClientSize.second * 0.1);*/
 
@@ -63,16 +64,16 @@ void Camera::Update()
 	}
 	else if ( global::IsPlay()  && !bMouseFollow)
 	{
-		Shaking(Dt);
+		
 		vec3 Goal = CurrentCameraPos;
-		Goal += _Shake;
-		_Shake = { 0,0 ,0 };
 
 		Goal.x = std::clamp<float>(Goal.x, CameraLockLT.x, CameraLockRB.x - global::ClientSize.first + global::ClientSize.first * 0.1);
 		Goal.y = std::clamp<float>(Goal.y, CameraLockLT.y, CameraLockRB.y - global::ClientSize.second + global::ClientSize.second * 0.1);
 	/*	global::CameraPos.x = std::clamp<float>(Goal.x, CameraLockLT.x, CameraLockRB.x - global::ClientSize.first + global::ClientSize.first * 0.1);
 		global::CameraPos.y = std::clamp<float>(Goal.y, CameraLockLT.y, CameraLockRB.y - global::ClientSize.second + global::ClientSize.second * 0.1);*/
-
+		Shaking(Dt);
+		Goal += _Shake;
+		_Shake = { 0,0 ,0 };
 		global::CameraPos = math::lerp(global::CameraPos, Goal, 0.6f, Time::instance().Delta());
 		return;
 	}

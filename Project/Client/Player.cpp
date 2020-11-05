@@ -19,8 +19,9 @@
 #include "RenderManager.h"
 #include "Camera.h"
 #include "Time.h"
-
+#include "Item.h"
 using namespace std;
+
 
 OBJECT_ID::EID Player::GetID()
 {
@@ -50,8 +51,8 @@ void Player::Initialize() & noexcept
 		LAYER::ELAYER::EOBJECT);
 	_RenderComp->AfterImgOff();
 	_RenderComp->PositionCorrection = vec3{ 0.f,-8.f,0.f };
-	_RenderComp->SlowDeltaCoefft = 0.2f;
-	_RenderComp->NormalAfterImgPushDelta *= 1.5f;
+	_RenderComp->SlowDeltaCoefft = 0.05f;
+	_RenderComp->NormalAfterImgPushDelta *= 1.f;
 
 	_CollisionComp->_CollisionInfo._ShapeType =
 		CollisionComponent::CollisionInfo::EShapeType::Rect;
@@ -67,7 +68,7 @@ void Player::Initialize() & noexcept
 
 	_SpUIItemIcon = ObjectManager::instance().InsertObject<UIItemIcon>();
 	_SpUIItemIcon->SetOwner(_This);
-
+	
 	_SpAttackSlash = ObjectManager::instance().InsertObject<typename Attack_Slash>();
 	_SpAttackSlash->SetOwner(_This);
 
@@ -322,7 +323,7 @@ void Player::Move(vec3 Dir,const float AddSpeed)
 		Speed = PlayerSpeed;
 		break;
 	case Player::State::Roll:
-		Speed = PlayerSpeed * 1.15f;
+		Speed = PlayerSpeed * 1.25f;
 		break;
 	default:
 		break;
@@ -762,6 +763,29 @@ void Player::KeyBinding() & noexcept
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::UP));
 
+
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	{
+		if (!object::IsValid(Observer))return;
+		if (!_SpCurItem)return;
+
+		vec3 MyLocation = _PhysicComp->Position;
+		vec3 MouseLocation = global::MousePosWorld;
+		vec3 ToMouse = MouseLocation - MyLocation;
+		D3DXVec3Normalize(&ToMouse, &ToMouse); 
+		_SpCurItem->Throw(MyLocation, ToMouse);
+		_SpUIItemIcon->SetIcon(EItem::None);
+	},
+		'Z', InputManager::EKEY_STATE::DOWN));
+
+	/*_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	{
+		
+	},
+		'Q', InputManager::EKEY_STATE::DOWN));*/
+
+
+
 	/*_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
@@ -800,7 +824,7 @@ void Player::Attack()
 	_PhysicComp->Flying();
 	RenderComponent::NotifyType _Notify;
 	_Notify[7] = [this]() {bAttackMotionEnd = true; };
-	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.35f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.20f, std::move(_Notify));
 	
 	_PhysicComp->Position.z = 0.f;
 	vec3 Distance = global::MousePosWorld - _PhysicComp->Position;
@@ -1094,7 +1118,7 @@ void Player::HurtRecoverState()
 
 void Player::AttackState()
 {
-	if (bAttackMotionEnd)
+	if (bAttackMotionEnd || _SpAttackSlash->bSlashEffectEnd)
 	{
 		_RenderComp->AfterImgOff();
 		bAttackMotionEnd = false;
@@ -1110,10 +1134,9 @@ void Player::Roll()
 	{
 		bRollMotionEnd = true;
 	};
-	_RenderComp->Anim(false, false, L"spr_dragon_roll",7, 0.4f ,std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_dragon_roll",7, 0.35f ,std::move(_Notify));
 	_RenderComp->PositionCorrection.y += 10.f;
 	_RenderComp->AfterImgOn();
-
 }
 
 void Player::RollState()
@@ -1266,4 +1289,11 @@ void Player::JumpWallRide()
 	_Physics.T = 0.f;
 
 	_Physic_TransformComp->Move(std::move(_Physics));
+}
+
+ bool Player::IsEqItem() const& { return _SpUIItemIcon->ItemIcons.second != EItem::None; }
+
+void Player::EqItem(std::shared_ptr<class Item> _Item)
+{
+	_SpCurItem = _Item;
 }

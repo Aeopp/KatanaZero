@@ -79,8 +79,11 @@ public :
 	D3DXCOLOR SlowColor = D3DCOLOR_ARGB(255, 0, 255, 255);
 	D3DXCOLOR GetCurGameStateColor();
 
+	// 낮출수록 잔상주기가 짧아집니다.
 	float AfterDeltaCoefft = 0.3f;
+	// 낮출수록 잔상이 오래남습니다.
 	float SlowDeltaCoefft = 0.4f;
+
 	float SlowAfterImgPushDelta = 0.05f;
 	float NormalAfterImgPushDelta = 0.0125f;
 	

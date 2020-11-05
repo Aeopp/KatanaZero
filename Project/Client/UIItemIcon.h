@@ -1,6 +1,16 @@
 #pragma once
 #include "UI.h"
 
+enum EItem : int8_t
+{
+    None,
+    Knife,
+    Smoke,
+    Explosive,
+    Katana,
+    End,
+};
+
 class UIItemIcon :
     public UI
 {
@@ -14,15 +24,8 @@ public :
     OBJECT_TAG::ETAG GetTag()override;
     std::wstring_view GetName()const& override;
 
-    enum EItem : int8_t
-    {
-        None,
-        Knife,
-        Smoke,
-        Explosive,
-        Katana,
-        End,
-    };
+    void SetIcon(EItem _Item);
+
     std::pair<int8_t, int8_t > ItemIcons{ Katana,None };
 private:
 };

@@ -18,14 +18,15 @@ class math
 private:
 	static  inline std::random_device rd;
 public:
-	static constexpr float GRAVITY = 300.f;
-	static constexpr float GRAVITY_ACC = 100.f;
+	static constexpr float GRAVITY = 370.f;
+	static constexpr float GRAVITY_ACC = 133.f;
 	static constexpr float PI = 3.14159265f;
 
 	template<typename Type>
 	auto LOOP(std::pair<Type, Type> Range, Type Target);
 
 	static vec3 RandVec( std::pair<float, float> Range);
+	
 
 	template<typename Ty>
 	static Ty Rand_Normal(std::pair<Ty, Ty> range);
@@ -160,7 +161,7 @@ auto math::LOOP(std::pair<Type, Type> Range, Type Target)
 template<typename Ty>
 Ty math::Rand_Normal(std::pair<Ty, Ty> range)
 {
-	static std::mt19937 gen(rd());
+	 std::mt19937 gen(rd());
 
 	if constexpr (std::is_floating_point_v<Ty>)
 	{
@@ -176,7 +177,7 @@ Ty math::Rand_Normal(std::pair<Ty, Ty> range)
 template<typename Ty>
 Ty math::Rand(std::pair<Ty, Ty> range)
 {
-	static std::mt19937 gen(rd());
+	 std::mt19937 gen(rd());
 
 	if constexpr (std::is_floating_point_v<Ty>)
 	{

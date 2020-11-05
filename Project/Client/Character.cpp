@@ -99,7 +99,7 @@ void Character::BloodingPastDir()
 
     EffectManager::instance().EffectPush(L"Blood", StateKey, 6,
         0.1f, 6 * 0.1f + 0.01f, OBJECT_ID::EID::WHITE_BLOOD, true, Pos, RandVec * math::Rand<float>({50,100}),
-        { 3,3,3 }, false, false, false, false, 0.f, 0.f, 255, false,
+        { 3,3,3 }, false, true, false, true, 8, 8, 255, false,
         0.f, atan2f(RandVec.y, RandVec.x), 0.f, 0);
 }
 
@@ -128,7 +128,7 @@ void Character::BloodInit(vec3 Dir)
 
         EffectManager::instance().EffectPush(L"Blood", StateKey, 6,
             0.07f, 6 * 0.07f + 0.01f, OBJECT_ID::EID::WHITE_BLOOD,true, Pos, _Dir,
-            { 3,3,3 }, false, false, false, false, 0.f, 0.f, 255, false,
+            { 3,3,3 }, false, true, false, true, 8, 8, 255, false,
             0.f, atan2f(_Dir.y, _Dir.x), 0.f, 0);
         return false; });
 }
@@ -149,6 +149,6 @@ void Character::BloodingOverHead()
 
     EffectManager::instance().EffectPush(L"Blood", StateKey, 6,
         0.1f, 6 * 0.1f + 0.01f, OBJECT_ID::EID::WHITE_BLOOD, true, Pos, Dir * 25.f,
-        { 3,3,3 }, false, false, false, false, 0.f, 0.f, 255, false,
+        { 3,3,3 }, false, true, false, true, 8, 8, 255, false,
         0.f, atan2f(Dir.y, Dir.x), 0.f, 0);
 }

@@ -110,3 +110,8 @@ std::wstring_view UIItemIcon::GetName() const&
 {
     return L"UIItemIcons"sv;
 }
+
+void UIItemIcon::SetIcon(EItem _Item)
+{
+	ItemIcons.second = _Item;
+}
