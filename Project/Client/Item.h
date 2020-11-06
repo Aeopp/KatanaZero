@@ -16,6 +16,7 @@ public :
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo);
 	virtual void Update()override;
 	EItem _ItemID = EItem::Knife;
+	bool bThrow = false;
 private:
 	std::shared_ptr<class CollisionComponent> _CollisionComp;
 	std::shared_ptr<class RenderComponent> _RenderComp;
@@ -25,7 +26,7 @@ private:
 	float ThrowRotZSpeed = math::PI*3.f;
 	vec3 ThrowDir{ 0,0,0 };
 
-	bool bThrow = false;
+
 	bool bEq = false;
 	bool bUse = false;
 

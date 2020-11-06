@@ -178,6 +178,12 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 	if (_CollisionInfo._ID == OBJECT_ID::EID::BULLET)
 	{
+		auto _RefEftInfo = _CollisionInfo._Variable._Cast<std::reference_wrapper<EffectInfo>>();
+		_RefEftInfo->get().T = 0.f;
+		_RefEftInfo->get().MaxT = 5.f;
+		_RefEftInfo->get().bPhysic = false;
+		_RefEftInfo->get().Scale.x *= 4.f;
+
 		if (_CurrentState == Player::State::Attack && AtAttackDir.has_value())
 		{
 			vec3 BulletDir = _CollisionInfo.PosDir;
@@ -190,7 +196,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		_CollisionInfo.PushDir.y -= 0.4f;
 
-		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 2.5f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);
@@ -220,7 +226,6 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
 			0, 0);
 
-
 		ObjectManager::instance()._Camera.lock()->CameraShake(
 			_CollisionInfo.PushForce * 5, _CollisionInfo.PushDir, 0.3f);
 
@@ -247,9 +252,14 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 	}
 	else if (_CollisionInfo._TAG == OBJECT_TAG::ENEMY_ATTACK  )
 	{
-		_CollisionInfo.PushDir.y -= 0.4f;
+		vec3 UpDir = { 0,-1,0 };
 
-		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
+		/*_CollisionInfo.PushDir =*/ D3DXVec3Lerp(&_CollisionInfo.PushDir, &_CollisionInfo.PushDir,
+			&UpDir, 0.3f);
+
+		// _CollisionInfo.PushDir.y -= 0.4f;
+		
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 10.f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);

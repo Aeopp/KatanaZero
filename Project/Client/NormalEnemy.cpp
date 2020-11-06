@@ -183,7 +183,7 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 	{
 		auto _Item = std::dynamic_pointer_cast<Item>(_CollisionInfo._Target.lock());
 
-		if (_Item->_ItemID == EItem::Knife)
+		if (_Item->_ItemID == EItem::Knife && _Item->bThrow)
 		{
 			_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
 				_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
@@ -243,8 +243,9 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 		{
 			auto _RefEftInfo = _CollisionInfo._Variable._Cast<std::reference_wrapper<EffectInfo>>();
 			_RefEftInfo->get().T = 0.f;
-			_RefEftInfo->get().MaxT = 0.1f;
+			_RefEftInfo->get().MaxT = 5.f;
 			_RefEftInfo->get().bPhysic = false;
+			_RefEftInfo->get().Scale.x *= 4.f;
 		}
 
 		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce *3.5f),

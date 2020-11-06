@@ -13,6 +13,8 @@
 #include "Gangster.h"
 #include "TransformComponent.h"
 #include "GO.h"
+#include "Item.h"
+#include "Drum.h"
 
 
 
@@ -78,6 +80,9 @@ void Scene::LoadObjectInfo()
 		switch (_SpawnID)
 		{
 		case ObjectInfo::Explosive:
+			_SpawnObj = ObjectManager::instance().InsertObject<Item>(_ObjectInfo.Position);
+			std::dynamic_pointer_cast<Item>(_SpawnObj)->SetUpInitState(EItem::Explosive);
+			SceneManageObjs.push_back(_SpawnObj);
 			break;
 		case ObjectInfo::HeadHunter:
 			break;
@@ -94,12 +99,18 @@ void Scene::LoadObjectInfo()
 			SceneManageObjs.push_back(_SpawnObj);
 			break;
 		case ObjectInfo::Knife:
+			_SpawnObj = ObjectManager::instance().InsertObject<Item>(_ObjectInfo.Position);
+			std::dynamic_pointer_cast<Item>(_SpawnObj)->SetUpInitState(EItem::Knife);
+			SceneManageObjs.push_back(_SpawnObj);
 			break;
 		case ObjectInfo::Pomp:
 			break;
 		case ObjectInfo::Shotgun:
 			break;
 		case ObjectInfo::Smoke:
+			_SpawnObj = ObjectManager::instance().InsertObject<Item>(_ObjectInfo.Position);
+			std::dynamic_pointer_cast<Item>(_SpawnObj)->SetUpInitState(EItem::Smoke);
+			SceneManageObjs.push_back(_SpawnObj);
 			break;
 		case ObjectInfo::EndTrigger:
 			_SpawnObj = ObjectManager::instance().InsertObject<GO>();
@@ -111,6 +122,10 @@ void Scene::LoadObjectInfo()
 			_SpawnObj = ObjectManager::instance().InsertObject<Player>
 				(_ObjectInfo.Position);
 			ObjectManager::instance()._Player = std::dynamic_pointer_cast<Player>(_SpawnObj);
+			SceneManageObjs.push_back(_SpawnObj);
+			break;
+		case ObjectInfo::Drum:
+			_SpawnObj = ObjectManager::instance().InsertObject<Drum>(_ObjectInfo.Position);
 			SceneManageObjs.push_back(_SpawnObj);
 			break;
 		default:

@@ -240,7 +240,7 @@ void Gangster::AttackState()
 		{
 			AttackCoolTime = 0.66f;
 			constexpr float AttackRich = 70.f;
-			constexpr float BulletSpeed = 2000.f;
+			constexpr float BulletSpeed = 2300.f;
 
 			vec3 ToTarget = _Target->_TransformComp->Position;
 			ToTarget -= _PhysicComp->Position;
@@ -253,7 +253,7 @@ void Gangster::AttackState()
 
 			EffectManager::instance().EffectPush(L"Effect", L"spr_bullet",
 				1, (std::numeric_limits<float>::max)(), 10.f, OBJECT_ID::EID::BULLET,
-				true, FireLocation, ToTarget * BulletSpeed, { 3,1,1 }, false,
+				true, FireLocation, ToTarget * BulletSpeed, { 1,1,1 }, false,
 				true, false, true, 34 , 2, 255, false, 0.f, atan2f(ToTarget.y, ToTarget.x),
 				0);
 

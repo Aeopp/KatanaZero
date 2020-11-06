@@ -80,6 +80,7 @@ struct ObjectInfo
 		Smoke,
 		EndTrigger,
 		Player,
+		Drum=13,
 	};
 	ObjectInfo() = default;
 	//ObjectInfo(const uint32_t _ObjectID, const vec3& Position) : _ObjectID{ _ObjectID }, Position{ Position } {};

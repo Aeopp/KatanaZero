@@ -18,8 +18,6 @@
 #include "Item.h"
 #include "Drum.h"
 #include "SmokeCloud.h"
-
-
 // 
 //
 // 
