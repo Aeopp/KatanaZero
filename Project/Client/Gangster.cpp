@@ -129,10 +129,7 @@ void Gangster::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 		}
 	}
 
-	if (_CollisionInfo._ID == OBJECT_ID::SMOKE_CLOUD && _CurrentState != Gangster::State::InSmoke)
-	{
-		InSmoke();
-	}
+
 }
 
 void Gangster::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
@@ -155,6 +152,12 @@ void Gangster::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo
 			_PhysicComp->Dir.x *= -1.f;
 		}
 	}
+
+	if (_CollisionInfo._ID == OBJECT_ID::SMOKE_CLOUD && _CurrentState != Gangster::State::InSmoke)
+	{
+		InSmoke();
+	}
+
 }
 
 void Gangster::Move(vec3 Dir, const float AddSpeed)
@@ -235,6 +238,9 @@ void Gangster::AttackState()
 	if (_Target->bInAreaSmoke && _CurrentState != Gangster::State::InSmoke)
 	{
 		InSmoke();
+		_SpGun->GunRenderEnd();
+		_SpArm->ArmRenderEnd();
+
 		return;
 	}
 
@@ -252,7 +258,7 @@ void Gangster::AttackState()
 		return;
 	};
 
-	if (D3DXVec3Length(&ToTarget) < 70.f)
+	if (D3DXVec3Length(&ToTarget) < 80.f)
 	{
 		if ((!_Target->IsInvisible()) && (!_Target->bHurt))
 		{
@@ -550,7 +556,7 @@ void Gangster::Whip()
 	RenderComponent::NotifyType _Notify;
 	_RenderComp->PositionCorrection = {0,0,0};
 
-	_Notify[3] = [this]()
+	_Notify[0] = [this]()
 	{
 		if (!_Target->IsInvisible() && !_Target->bHurt)
 		{
@@ -588,6 +594,8 @@ void Gangster::InSmoke()
 	}
 	_EnemyState = NormalEnemy::State::Idle;
 	_CurrentState = Gangster::State::InSmoke;
+	_SpGun->GunRenderEnd();
+	_SpArm->ArmRenderEnd();
 
 	_RenderComp->Anim(true, true, L"spr_gangsteridle",8, 0.7f);
 	//_RenderComp->PositionCorrection += { 0, 10, 0 };

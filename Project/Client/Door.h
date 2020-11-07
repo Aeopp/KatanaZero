@@ -22,6 +22,7 @@ public:
     bool bOpen = false;
     float XDir = 1;
 
+    bool bUse = false;
     bool bGlowRender = true;
     bool bOpening = false;
 private:

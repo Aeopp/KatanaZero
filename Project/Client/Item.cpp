@@ -15,6 +15,8 @@
 #include "SceneManager.h"
 #include "Scene.h"
 #include "SmokeCloud.h"
+#include "Texture_Manager.h"
+#include "GraphicDevice.h"
 
 
 
@@ -63,6 +65,41 @@ void Item::Initialize() & noexcept
     _PhysicComp->bMapSlide = true;
     _PhysicComp->bGravity = false;
     _PhysicComp->bFollowOwner = false;
+    
+    _RenderComp->_RenderAfterEvent = [this,AnimFrame=0.f]() mutable
+    {
+        if (!bPickUpable)return;
+
+        {
+            float dt  =Time::instance().Delta();
+
+            auto TexInfo = TextureManager::instance().Get_TexInfo(L"Effect",
+                L"spr_pickuparrow_anim", AnimFrame);
+            RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width,
+            TexInfo->ImageInfo.Height };
+            vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+            matrix MWorld = _RenderComp->CurRenderWorld;
+            MWorld._42 += -70 * global::JoomScale;
+            MWorld._11 *= 1.3f;
+            MWorld._22 *= 1.3f;
+
+            //MWorld  
+            ////D3DXMatrixTranslation(&MWorld, RenderLocation.x -global::CameraPos.x, RenderLocation.y-global::CameraPos.y, 0);
+            /////*MWorld._11 = 2.f;
+            ////MWorld._22 = 2.f;
+            ////MWorld._33 = 2.f;*/
+            GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+            GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+                &_srcRT, &__TextureCenter, nullptr,
+                D3DCOLOR_ARGB(255, 255, 255, 255));
+
+            AnimFrame += dt *5.f;
+            if (AnimFrame >= 8.f)
+            {
+                AnimFrame -= 8.f;
+            }
+        }
+    };
 }
 
 void Item::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
@@ -84,6 +121,7 @@ void Item::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
                 EQEffectPosCorre + _PhysicComp->Position, { 0,0,0 }, { 1.7,1.7,0 }, true, false, false, false, 0, 0, 255, true, 0, 0, 0, 0);
 
             bEq = true;
+            bPickUpable = false;
         }
         
     };

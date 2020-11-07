@@ -26,6 +26,7 @@ private:
 	float ThrowRotZSpeed = math::PI*3.f;
 	vec3 ThrowDir{ 0,0,0 };
 
+	bool bPickUpable = true;
 	bool bEq = false;
 	bool bUse = false;
 

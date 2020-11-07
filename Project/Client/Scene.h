@@ -16,7 +16,6 @@ public:
 	std::vector<std::shared_ptr<class object>>SceneManageObjs;
 
 	void LoadObjectInfo();
-	
 
 	std::wstring CurrentMapStateKey{};
 	std::wstring LoadObjectInfoFilePath{};

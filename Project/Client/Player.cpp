@@ -690,7 +690,7 @@ void Player::Jump()
 	SimplePhysics _Physics;
 	_Physics.Acceleration = 200.f;
 	_Physics.Dir = Dir;
-	_Physics.Speed = { 0.f,-800.f ,0.f };
+	_Physics.Speed = { 0.f,-850.f ,0.f };
 	_Physics.MaxT = 0.3f;
 	_PhysicComp->Move(std::move(_Physics));
 
@@ -1034,7 +1034,32 @@ void Player::DoorKick()
 	{
 		bDoorKickMotionEnd = true;
 	};
-	_RenderComp->Anim(false, false, L"spr_dragon_doorkick", 6, 0.4f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_dragon_doorkick", 6, 0.3f, std::move(_Notify));
+
+	/*EffectManager::instance().EffectPush(L"Effect",
+		L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+		_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
+		{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+		255, false, 0, ImpactRotZ, 0, 0);
+	*/
+
+	float DoorKickRich = 150.f ; 
+	if (ToDoorX < 0.f)
+	{
+		DoorKickRich += 100.f;
+	}
+	vec3 ToDoor{ ToDoorX,0,0 };
+	ToDoor = math::ConvertXAxisDir(ToDoor);
+	float RotZ = 0.f;
+	if (ToDoor.x < 0.f)
+	{
+		RotZ = math::PI * 1.f;
+	}
+	vec3 DoorKickImpactLocation = _PhysicComp->Position + ToDoor *DoorKickRich;
+	EffectManager::instance().EffectPush(L"Effect",
+		L"spr_hit_impact", 5, 0.1f, 5 * 0.1f + 0.01f, OBJECT_ID::DOOR_KICK_IMPACT, true,
+		DoorKickImpactLocation, { 0,0,0 }, { 2.5,2.5,1 }, false, true, false, false, 50, 50, 255, false, 0, RotZ, 0, 0, 0, 0, 0);
+	//EffectManager::instance().
 };
 
 void Player::DoorKickState()
@@ -1489,7 +1514,9 @@ void Player::AnyState()
 
 		vec3 ToDoor = DoorLocationCorrection - _TransformComp->Position;
 		float Distance = D3DXVec3Length(&ToDoor);
-		if (Distance < 100 && !spDoor->bOpen)
+		ToDoorX = ToDoor.x;
+
+		if (Distance < 140 && !spDoor->bOpen && !spDoor->bUse)
 		{
 			spDoor->Open(ToDoor.x);
 			DoorKick();

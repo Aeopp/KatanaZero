@@ -96,6 +96,8 @@ public :
 	vec3 PositionCorrection{ 0.f,0.f,0.f };
 	int32_t AnimDir = 1.f;
 	bool bRender{ true };
+
+	matrix CurRenderWorld;
 private:
 	float SlowAfterImgPushCurrentDelta = 0.f;
 	float NormalAfterImgPushCurrentDelta = 0.f;

@@ -217,22 +217,56 @@ void RecordManager::RePlayRender()
 		EffectManager::instance().RecordRender();
 		float diff = EndTiming - Timing;
 		diff /= EndTiming;
-		int32_t Alpha = 160 - (diff * 160);
 
-		D3DXCOLOR _Color = D3DCOLOR_ARGB(Alpha, 255, 255, 255);
+		{
+			int32_t Alpha = 160 - (diff * 160);
 
-		auto TexInfo = TextureManager::instance().Get_TexInfo(L"Effect", L"ReplayBack", 0);
-		RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width ,
-					  TexInfo->ImageInfo.Height };
-		vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
-		matrix MScale, MTrans, MWorld;
-		D3DXMatrixScaling(&MScale, 1920, 1080, 0);
-		D3DXMatrixTranslation(&MTrans, 1920.f / 2.f, 1080.f / 2.f, 0);
-		MWorld = MScale * MTrans;
-		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
-		GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
-			&_srcRT, &__TextureCenter, nullptr,
-			_Color);
+			D3DXCOLOR _Color = D3DCOLOR_ARGB(Alpha, 255, 255, 255);
+
+			auto TexInfo = TextureManager::instance().Get_TexInfo(L"Effect", L"ReplayBack", 0);
+			RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width ,
+						  TexInfo->ImageInfo.Height };
+			vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+			matrix MScale, MTrans, MWorld;
+			D3DXMatrixScaling(&MScale, 1920, 1080, 0);
+			D3DXMatrixTranslation(&MTrans, 1920.f / 2.f, 1080.f / 2.f, 0);
+			MWorld = MScale * MTrans;
+			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+			GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+				&_srcRT, &__TextureCenter, nullptr,
+				_Color);
+		}
+
+		{
+			auto TexInfo = TextureManager::instance().Get_TexInfo(L"MYUI",
+				L"Replay", 0);
+			RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width,
+			TexInfo->ImageInfo.Height };
+			vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+			matrix MWorld;
+			D3DXMatrixTranslation(&MWorld, 1800, 850, 0);
+			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+			GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+				&_srcRT, &__TextureCenter, nullptr,
+				D3DCOLOR_ARGB(255,255,255,255));
+		}
+
+		int32_t DrawID = TimingSpeed < 0 ? 2 : 1;
+		DrawID = TimingSpeed == 0 ? 3 : DrawID;
+
+		{
+			auto TexInfo = TextureManager::instance().Get_TexInfo(L"MYUI",
+				L"Replay", DrawID);
+			RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width,
+			TexInfo->ImageInfo.Height };
+			vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+			matrix MWorld;
+			D3DXMatrixTranslation(&MWorld, 200, 100, 0);
+			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+			GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+				&_srcRT, &__TextureCenter, nullptr,
+				D3DCOLOR_ARGB(255, 255, 255, 255));
+		}
 	}
 	Time::instance().Render();
 	GraphicDevice::instance().RenderEnd();

@@ -147,6 +147,7 @@ public :
 	bool bCurWallRideCollision{ false };
 	bool bWallJump{ false };
 	float InvincibleTime = 0.f;
+	float ToDoorX = 1.f;
 	// 테스트끝나고수정
 	const float DashCoolTime = 2.f;
 	// 

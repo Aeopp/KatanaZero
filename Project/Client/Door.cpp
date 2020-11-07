@@ -55,7 +55,7 @@ void Door::Initialize() & noexcept
     _CollisionComp->_CollisionInfo._ShapeType =
         CollisionComponent::CollisionInfo::EShapeType::Rect;
     _CollisionComp->_CollisionInfo.Height = 64;
-    _CollisionComp->_CollisionInfo.Width = 100;
+    _CollisionComp->_CollisionInfo.Width = 80;
  //   _CollisionComp->LocationCorrection = { -20,0,0 };
     _CollisionComp->_Tag = CollisionComponent::ETag::EDoor;
     _CollisionComp->bCollision = true;
@@ -96,7 +96,9 @@ void Door::SetUpInitState(int32_t InitKey, float XDir)
 void Door::Open(float XDir)
 {
 //    bOpening = true;
-    bOpen = true;
+    bUse = true;
+  /*  _CollisionComp->_CollisionInfo.Width *= 100.f;*/
+
     RenderComponent::NotifyType _Notify;
     _Notify[3] = [this]()
     {
@@ -108,6 +110,7 @@ void Door::Open(float XDir)
         bOpening = false;
     };
     _Notify[20] = [this]() {
+        bOpen = true;
         OpenEnd(); 
     };
 
@@ -125,7 +128,6 @@ void Door::Open(float XDir)
 
 void Door::OpenEnd()
 {
- 
     bOpening = false;
     _CollisionComp->bCollision = false;
     _RenderCompDoorGlow->bRender = false;

@@ -40,6 +40,7 @@ void RenderComponent::Render()
 	MWorld._41 += PositionCorrection.x;
 	MWorld._42 += PositionCorrection.y;
 	MWorld._43 += PositionCorrection.z;
+	CurRenderWorld = MWorld;
 
 	const auto LocalPoints = math::GetLocalRect(vec2{ (float)spTexInfo->ImageInfo.Width,(float)spTexInfo->ImageInfo.Height });
 

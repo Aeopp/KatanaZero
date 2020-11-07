@@ -11,14 +11,12 @@
 using float_t = float;
 
 
-
-
 class math
 {
 private:
 	static  inline std::random_device rd;
 public:
-	static constexpr float GRAVITY = 370.f;
+	static constexpr float GRAVITY = 330.f;
 	static constexpr float GRAVITY_ACC = 100.f;
 	static constexpr float PI = 3.14159265f;
 

@@ -16,6 +16,8 @@ public:
 
     float XDir = 1.f;
 
+
+
     std::shared_ptr<class CollisionComponent > _CollisionComponent{};
     float ClearCheckTime = 2.f;
 

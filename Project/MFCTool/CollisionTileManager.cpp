@@ -147,7 +147,7 @@ void CollisionTileManager::DebugRender()&
 	DebugTileStr = L"CullingDebugCollisionTile : " + std::to_wstring(TileCount - RenderCount);
 	rectRender = { 0,75,500,100};
 	GraphicDevice::instance().GetFont()->DrawTextW(nullptr, DebugTileStr.c_str(), DebugTileStr.size(), &rectRender, 0, D3DCOLOR_ARGB(255, 109, 114, 255));
-
+	
 	GraphicDevice::instance().GetSprite()->Begin(D3DXSPRITE_ALPHABLEND);
 }
 

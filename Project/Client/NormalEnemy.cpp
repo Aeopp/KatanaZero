@@ -123,14 +123,14 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 		return;
 	}
 
-	if (_CollisionInfo._ID == OBJECT_ID::DOOR)
+	if (_CollisionInfo._ID == OBJECT_ID::DOOR_KICK_IMPACT)
 	{
-		auto _wpDoor = _CollisionInfo._Target.lock();
-		auto spDoor = std::dynamic_pointer_cast<Door>(_wpDoor);
-
-		if (spDoor->bOpening)
-		{
-			_CollisionInfo.PushDir = vec3{ spDoor->XDir,0,0 };
+			vec3 PushDir = { 1,0,0 };
+			if (_CollisionInfo.PosDir.x<0.f)
+			{
+				PushDir.x = -1.f;
+			}
+			_CollisionInfo.PushDir = PushDir;
 			_CollisionInfo.PushForce = 100.f;
 
 			_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
@@ -162,10 +162,10 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			_EnemyState = NormalEnemy::State::Die;
 
 			ObjectManager::instance()._Camera.lock()->CameraShake(
-				_CollisionInfo.PushForce * 7, _CollisionInfo.PushDir, 0.3f);
+				_CollisionInfo.PushForce * 3.5f, _CollisionInfo.PushDir, 0.3f);
 
 			Time::instance().TimeScale = 0.2f;
-			Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]() {
+			Time::instance().TimerRegist(0.04f, 0.04f, 0.04f, [this]() {
 
 				if (global::ECurGameState::PlaySlow != global::_CurGameState)
 				{
@@ -184,8 +184,6 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			});
 
 			Die();
-		}
-
 	}
 
 	if (_CollisionInfo._ID == OBJECT_ID::EID::DRAGON_DASH)

@@ -17,11 +17,6 @@
 #include "Drum.h"
 #include "Door.h"
 
-
-
-
-
-
 Scene::~Scene() noexcept
 {
 	Release();
@@ -143,7 +138,6 @@ void Scene::LoadObjectInfo()
 			_Door->SetUpInitState(2, 0);
 			SceneManageObjs.push_back(_SpawnObj);
 			ObjectManager::instance()._Doors.push_back(_Door);
-
 			break;
 		case ObjectInfo::DoorMansion:
 			_SpawnObj = ObjectManager::instance().InsertObject<Door>(_ObjectInfo.Position);
@@ -151,7 +145,6 @@ void Scene::LoadObjectInfo()
 			_Door->SetUpInitState(3, 0);
 			SceneManageObjs.push_back(_SpawnObj);
 			ObjectManager::instance()._Doors.push_back(_Door);
-
 			break;
 		default:
 			break;

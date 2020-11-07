@@ -502,3 +502,7 @@ quest
 spr_enemy_exclaim
 exclaim
 2
+..\Resource\Texture\MYUI\Replay\%d.png
+MYUI
+Replay
+4
