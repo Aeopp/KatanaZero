@@ -26,13 +26,11 @@ private:
 	float ThrowRotZSpeed = math::PI*3.f;
 	vec3 ThrowDir{ 0,0,0 };
 
-
 	bool bEq = false;
 	bool bUse = false;
 
 	vec3 EQEffectPosCorre = { 0,-100,0 };
 	std::wstring EQStateKey = L"";
-
 	
 	static constexpr int32_t SmokeNum = 50;
 	std::array<std::shared_ptr<class SmokeCloud>, SmokeNum > _Smoke;

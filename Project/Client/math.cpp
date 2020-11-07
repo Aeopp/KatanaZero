@@ -67,6 +67,12 @@ vec3 math::RandVec(std::pair<float, float> Range)
 	vec.z = 0;
 	return vec;
 }
+//
+//vec3 math::RandRotVec()
+//{
+//	vec3 Dir{ 1,0,0 };
+//	return math::RotationVec(Dir, math::Rand<float>({ -360,360 }));
+//}
 
 
 vec3 math::ConvertXAxisDir(vec3 Dir)
@@ -361,8 +367,6 @@ typename math::Collision::IsCollision_Dir math::Collision::SegmentAndRect(
 			}
 		}
 	}
-
-
 
 	return std::nullopt;
 }

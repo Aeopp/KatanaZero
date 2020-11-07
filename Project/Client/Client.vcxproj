@@ -175,6 +175,7 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="ComponentManager.h" />
     <ClInclude Include="DELEGATE.h" />
+    <ClInclude Include="Door.h" />
     <ClInclude Include="Drum.h" />
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="Enemy.h" />
@@ -253,6 +254,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ComponentManager.cpp" />
     <ClCompile Include="DELEGATE.cpp" />
+    <ClCompile Include="Door.cpp" />
     <ClCompile Include="Drum.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Enemy.cpp" />

@@ -184,6 +184,8 @@ void CollisionTileManager::Update()&
 		bool bFly = false;
 
 		if (!_spCollision->bCollision)continue;
+		if (!_spCollision->bTileCollision)continue;
+
 		if (!(_CollisionTagSet.contains(_spCollision->_Tag)))continue;
 		for (auto& _CollisionTile : _CollisionTileVec)
 		{
@@ -261,6 +263,7 @@ void CollisionTileManager::Update()&
 		bool bLand = false;
 		bool bFly = false;
 		if (!_spCollision->bCollision)continue;
+		if (!_spCollision->bTileCollision)continue;
 		if (!(_CollisionTagSet.contains(_spCollision->_Tag)))continue;
 		if (_spCollision->bDownJump)continue;
 

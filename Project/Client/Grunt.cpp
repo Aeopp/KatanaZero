@@ -10,6 +10,8 @@
 #include "ObjectManager.h"
 #include "Time.h"
 #include "GraphicDevice.h"
+#include "Door.h"
+
 
 using namespace std;
 
@@ -45,7 +47,7 @@ void Grunt::Initialize() & noexcept
 
 	_PhysicComp->bGravity = true;
 
-	Speed = 500.f ;
+	Speed = 700.f ;
 	MoveGoalTime = 2.f;
 	DetectionRange = 400.f;
 	AttackRange = 100.f;
@@ -81,6 +83,7 @@ void Grunt::LateUpdate()
 	Super::LateUpdate();
 
 	const float Dt = Time::instance().Delta();
+	DoorTurnDuration -= Dt;
 
 	//bFrameCurrentCharacterInput = false;
 	//bMoveKeyCheck = false;
@@ -97,13 +100,13 @@ void Grunt::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 {
 	Super::MapHit(_CollisionInfo);
 
-	if (_CurrentState == Grunt::State::Walk && _CollisionInfo._ID ==OBJECT_ID::ETILE)
+	if (_CurrentState == Grunt::State::Walk && _CollisionInfo._ID == OBJECT_ID::ETILE)
 	{
 		if (
-			( math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal) 
-			  && (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 5.f)))         ||
+			(math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal)
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 4))) ||
 			(math::almost_equal(vec3{ -1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 5.f)))
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 4)))
 			)
 		{
 			Turn();
@@ -115,6 +118,28 @@ void Grunt::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 void Grunt::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
 	Super::Hit(_Target  , _CollisionInfo );
+
+	if (_EnemyState == NormalEnemy::State::Die)return;
+
+	if (  (_EnemyState == NormalEnemy::State::Walk ||
+		        _CurrentState==Grunt::State::Walk) && _CollisionInfo._ID == OBJECT_ID::DOOR &&
+		DoorTurnDuration<0.f)
+	{
+		auto spObject = _CollisionInfo._Target.lock();
+		auto spDoor = std::dynamic_pointer_cast<Door>(spObject);
+
+		if (!spDoor->bOpening)
+		{
+			DoorTurnDuration = 1.f;
+			Turn();
+			_PhysicComp->Dir.x *= -1.f;
+		}
+	}
+
+	if (_CollisionInfo._ID == OBJECT_ID::SMOKE_CLOUD && _CurrentState!= Grunt::State::InSmoke)
+	{
+		InSmoke();
+	}
 }
 
 void Grunt::Move(vec3 Dir, const float AddSpeed)
@@ -271,25 +296,35 @@ void Grunt::HurtGroundState()
 void Grunt::Idle()
 {
 	_CurrentState = Grunt::State::Idle;
-	_RenderComp->Anim(false, true, L"spr_grunt_idle", 8, 0.5f);
+	_RenderComp->Anim(true, true, L"spr_grunt_idle", 8, 0.5f);
+	_RenderComp->PositionCorrection += {0, 10, 0};
 }
 
 void Grunt::IdleState()
 {
 	vec3 BeforeDir = _PhysicComp->Dir;
 	IsDetected = IsRangeInnerTarget();
-	
 
 	if (IsDetected)
 	{
-		if (D3DXVec3Dot(&BeforeDir, &ToTarget) < 0.f)
+		if (_Target->bInAreaSmoke && _CurrentState != Grunt::State::InSmoke)
 		{
+			InSmoke();
+			return;
+		}
+		else if (D3DXVec3Dot(&BeforeDir, &ToTarget) < 0.f)
+		{
+			_RenderComp->PositionCorrection += {0, -10, 0};
+
 			_PhysicComp->Dir = ConvertXAxisDir(ToTarget);
 			Turn();
 			return;
 		}
-		else 
+		else
+		{
+			_RenderComp->PositionCorrection += {0, -10, 0};
 			Run();
+		}
 	}
 }
 
@@ -306,6 +341,14 @@ void Grunt::RunState()
 {
 	vec3 ToTarget = _Target->_TransformComp->Position - _PhysicComp->Position;
 	float ToTargetDistance = D3DXVec3Length(&ToTarget);
+
+	if (_Target->bInAreaSmoke && _CurrentState != Grunt::State::InSmoke &&
+		ToTargetDistance < PursuitRange)
+	{
+		InSmoke();
+		return;
+	}
+
 	if (ToTargetDistance < AttackRange)
 	{
 		Attack();
@@ -354,6 +397,8 @@ void Grunt::Turn()
 		bTurnMotionEnd = true;
 	};
 	_RenderComp->Anim(true, false, L"spr_grunt_turn", 8, 0.45f,std::move(_Notify));
+	_RenderComp->PositionCorrection += {0, 10, 0};
+
 }
 
 void Grunt::TurnState()
@@ -365,15 +410,19 @@ void Grunt::TurnState()
 		switch (_EnemyState)
 		{
 		case NormalEnemy::State::Idle:
+			_RenderComp->PositionCorrection += {0, -10, 0};
 			Idle();
 			break;
 		case NormalEnemy::State::Detecting:
+			_RenderComp->PositionCorrection += {0, -10, 0};
 			Run();
 			break;
 		case NormalEnemy::State::Walk:
+			_RenderComp->PositionCorrection += {0, -10, 0};
 			Walk();
 			break;
 		default:
+			_RenderComp->PositionCorrection += {0, -10, 0};
 			Idle();
 			break;
 		}
@@ -390,13 +439,19 @@ void Grunt::Walk()
 
 void Grunt::WalkState()
 {
+
+
 	vec3 BeforeDir = _PhysicComp->Dir;
 	IsDetected = IsRangeInnerTarget();
-	
 
 	if (IsDetected)
 	{
-		if (D3DXVec3Dot(&BeforeDir, &ToTarget) < 0.f)
+		if (_Target->bInAreaSmoke && _CurrentState != Grunt::State::InSmoke)
+		{
+			InSmoke();
+			return;
+		}
+		else if (D3DXVec3Dot(&BeforeDir, &ToTarget) < 0.f)
 		{
 			_PhysicComp->Dir = ConvertXAxisDir(ToTarget);
 			Turn();
@@ -406,9 +461,48 @@ void Grunt::WalkState()
 		{
 			Run();
 		}
-	}
+	};
 
 	Move(_PhysicComp->Dir, Speed *0.25f);
+}
+
+void Grunt::InSmoke()
+{
+	if (_CurrentState == Grunt::State::Idle)
+	{
+		_RenderComp->PositionCorrection += { 0, -10, 0 };
+	}
+	_EnemyState = NormalEnemy::State::Idle;
+	_CurrentState = Grunt::State::InSmoke;
+
+	_RenderComp->Anim(true, true, L"spr_grunt_idle", 8, 0.5f);
+	_RenderComp->PositionCorrection += { 0,10,0 };
+
+	_MsgRenderComp->bRender = true;
+	_MsgRenderComp->Anim(true, false, L"quest",
+		1, 1.f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 }, L"spr_enemy_question",
+		LAYER::ELAYER::EOBJECT_OVER);
+
+	Time::instance().TimerRegist(0.3f, 0.3f, 0.3f, [this]() {
+		bSmokeEnd = true;
+		 return true; });
+}
+
+void Grunt::InSmokeState()
+{
+	if (bSmokeEnd)
+	{
+		_RenderComp->PositionCorrection += { 0, -10, 0 };
+		bSmokeEnd = false;
+		Idle();
+	}
+	 // vec3 BeforeDir = _PhysicComp->Dir;
+
+		// 상태전이할때
+		// 
+
+	// IsDetected = IsRangeInnerTarget();
+	//Move(_PhysicComp->Dir, Speed * 0.25f);
 }
 
 
@@ -450,6 +544,9 @@ void Grunt::FSM()
 		break;
 	case Grunt::State::EnterStair:
 		EnterStairState();
+		break;
+	case Grunt::State::InSmoke:
+		InSmokeState();
 		break;
 	default:
 		break;

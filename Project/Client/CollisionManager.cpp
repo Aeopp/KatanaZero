@@ -54,6 +54,15 @@ void CollisionManager::Update()
 					else
 						Normal.x = 0;
 
+					if (_CollisionCompRhs->_Tag == CollisionComponent::ETag::EDoor)
+					{
+						vec3 Diff = LhsOwner->_TransformComp->Position - RhsOwner->_TransformComp->Position;
+						if(Diff.x<0)
+							LhsOwner->_TransformComp->Position += Normal;
+						else 
+							LhsOwner->_TransformComp->Position -= Normal;
+					};
+
 					D3DXVec3Normalize(&Normal, &Normal);
 					// //
 					vec3 Dis = RhsOwner->_TransformComp->Position - LhsOwner->_TransformComp->Position;

@@ -18,6 +18,8 @@
 #include "Texture_Manager.h"
 #include "GangsterGun.h"
 #include "GangsterArm.h"
+#include "Door.h"
+
 
 using namespace std;
 
@@ -53,10 +55,10 @@ void Gangster::Initialize() & noexcept
 
 	_PhysicComp->bGravity = true;
 
-	Speed = 500.f;
+	Speed = 633.f;
 	MoveGoalTime = 2.f;
-	DetectionRange = 800.f;
-	AttackRange = 800.f;
+	DetectionRange = 730.f;
+	AttackRange = 730.f;
 
 	_CurrentState = Gangster::State::Idle;
 
@@ -65,7 +67,7 @@ void Gangster::Initialize() & noexcept
 	//TODO::
 	/*_SpAttack = ObjectManager::instance().InsertObject < Grunt_Slash>();
 	_SpAttack->SetOwner(_This);*/
-	DelayAfterAttack = 0.4f;
+	DelayAfterAttack = 0.66f;
 
 	_SpGun = ObjectManager::instance().InsertObject<GangsterGun>();
 	_SpGun->SetOwner(_This);
@@ -73,7 +75,7 @@ void Gangster::Initialize() & noexcept
 	_SpArm = ObjectManager::instance().InsertObject<GangsterArm>();
 	_SpArm->SetOwner(_This);
 
-	IsSamefloorRange = { -120.f,+48.f };
+	IsSamefloorRange = { -169.f,+60.f};
 
 	DetectionRange = AttackRange;
 }
@@ -96,11 +98,16 @@ void Gangster::LateUpdate()
 	if (!global::IsPlay())return;
 	if (!ObjectManager::instance().bEnemyUpdate)return;
 
+	if (_EnemyState == NormalEnemy::State::Die)
+	{
+		_SpArm->_RenderComp->bRender = false;
+		_SpGun->_RenderComp->bRender = false;
+	}
 
 	Super::LateUpdate();
 
 	const float Dt = Time::instance().Delta();
-
+	DoorTurnDuration -= Dt;
 	AttackCoolTime -= Dt;
 }
 
@@ -112,14 +119,19 @@ void Gangster::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 	{
 		if (
 			(math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 5.f))) ||
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 4))) ||
 			(math::almost_equal(vec3{ -1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 5.f)))
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 4)))
 			)
 		{
 			Turn();
 			_PhysicComp->Dir.x *= -1.f;
 		}
+	}
+
+	if (_CollisionInfo._ID == OBJECT_ID::SMOKE_CLOUD && _CurrentState != Gangster::State::InSmoke)
+	{
+		InSmoke();
 	}
 }
 
@@ -127,9 +139,22 @@ void Gangster::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo
 {
 	Super::Hit(_Target, _CollisionInfo);
 
-	_SpArm->_RenderComp->bRender = false;
+	if (_EnemyState == NormalEnemy::State::Die)return;
 
-	_SpGun->_RenderComp->bRender = false;
+	if ((_EnemyState == NormalEnemy::State::Walk ||
+		_CurrentState == Gangster::State::Walk) && _CollisionInfo._ID == OBJECT_ID::DOOR &&
+		DoorTurnDuration < 0.f)
+	{
+		auto spObject = _CollisionInfo._Target.lock();
+		auto spDoor = std::dynamic_pointer_cast<Door>(spObject);
+
+		if (!spDoor->bOpening)
+		{
+			DoorTurnDuration = 1.f;
+			Turn();
+			_PhysicComp->Dir.x *= -1.f;
+		}
+	}
 }
 
 void Gangster::Move(vec3 Dir, const float AddSpeed)
@@ -143,7 +168,6 @@ void Gangster::Die()&
 	HurtFly();
 
 	bBlooding = true;
-
 }
 
 void Gangster::EnterStair()
@@ -190,7 +214,7 @@ void Gangster::LeaveStairState()
 void Gangster::Attack()
 {
 	_RenderComp->PositionCorrection = vec3{ 0.f,-20.f,0.f };
-	AttackCoolTime = 0.4f;
+	AttackCoolTime = 0.6f;
 
 	_CurrentState = Gangster::State::Attack;
 	RenderComponent::NotifyType _Notify;
@@ -208,6 +232,12 @@ void Gangster::Attack()
 
 void Gangster::AttackState()
 {
+	if (_Target->bInAreaSmoke && _CurrentState != Gangster::State::InSmoke)
+	{
+		InSmoke();
+		return;
+	}
+
 	vec3 ToTarget = _Target->_PhysicComp->Position - _PhysicComp->Position;
 	float TargetDistance = D3DXVec3Length(&ToTarget);
 
@@ -240,7 +270,7 @@ void Gangster::AttackState()
 		{
 			AttackCoolTime = 0.66f;
 			constexpr float AttackRich = 70.f;
-			constexpr float BulletSpeed = 2300.f;
+			constexpr float BulletSpeed = 1800.f;
 
 			vec3 ToTarget = _Target->_TransformComp->Position;
 			ToTarget -= _PhysicComp->Position;
@@ -278,7 +308,9 @@ void Gangster::AttackState()
 	else
 	{
 		Time::instance().TimerRegist(DelayAfterAttack, DelayAfterAttack, DelayAfterAttack,
-			[this]() {
+			[this,This=_This]() {
+
+			if (This.expired())return true ;
 			if (!global::IsPlay())return true;
 			if (_EnemyState != NormalEnemy::State::Die)
 			{
@@ -347,7 +379,7 @@ void Gangster::HurtGroundState()
 void Gangster::Idle()
 {
 	_CurrentState = Gangster::State::Idle;
-	_RenderComp->Anim(false, true, L"spr_gangsteridle", 8, 0.5f);
+	_RenderComp->Anim(false, true, L"spr_gangsteridle", 8, 0.7f);
 }
 
 void Gangster::IdleState()
@@ -357,7 +389,12 @@ void Gangster::IdleState()
 
 	if (IsDetected)
 	{
-		if (D3DXVec3Dot(&BeforeDir, &ToTarget) < 0.f)
+		if (_Target->bInAreaSmoke && _CurrentState != Gangster::State::InSmoke)
+		{
+			InSmoke();
+			return;
+		}
+		else if (D3DXVec3Dot(&BeforeDir, &ToTarget) < 0.f)
 		{
 			_PhysicComp->Dir = ConvertXAxisDir(ToTarget);
 			Turn();
@@ -383,6 +420,13 @@ void Gangster::RunState()
 {
 	vec3 ToTarget = _Target->_TransformComp->Position - _PhysicComp->Position;
 	float ToTargetDistance = D3DXVec3Length(&ToTarget);
+
+	if (_Target->bInAreaSmoke && _CurrentState != Gangster::State::InSmoke &&
+		ToTargetDistance < PursuitRange)
+	{
+		InSmoke();
+		return;
+	}
 
 	if (ToTargetDistance < AttackRange)
 	{
@@ -435,7 +479,7 @@ void Gangster::Turn()
 		bTurnMotionEnd = true;
 	};
 	_RenderComp->PositionCorrection = { 0,-10.f,0 };
-	_RenderComp->Anim(false, false, L"spr_gangsterturn", 6, 1.f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_gangsterturn", 6, 0.3f, std::move(_Notify));
 }
 
 void Gangster::TurnState()
@@ -468,6 +512,7 @@ void Gangster::Walk()
 	_CurrentState = Gangster::State::Walk;
 	_RenderComp->Anim(false, true, L"spr_gangsterwalk",
 		8, 0.84f);
+	_RenderComp->PositionCorrection += {0,0,0};
 }
 
 void Gangster::WalkState()
@@ -477,14 +522,21 @@ void Gangster::WalkState()
 
 	if (IsDetected)
 	{
-		if (D3DXVec3Dot(&BeforeDir, &ToTarget) < 0.f)
+		if (_Target->bInAreaSmoke && _CurrentState != Gangster::State::InSmoke)
 		{
+			InSmoke();
+			return;
+		}
+		else if (D3DXVec3Dot(&BeforeDir, &ToTarget) < 0.f)
+		{
+			_RenderComp->PositionCorrection += {0, 0, 0};
 			_PhysicComp->Dir = ConvertXAxisDir(ToTarget);
 			Turn();
 			return;
 		}
 		else
 		{
+			_RenderComp->PositionCorrection += {0, 0, 0};
 			Run();
 		}
 	}
@@ -528,6 +580,39 @@ void Gangster::WhipState()
 	}
 }
 
+void Gangster::InSmoke()
+{
+	if (_CurrentState == Gangster::State::Idle)
+	{
+	//	_RenderComp->PositionCorrection += { 0, -10, 0 };
+	}
+	_EnemyState = NormalEnemy::State::Idle;
+	_CurrentState = Gangster::State::InSmoke;
+
+	_RenderComp->Anim(true, true, L"spr_gangsteridle",8, 0.7f);
+	//_RenderComp->PositionCorrection += { 0, 10, 0 };
+
+	_MsgRenderComp->bRender = true;
+	_MsgRenderComp->Anim(true, false, L"quest",
+		1, 1.f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 }, L"spr_enemy_question",
+		LAYER::ELAYER::EOBJECT_OVER);
+
+	Time::instance().TimerRegist(0.3f, 0.3f, 0.3f, [this]() {
+		bSmokeEnd = true;
+		return true; });
+}
+
+void Gangster::InSmokeState()
+{
+	if (bSmokeEnd)
+	{
+		//_RenderComp->PositionCorrection += { 0, -10, 0 };
+		bSmokeEnd = false;
+		Idle();
+	}
+
+}
+
 void Gangster::AnyState()
 {
 }
@@ -569,6 +654,9 @@ void Gangster::FSM()
 	case Gangster::State::Whip:
 		WhipState();
 		break; 
+	case Gangster::State::InSmoke:
+		InSmokeState();
+		break;
 	default:
 		break;
 	}

@@ -22,6 +22,7 @@ public:
 		Whip,
 		EnterStair,
 		LeaveStair,
+		InSmoke,
 	};
 private:
 	//TODO :: 여기서 어택객체 
@@ -29,7 +30,7 @@ private:
 	std::shared_ptr<class GangsterArm> _SpArm;
 	std::shared_ptr<class GangsterGun> _SpGun;
 	typename Gangster::State _CurrentState{ Gangster::State::Idle };
-	float AttackCoolTime = 0.3f;
+	float AttackCoolTime = 0.6f;
 public :
 	virtual void Initialize() & noexcept;
 	virtual void Update();
@@ -61,10 +62,16 @@ public :
 	void WalkState();
 	void Whip();
 	void WhipState();
+
+	void InSmoke();
+	void InSmokeState();
+	
 private:
 	void AnyState();
 	void FSM();
-	
+	bool bSmokeEnd = false;
+	float DoorTurnDuration = 1.f;
+
 	void FollowRouteProcedure();
 public:
 	bool bTurnMotionEnd{ false };

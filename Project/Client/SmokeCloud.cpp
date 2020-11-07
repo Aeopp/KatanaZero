@@ -50,6 +50,8 @@ void SmokeCloud::Initialize() & noexcept
     _CollisionComp->_CollisionInfo.Width = 28;
     _CollisionComp->_Tag = CollisionComponent::ETag::ESmoke_Cloud;
     _CollisionComp->bCollision = false;
+    _CollisionComp->bLineCollision = false;
+    _CollisionComp->bTileCollision = false;
 
     _PhysicComp->bMapSlide = true;
     _PhysicComp->bGravity = false;
@@ -149,6 +151,7 @@ void SmokeCloud::Start()
     _Notify[3] = [this]() {
         bAppear = true;
     };
+
     _RenderComp->Anim(false, false, L"spr_smoke_appear", 3, 0.4f, std::move(_Notify),
         D3DCOLOR_ARGB(Alpha, 255, 255, 255), 0.f, { 1,1 }, L"Effect", LAYER::ELAYER::EOBJECT_UNDER);
     bAppear = false;

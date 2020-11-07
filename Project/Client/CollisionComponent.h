@@ -5,10 +5,12 @@ class CollisionComponent :
     public Component
 {
 public:
+    
     enum class ETag : uint8_t
     {
         ENone,
         ESmoke_Cloud,
+        EDoor,
         EInteractionObject,
         ETrigger,
         EEnemy,
@@ -39,6 +41,9 @@ public:
         ////////////////////////////////
     };
 
+    bool bLineCollision = true;
+    bool bTileCollision = true;
+    //bool bLhsSlide = false;
     float PushForce = 0.f;
     vec3 CurrentPushDir{ +1.f,0.f,0.f };
     ETag _Tag = ETag::ENone;

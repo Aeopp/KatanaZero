@@ -22,6 +22,7 @@ public:
 	std::shared_ptr<class RenderComponent> _OldSlash1;
 	std::shared_ptr<class RenderComponent> _OldSlash2;
 public:
+	void DashAttackStart(vec3 AttackPos, vec3 Dir);
 	void AttackStart(vec3 AttackPos, vec3 Dir);
 	bool bSlashEffectEnd{ false };
 private:

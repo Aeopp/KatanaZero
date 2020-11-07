@@ -25,9 +25,10 @@ public :
 protected:
     static inline std::pair<float, float> IsSamefloorRange{-169.f,+48.f};
     bool IsSamefloor(vec3 TargetPos);
-    
+    bool IsDetectDoorCheck();
 
-    std::shared_ptr<class RenderComponent> _FollowRenderComp;
+    std::shared_ptr<class RenderComponent> _MsgRenderComp;
+
     std::vector<vec3> Paths;
     vec3 GoalPos{ 0.f,0.f,0.f };
     static inline const float PathFindCheckMinDistanceMin = 100.f;
@@ -50,6 +51,7 @@ protected:
     D3DXCOLOR _DetectionRangeColorGoal;
     float _DetectionRangeColorGoalTime= 1.0f;
     float NarrowRange = 200.f;
+
 
     bool IsRangeInnerTarget();
     vec3 ToTargetDir{ -1.f,0.f,0.f };

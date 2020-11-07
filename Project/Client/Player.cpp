@@ -20,8 +20,11 @@
 #include "Camera.h"
 #include "Time.h"
 #include "Item.h"
-using namespace std;
+#include "Texture_Manager.h"
+#include "GraphicDevice.h"
+#include "Door.h"
 
+using namespace std;
 
 OBJECT_ID::EID Player::GetID()
 {
@@ -54,6 +57,7 @@ void Player::Initialize() & noexcept
 	_RenderComp->SlowDeltaCoefft = 0.05f;
 	_RenderComp->NormalAfterImgPushDelta *= 1.f;
 
+	
 	_CollisionComp->_CollisionInfo._ShapeType =
 		CollisionComponent::CollisionInfo::EShapeType::Rect;
 	_CollisionComp->_CollisionInfo.Height = 35;
@@ -95,6 +99,113 @@ void Player::Initialize() & noexcept
 		return true;
 	});
 	/*_RenderComp->SlowGoalColor = D3DCOLOR_ARGB(0, 255, 0, 255);*/
+
+	_RenderComp->_RenderAfterEvent = [this]()
+	{	
+		const float JoomScale = global::JoomScale;
+		vec3 CameraPos = global::CameraPos;
+
+		matrix MWorld = this->_TransformComp->CalcWorldMatrix(true);
+
+		MWorld = MWorld * math::GetCameraJoomMatrix(JoomScale, vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
+		MWorld._41 += _RenderComp->PositionCorrection.x;
+		MWorld._42 += _RenderComp->PositionCorrection.y;
+		MWorld._43 += _RenderComp->PositionCorrection.z;
+
+		// 대쉬 쿨타임 렌더링 시작 ... 
+		if (CurDashCoolTime > 0.f)
+		{
+			vec2 CoolTimeRange = { 30,0 };
+			vec2 CoolTimeLocationRePos = { 0,-70};
+			CoolTimeLocationRePos *= JoomScale;
+			CoolTimeRange *= JoomScale;
+
+			vec2 PlayerLocation = { MWorld._41,MWorld._42 };
+			vec2 CoolLineStartLocation = PlayerLocation + CoolTimeLocationRePos;
+			
+			std::array<vec2, 2ul> _CoolTimeLeftRight;
+
+			_CoolTimeLeftRight[0] = CoolLineStartLocation + (-CoolTimeRange * (CurDashCoolTime / DashCoolTime));
+			_CoolTimeLeftRight[1]= CoolLineStartLocation + (+CoolTimeRange *(CurDashCoolTime / DashCoolTime));
+
+			GraphicDevice::instance().GetSprite()->End();
+			GraphicDevice::instance().GetLine()->SetWidth(15.f);
+			GraphicDevice::instance().GetLine()->Draw(_CoolTimeLeftRight.data(), _CoolTimeLeftRight.size(), D3DCOLOR_ARGB(255, 255, 0, 0));
+			GraphicDevice::instance().GetSprite()->Begin(D3DXSPRITE_ALPHABLEND);
+		}
+		// 대쉬 레인지 렌더링 시작 ....
+		if (!bDashRangeRender) return;
+
+		auto spTexInfo = TextureManager::instance().Get_TexInfo
+		(L"Dragon", L"spr_dragon_dash_range", 0);
+		
+		vec2 LineStartLocation = { MWorld._41  ,   	MWorld._42 };
+		const auto LocalPoints = math::GetLocalRect(vec2{ (float)spTexInfo->ImageInfo.Width,(float)spTexInfo->ImageInfo.Height });
+
+		bool IsRenderable = false;
+
+		for (const auto& LocalPoint : LocalPoints)
+		{
+			vec3 WorldPoint{ 0,0,0 };
+			D3DXVec3TransformCoord(&WorldPoint, &LocalPoint, &MWorld);
+			IsRenderable |= math::IsPointInnerRect(global::GetScreenRect(), WorldPoint);
+			if (IsRenderable)break;
+		}
+
+		if (IsRenderable)
+		{
+			RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _RenderComp->_Info.SrcScale.x,
+					  spTexInfo->ImageInfo.Height * _RenderComp->_Info.SrcScale.y };
+			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,
+			spTexInfo->ImageInfo.Height / 2.f,0.f };
+			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture,
+				&srcRect, &TextureCenter, nullptr,
+				D3DCOLOR_ARGB(255,255,255,255));
+		}
+
+		vec3 MouseLocation  = global::MousePosWorld;
+		vec3 MyLocation = _PhysicComp->Position;
+		vec3 ToMouse = MouseLocation - MyLocation;
+		CurDashRange = D3DXVec3Length(&ToMouse);
+		CurDashRange  = min(CurDashRange, 500.f);
+		vec3 ToMouseDir;
+		D3DXVec3Normalize(&ToMouseDir, &ToMouse);
+		//float DashRange = 500.f;
+		ToMouseDir *= CurDashRange;
+		if (ToMouseDir.x < 0.f)
+		{
+			MWorld._11 *= -1.f;
+		}
+
+		MWorld._41 += ToMouseDir.x;
+		MWorld._42 += ToMouseDir.y;
+
+		{
+			vec2 ToMouseDir2D = { ToMouseDir.x,ToMouseDir.y };
+			D3DXVec2Normalize(&ToMouseDir2D, &ToMouseDir2D);
+			ToMouseDir2D *= CurDashRange;
+			std::array<vec2, 2ul> Line2Ds{ LineStartLocation ,   ToMouseDir2D + vec2{ LineStartLocation.x,LineStartLocation.y } };
+			GraphicDevice::instance().GetSprite()->End();
+			GraphicDevice::instance().GetLine()->SetWidth(8.f);
+			GraphicDevice::instance().GetLine()->Draw(Line2Ds.data(), Line2Ds.size(), D3DCOLOR_ARGB(255, 0, 199, 235));
+			GraphicDevice::instance().GetSprite()->Begin(D3DXSPRITE_ALPHABLEND);
+		}
+
+		{
+			auto spTexInfo = TextureManager::instance().Get_TexInfo
+			(L"Dragon", L"spr_dragon_attack", 6);
+
+			RECT srcRect = { 0,0,spTexInfo->ImageInfo.Width * _RenderComp->_Info.SrcScale.x,
+					  spTexInfo->ImageInfo.Height * _RenderComp->_Info.SrcScale.y };
+			vec3 TextureCenter = { spTexInfo->ImageInfo.Width / 2.f,
+			spTexInfo->ImageInfo.Height / 2.f,0.f };
+			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+			GraphicDevice::instance().GetSprite()->Draw(spTexInfo->pTexture,
+				&srcRect, &TextureCenter, nullptr,
+				D3DCOLOR_ARGB(255, 0, 199, 235));
+		}
+	};
 };
 
 void Player::LateInitialize() & noexcept
@@ -130,11 +241,13 @@ void Player::LateUpdate()
 	bDownKeyCheck = false;
 	bSneakKeyCheck = false;
 	bCurWallRideCollision = false;
+	
 
 	RollEffectDelta -= Dt;
 	WallRideEffectDelta -= Dt;
 	CurAttackCoolTime -= Dt;
 	InvincibleTime -= Dt;
+	CurDashCoolTime -= Dt;
 
 	if (!_SpBattery->IsUse())
 	{
@@ -176,6 +289,20 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 	if (IsInvisible())return;
 	if (bHurt)return;
 
+	if (!bInAreaSmoke && _CollisionInfo._ID == OBJECT_ID::EID::SMOKE_CLOUD)
+	{
+		bInAreaSmoke = true;
+
+		Time::instance().TimerRegist(0.3f, 0.3f, 0.3f, [this,This = _This]() { 
+			if (This.expired())return true;
+			bInAreaSmoke = false;
+			return true; });
+	}
+	if (_CollisionInfo._ID == OBJECT_ID::EID::DOOR)
+	{
+		_CurDoor = _CollisionInfo._Target;
+	}
+
 	if (_CollisionInfo._ID == OBJECT_ID::EID::BULLET)
 	{
 		auto _RefEftInfo = _CollisionInfo._Variable._Cast<std::reference_wrapper<EffectInfo>>();
@@ -203,7 +330,8 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		BloodInit(_CollisionInfo.PushDir);
 
-		bFatal = true;
+		if(!bCheat)
+			bFatal = true;
 
 
 		EffectManager::instance().EffectPush(L"Effect",
@@ -266,7 +394,8 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		BloodInit(_CollisionInfo.PushDir);
 
-		bFatal = true;
+		if(!bCheat)
+			bFatal = true;
 
 
 		EffectManager::instance().EffectPush(L"Effect",
@@ -588,6 +717,7 @@ void Player::FSM()
 		CrouchState();
 		break;
 	case Player::State::Dash:
+		DashState();
 		break;
 	case Player::State::DoorKick:
 		DoorKickState();
@@ -670,14 +800,6 @@ void Player::KeyBinding() & noexcept
 		InputManager::instance().EventRegist([]() {Time::instance().bTimeInfoRender = !Time::instance().bTimeInfoRender; }, 'O', InputManager::EKEY_STATE::DOWN)
 	);
 
-	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
-	{
-		if (!object::IsValid(Observer))return;
-		bFrameCurrentCharacterInput = true;
-
-		BloodInit(_PhysicComp->Dir);
-	},
-		VK_RBUTTON, InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{		
@@ -752,6 +874,39 @@ void Player::KeyBinding() & noexcept
 		vec3 Dir = _PhysicComp->Dir;
 	}, VK_LBUTTON, InputManager::EKEY_STATE::DOWN));
 
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	{
+		if (!object::IsValid(Observer))return;
+		if (global::IsReWind() && global::IsReplay())return;
+
+		if (global::IsSlow() && CurDashCoolTime<0.f)
+		{
+			Time::instance().Return();
+			bFrameCurrentCharacterInput = true;
+			bDashKeyCheck = true;
+			bDashRangeRender = false;
+			_PhysicComp->Position.z = 0.f;
+			vec3 MouseToDistance = global::MousePosWorld - _PhysicComp->Position;
+			D3DXVec3Normalize(&_PhysicComp->Dir, &MouseToDistance);
+		}
+	}, VK_RBUTTON, InputManager::EKEY_STATE::UP));
+
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	{
+		if (!object::IsValid(Observer))return;
+		if (global::IsReWind() && global::IsReplay())return;
+		if (_SpBattery->IsUse() && CurDashCoolTime < 0.f)
+		{
+			Time::instance().SlowDownTime();
+			bFrameCurrentCharacterInput = true;
+			bDashRangeRender = true;
+			_PhysicComp->Position.z = 0.f;
+			vec3 MouseToDistance = global::MousePosWorld - _PhysicComp->Position;
+			D3DXVec3Normalize(&_PhysicComp->Dir, &MouseToDistance);
+		}
+	}, VK_RBUTTON, InputManager::EKEY_STATE::DOWN));
+
+
 	_Anys.emplace_back(InputManager::instance().EventRegist([this,Observer]()
 	{
 		if (!object::IsValid(Observer))return;
@@ -769,11 +924,10 @@ void Player::KeyBinding() & noexcept
 		{
 			Time::instance().Return();
 		}
-		
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::UP));
 
-
+	
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
@@ -788,20 +942,15 @@ void Player::KeyBinding() & noexcept
 	},
 		'Z', InputManager::EKEY_STATE::DOWN));
 
-	/*_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
-	{
-		
-	},
-		'Q', InputManager::EKEY_STATE::DOWN));*/
-
-
-
-	/*_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		RecordManager::instance().ReWindStart();
+		if (global::IsReWind() && global::IsReplay())return;
+
+		bCheat = !bCheat;
 	},
-		'1', InputManager::EKEY_STATE::DOWN));*/
+		VK_F2, InputManager::EKEY_STATE::DOWN));
+
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
@@ -1033,8 +1182,7 @@ void Player::HurtFlyBeginState()
 	if (bHurtFlyBeginMotionEnd)
 	{
 		bHurtFlyBeginMotionEnd = false;
-		
-
+	
 		HurtFly();
 	}
 };
@@ -1051,6 +1199,60 @@ void Player::HurtFlyState()
 	if (_PhysicComp->bLand)
 	{
 		HurtGround();
+	}
+}
+void Player::Dash()
+{
+	_CurrentState = Player::State::Dash;
+
+	_PhysicComp->Flying();
+	RenderComponent::NotifyType _Notify;
+	_Notify[1] = [this]()
+	{
+		_SpAttackSlash->DashAttackStart(AtDashDir * 80.f, AtDashDir);
+	};
+
+	_Notify[2] = [this]() {
+		bDashEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_dragon_dash", 2, 0.5f, std::move(_Notify));
+	_PhysicComp->Position.z = 0.f;
+
+	vec3 Distance = global::MousePosWorld - _PhysicComp->Position;
+	vec3 Dir;
+	D3DXVec3Normalize(&Dir, &Distance);
+	SimplePhysics _Physics;
+	_Physics.Acceleration = 0.f;
+	_Physics.Dir = Dir;
+	_Physics.Speed = (Dir * 9333.f) * (  CurDashRange/ 500.f );
+	_Physics.MaxT = 0.04f;
+	_Physics.T = 0.f;
+	_PhysicComp->Move(std::move(_Physics));
+
+//	_SpAttackSlash->AttackStart(Dir * 30.f, Dir);
+	AtDashDir = Dir;
+	_RenderComp->AfterImgOn();
+
+	// i 값 조절
+	float MaxIndex = 13.f * (CurDashRange / 500.f);
+
+	for (int i = 0; i < MaxIndex; ++i)
+	{
+		vec3 Location = _PhysicComp->Position;
+		float Diff = 40.f;
+		EffectManager::instance().EffectPush(L"Dragon", L"spr_dragon_dash", 2, 0.0125f, 0.0251f,
+			OBJECT_ID::EID::DRAGON_DASH, false, Location + (Dir * (Diff * i)), { 0,0,0 },
+			{ 2.5,2.5,0 }, false, true, false, false, 36, 40, 255, false, 0, atan2f(Dir.y, Dir.x), 0, 0);
+	};
+}
+void Player::DashState()
+{
+	if (bDashEnd)
+	{
+		
+		bDashEnd = false;
+		_RenderComp->AfterImgOff();
+		Fall();
 	}
 }
 void Player::HurtGround()
@@ -1077,10 +1279,12 @@ void Player::HurtGround()
 		RecordManager::instance().bUpdate = false;
 
 		EffectManager::instance().EffectPush(L"Effect", L"NothingBack", 1, 0.2f,
-			FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 });
+			FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 },
+			false,false,false,false,0,0,255,false,0,0,0,0,false,0,0);
 
 		EffectManager::instance().EffectPush(L"Effect", L"Nothing", 1, 0.2f,
-			FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 });
+			FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 },false
+		,false,false,false,0,0,255,false,0,0,0,0,true,0.4f,1);
 	};
 }
 void Player::HurtGroundState()
@@ -1276,10 +1480,37 @@ void Player::FlipState()
 
 void Player::AnyState()
 {
-	if (bAttackKeyCheck && CurAttackCoolTime<0.f && !bHurt)
+	if (bAttackKeyCheck  && _PhysicComp->bLand && !_CurDoor.expired())
+	{
+		auto _Door = _CurDoor.lock();
+		auto spDoor = std::dynamic_pointer_cast<Door>(_Door);
+		vec3 DoorLocationCorrection = spDoor->_TransformComp->Position;
+		DoorLocationCorrection.x += Door::XCorrection;
+
+		vec3 ToDoor = DoorLocationCorrection - _TransformComp->Position;
+		float Distance = D3DXVec3Length(&ToDoor);
+		if (Distance < 100 && !spDoor->bOpen)
+		{
+			spDoor->Open(ToDoor.x);
+			DoorKick();
+		}
+		else if (bAttackKeyCheck && CurAttackCoolTime < 0.f && !bHurt)
+		{
+			CurAttackCoolTime = 0.3f;
+			Attack();
+		}
+	}
+	else if (bAttackKeyCheck && CurAttackCoolTime<0.f && !bHurt)
 	{
 		CurAttackCoolTime = 0.3f;
 		Attack();
+	}
+
+	if (bDashKeyCheck && CurDashCoolTime < 0.f && !bHurt)
+	{
+		bDashKeyCheck = false;
+		CurDashCoolTime = DashCoolTime;
+		Dash();
 	}
 }
 

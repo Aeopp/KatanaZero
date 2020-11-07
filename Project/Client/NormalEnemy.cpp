@@ -13,17 +13,19 @@
 #include "ObjectManager.h"
 #include "Camera.h"
 #include "ComponentManager.h"
+#include "Door.h"
 
 void NormalEnemy::Initialize() & noexcept
 {
 	Super::Initialize();
 
-	_FollowRenderComp = ComponentManager::instance().Insert<RenderComponent>(_This);
-	_FollowRenderComp->bRender = false;
-	_FollowRenderComp->AfterImgOff();
-	_FollowRenderComp->PositionCorrection = vec3{ 0.f,-60.f,0.f };
-	_FollowRenderComp->Anim(true, false, L"follow", 2, 1.2f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 }, L"spr_enemy_follow", LAYER::ELAYER::EOBJECT);
-	
+	_MsgRenderComp = ComponentManager::instance().Insert<RenderComponent>(_This);
+	_MsgRenderComp->bSmokeAffected = false;
+	_MsgRenderComp->bRender = false;
+	_MsgRenderComp->AfterImgOff();
+	_MsgRenderComp->PositionCorrection = vec3{ 0.f,-60.f,0.f };
+	//_MsgRenderComp->Anim(true, false, L"follow", 2, 1.2f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 }, L"spr_enemy_follow", LAYER::ELAYER::EOBJECT);
+
 	_RenderComp->_RenderAfterEvent = [this]() 
 	{	
 		if (!global::bDebug)return;
@@ -77,7 +79,6 @@ void NormalEnemy::Initialize() & noexcept
 
 	_RenderComp->SlowDeltaCoefft = 0.05f;
 	_RenderComp->AfterDeltaCoefft = 0.07f;
-	
 
 	_RenderComp->SlowStartColor = D3DCOLOR_ARGB(255, 125, 125, 125);
 	_RenderComp->SlowColor = D3DCOLOR_ARGB(255, 125, 125, 125);
@@ -112,6 +113,7 @@ void NormalEnemy::LateUpdate()
 	}
 }
 
+
 void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
 	Super::Hit(_Target, _CollisionInfo);
@@ -119,6 +121,135 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 	if (_EnemyState == NormalEnemy::State::Die)
 	{
 		return;
+	}
+
+	if (_CollisionInfo._ID == OBJECT_ID::DOOR)
+	{
+		auto _wpDoor = _CollisionInfo._Target.lock();
+		auto spDoor = std::dynamic_pointer_cast<Door>(_wpDoor);
+
+		if (spDoor->bOpening)
+		{
+			_CollisionInfo.PushDir = vec3{ spDoor->XDir,0,0 };
+			_CollisionInfo.PushForce = 100.f;
+
+			_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
+				500.f,
+				0.6f,
+				_CollisionInfo.PushDir);
+
+			BloodInit(_CollisionInfo.PushDir);
+
+			float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
+
+			EffectManager::instance().EffectPush(L"Effect",
+				L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+				_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
+				{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+				255, false, 0, ImpactRotZ, 0, 0);
+
+			vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
+
+			EffectManager::instance().EffectPush(L"Effect",
+				L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false, Pos,
+				_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
+				, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
+				0, 0);
+
+			_MsgRenderComp->bRender = false;
+
+			_RenderComp->AfterImgOn();
+			_EnemyState = NormalEnemy::State::Die;
+
+			ObjectManager::instance()._Camera.lock()->CameraShake(
+				_CollisionInfo.PushForce * 7, _CollisionInfo.PushDir, 0.3f);
+
+			Time::instance().TimeScale = 0.2f;
+			Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]() {
+
+				if (global::ECurGameState::PlaySlow != global::_CurGameState)
+				{
+					Time::instance().TimeScale = 1.f;
+				}
+				return true; });
+
+			_RenderComp->AfterImgOn();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+			Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+			{
+				_RenderComp->AfterImgOff();
+				_RenderComp->NormalAfterImgPushDelta *= 1.f;
+				return true;
+			});
+
+			Die();
+		}
+
+	}
+
+	if (_CollisionInfo._ID == OBJECT_ID::EID::DRAGON_DASH)
+	{
+		_CollisionInfo.PushDir = _CollisionInfo.PosDir;
+		D3DXVec3Normalize(&_CollisionInfo.PushDir, &_CollisionInfo.PushDir);
+
+		_CollisionInfo.PushForce = 500.f;
+
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
+			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
+			0.3f,
+			_CollisionInfo.PushDir);
+
+		BloodInit(_CollisionInfo.PushDir);
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_slashfx", 5, 0.02f,
+			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
+			{ 0,0,0 }, { 2.9,2.9,0 });
+
+		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
+			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+			255, false, 0, ImpactRotZ, 0, 0);
+
+		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false, Pos,
+			_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
+			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
+			0, 0);
+
+		_MsgRenderComp->bRender = false;
+
+		_RenderComp->AfterImgOn();
+		_EnemyState = NormalEnemy::State::Die;
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			_CollisionInfo.PushForce * 2, _CollisionInfo.PushDir, 0.1f);
+
+		Time::instance().TimeScale = 0.2f;
+		Time::instance().TimerRegist(0.05f, 0.05f, 0.05f, [this]() {
+
+			if (global::ECurGameState::PlaySlow != global::_CurGameState)
+			{
+				Time::instance().TimeScale = 1.f;
+			}
+			return true; });
+
+		_RenderComp->AfterImgOn();
+		_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+		{
+			_RenderComp->AfterImgOff();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+			return true;
+		});
+
+		Die();
 	}
 
 	if (_CollisionInfo._ID==OBJECT_ID::EID::EXPLOSION)
@@ -143,19 +274,19 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 
 		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
 
-		EffectManager::instance().EffectPush(L"Effect",
+		/*EffectManager::instance().EffectPush(L"Effect",
 			L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false, Pos,
 			_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
 			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
-			0, 0);
+			0, 0);*/
 
-		_FollowRenderComp->bRender = false;
+		_MsgRenderComp->bRender = false;
 
 		_RenderComp->AfterImgOn();
 		 _EnemyState = NormalEnemy::State::Die;
 
 		ObjectManager::instance()._Camera.lock()->CameraShake(
-			4000.f, _CollisionInfo.PushDir, 0.3f);
+			2500.f, _CollisionInfo.PushDir, 0.2f);
 
 		Time::instance().TimeScale = 0.2f;
 		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]() {
@@ -205,13 +336,13 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 				, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
 				0, 0);
 
-			_FollowRenderComp->bRender = false;
+			_MsgRenderComp->bRender = false;
 
 			_RenderComp->AfterImgOn();
 			//_EnemyState = NormalEnemy::State::Die;
 
 			ObjectManager::instance()._Camera.lock()->CameraShake(
-				2333.f, _CollisionInfo.PushDir, 0.20f);
+				1777.f, _CollisionInfo.PushDir, 0.20f);
 
 			Time::instance().TimeScale = 0.2f;
 			Time::instance().TimerRegist(0.05f, 0.05f, 0.05f, [this]() {
@@ -275,16 +406,16 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
 			0, 0);
 
-		_FollowRenderComp->bRender = false;
+		_MsgRenderComp->bRender = false;
 		
 		_RenderComp->AfterImgOn();
 		_EnemyState = NormalEnemy::State::Die;
 
 		ObjectManager::instance()._Camera.lock()->CameraShake(
-			_CollisionInfo.PushForce*5, _CollisionInfo.PushDir, 0.3f);
+			_CollisionInfo.PushForce*3, _CollisionInfo.PushDir, 0.2f);
 
 			Time::instance().TimeScale = 0.2f;
-			Time::instance().TimerRegist(0.07f, 0.07f, 0.07f, [this]() {
+			Time::instance().TimerRegist(0.05f, 0.05f, 0.05f, [this]() {
 				
 				if (global::ECurGameState::PlaySlow != global::_CurGameState)
 				{
@@ -306,6 +437,8 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 	}
 }
 
+
+
 bool NormalEnemy::IsSamefloor(vec3 TargetPos)
 {
 	float y = _PhysicComp->Position.y;
@@ -321,8 +454,40 @@ bool NormalEnemy::IsSamefloor(vec3 TargetPos)
 	return false;
 }
 
+bool NormalEnemy::IsDetectDoorCheck()
+{
+	auto& DoorVec = ObjectManager::instance()._Doors;
+	for (auto& wpDoor : DoorVec)
+	{
+		auto spDoor = std::dynamic_pointer_cast<Door>(wpDoor.lock());
+		if ( spDoor&&!spDoor->bOpen)
+		{
+			if (IsSamefloor(spDoor->_TransformComp->Position))
+			{
+				vec3 ToTarget = _Target->_TransformComp->Position - _TransformComp->Position;
+				vec3 DoorLocationCorrection = spDoor->_TransformComp->Position;
+				DoorLocationCorrection.x += Door::XCorrection;
+				vec3 ToDoor = DoorLocationCorrection - _TransformComp->Position;
+				float ToTargetLength = D3DXVec3Length(&ToTarget);
+				float ToDoorLength = D3DXVec3Length(&ToDoor);
+
+				if (D3DXVec3Dot(&ToTarget, &ToDoor) > 0.f)
+				{
+					if (ToTargetLength > ToDoorLength)
+					{
+						return true;
+					}									
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
 bool NormalEnemy::IsRangeInnerTarget()
 {
+
 	vec3 TargetLocation = _Target->_PhysicComp->Position;
 	vec3 MyLocation = _PhysicComp->Position;
 
@@ -368,6 +533,12 @@ bool NormalEnemy::IsRangeInnerTarget()
 			if (!bIsPlayerSneak)
 				IsRangeInner |= ToTargetDistance < _NarrowRange;
 			// 여기서 Y Range 를 조사. 같은 층에 있는지 검출.
+
+			// 닫힌 문너머에 있는지를 조사 같은 층에있는 닫힌 문너머에  있다면 실패
+			if (IsDetectDoorCheck())
+			{
+				IsRangeInner = false;
+			}
 		}
 		break;
 	case NormalEnemy::State::Detecting:
@@ -377,6 +548,7 @@ bool NormalEnemy::IsRangeInnerTarget()
 	default:
 		break;
 	}
+	RenderComponent::NotifyType _Notify;
 	
 	if (IsRangeInner)
 	{
@@ -389,8 +561,18 @@ bool NormalEnemy::IsRangeInnerTarget()
 		case NormalEnemy::State::Walk:
 			_DetectionRangeColorGoal = D3DCOLOR_ARGB(255, 255, 0, 0);
 			_EnemyState = NormalEnemy::State::Detecting;
-			_FollowRenderComp->bRender = true;
-			_FollowRenderComp->Anim(true, false, L"follow", 2, 1.2f);
+			_MsgRenderComp->bRender = true;
+
+			_Notify[2] = [this]() 
+			{
+				_MsgRenderComp->Anim(true, false, L"follow", 2, 1, {},
+					D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 }, L"spr_enemy_follow",
+					LAYER::ELAYER::EOBJECT_OVER);
+			};
+
+			_MsgRenderComp->Anim(true, false, L"exclaim", 2, 0.5f, std::move(_Notify),
+				D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 }, L"spr_enemy_exclaim",
+				LAYER::ELAYER::EOBJECT_OVER);
 			break;
 		default:
 			break;
@@ -406,6 +588,7 @@ bool NormalEnemy::IsRangeInnerTarget()
 			_EnemyState = NormalEnemy::State::Idle;
 			break;
 		case NormalEnemy::State::Idle:
+			break;
 		case NormalEnemy::State::Walk:
 			break;
 		default:

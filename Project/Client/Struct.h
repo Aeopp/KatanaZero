@@ -80,6 +80,9 @@ struct ObjectInfo
 		Smoke,
 		EndTrigger,
 		Player,
+		DoorPrison=10,
+		DoorMansion=11,
+		DoorWood=12,
 		Drum=13,
 	};
 	ObjectInfo() = default;

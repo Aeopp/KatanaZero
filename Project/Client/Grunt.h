@@ -22,6 +22,7 @@ public :
 		Walk,
 		EnterStair,
 		LeaveStair,
+		InSmoke,
 	};
 private:
 	std::shared_ptr<class Grunt_Slash> _SpAttack;
@@ -55,14 +56,22 @@ public:
 	void TurnState();
 	void Walk();
 	void WalkState();
+
+	void InSmoke();
+	void InSmokeState();
 private:
 	void AnyState();
 	void FSM();
 
 	void FollowRouteProcedure();
+private:
+	int32_t SmokeCount = 0;
 public:
+	float DoorTurnDuration = 1.f;
+
 	bool bAttackMotionEnd{ false };
 	bool bTurnMotionEnd{ false };
+	bool bSmokeEnd{ false };
 
 	float _Y = 0.f;
 	// NormalEnemy을(를) 통해 상속됨

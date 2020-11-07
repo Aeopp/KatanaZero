@@ -139,6 +139,7 @@ void CollisionLineManager::Update()&
 			bool bCollision = false;
 			bool bLand = false;
 
+			if (!_spCollision->bLineCollision)continue;
 			if (!_spCollision->bCollision)continue;
 			auto _Owner = _spCollision->_Owner.lock();
 
@@ -191,6 +192,7 @@ void CollisionLineManager::Update()&
 			bool bLand = false;
 			
 			if (!_spCollision->bCollision)continue;
+			if (!_spCollision->bLineCollision)continue;
 			auto _Owner = _spCollision->_Owner.lock();
 			// 벽타기 가능한 선분이랑 상호작용가능한 타입
 			if (_Owner->GetID() != OBJECT_ID::EPLAYER)continue;

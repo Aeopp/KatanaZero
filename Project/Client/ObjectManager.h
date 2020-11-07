@@ -25,6 +25,8 @@ public :
 	std::weak_ptr<class Camera> _Camera;
 	std::weak_ptr<class Player> _Player;
 
+	std::vector<std::weak_ptr<class Door>> _Doors;
+
 	std::map<OBJECT_TAG::ETAG, std::map< OBJECT_ID::EID, std::vector<std::shared_ptr<class object>>>>
 		_ObjectMap;
 private:

@@ -45,12 +45,18 @@ struct EffectInfo
 	float AnimDelta = 0.1f;
 	float CurrentDelta = 0.f;
 
+	bool bFlashRender = false;
+	bool bFlash= false;
+	float FlashDt = 0.f;
+	float FlashRepeat = 0.4f;
 	// 알파를 이펙트 시간에 맞춰 보간할까요 ?? 
 	bool bAlphaLerp = false;
 	int32_t Alpha = 255;
 	OBJECT_ID::EID OBJ_ID = OBJECT_ID::EID::ENONE;
 
 	int32_t _ID = EffectInfo::MakeID();
+
+	int32_t Layer = 0;
 };
 
 class EffectManager : public singleton_interface<EffectManager>
@@ -67,7 +73,6 @@ public :
 
 	bool bRender = true;
 	D3DXCOLOR SwitchColorFromGameState(OBJECT_ID::EID _EffectID, D3DXCOLOR _Color);
-
 	D3DXCOLOR SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCOLOR _Color);
 
 	void EffectPush(
@@ -92,8 +97,11 @@ public :
 		float T = 0,
 		float RotZ = 0,
 		float RotZAcc = 0,
-		uint8_t _StartID = 0
-	);
+		uint8_t _StartID = 0,
+		bool bFlash=false ,
+		float FlashRepeat=0.4f,
+		int32_t Layer=0);
+
 	std::set<CollisionComponent::ETag> _EffectCollisionTagSet;
 
 	Record _Record;

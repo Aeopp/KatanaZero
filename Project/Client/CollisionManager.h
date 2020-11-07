@@ -19,7 +19,11 @@ public :
     {
         {Tag::ESmoke_Cloud,{ Tag::EPlayer,Tag::EEnemy,Tag::EPlayerAttack,Tag::EEnemyAttack ,
                             Tag::EItem,Tag::EInteractionObject,Tag::ECollisionEffect} },
+        
+        {Tag::EPlayer ,{Tag::EDoor}},
+        {Tag::EEnemy,{Tag::EDoor}},
 
+        //{Tag::EDoor , {Tag::EPlayer,Tag::EEnemy} } , 
         { Tag::EEnemyAttack, {Tag::EPlayer} },
         {Tag::EPlayerAttack ,{Tag::EEnemy } },
          { Tag::ETrigger,{ Tag::EPlayer} },

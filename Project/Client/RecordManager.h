@@ -30,7 +30,7 @@ public:
 
     bool bReplayInit = false;
 
-    int32_t RewindSpeed = -2;
+    int32_t RewindSpeed = -8;
     int32_t TimingSpeed = 1;
     int32_t EndTiming = 0;
 private:

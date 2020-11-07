@@ -8,6 +8,7 @@
 struct AfterImg
 {
 	matrix PastWorld;
+	std::wstring ObjKey{};
 	std::wstring StateKey{};
 	uint8_t ID{};
 	float T = 0.f;
@@ -87,6 +88,7 @@ public :
 	float SlowAfterImgPushDelta = 0.05f;
 	float NormalAfterImgPushDelta = 0.0125f;
 	
+	bool bSmokeAffected = true;
 	bool bSlowRender = true;
 	std::function<void()> _RenderAfterEvent;
 	std::vector<AfterImg> _AfterImgVec;

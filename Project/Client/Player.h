@@ -47,11 +47,12 @@ public:
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Hit(std::weak_ptr<class object>_Target, math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override; 
-	bool IsInvisible() { return  _CurrentState == Player::State::Roll || InvincibleTime > 0.f; }
+	bool IsInvisible() { return  _CurrentState == Player::State::Roll || (InvincibleTime > 0.f )  || _CurrentState == Player::State::Dash ||(_CurrentState == Player::State::Flip); };
 	void HurtGround();
 	bool bHurt{ false };
 public:
 	std::shared_ptr<class UIItemIcon > _SpUIItemIcon{};
+	bool bInAreaSmoke = false;
 
 private:
 	void AttackSlash();
@@ -95,6 +96,8 @@ private:
 	void HurtFlyBeginState();
 	void HurtFly();
 	void HurtFlyState();
+	void Dash();
+	void DashState();
 
 	void HurtGroundState();
 	void HurtRecover();
@@ -115,19 +118,27 @@ private :
 	bool bHurtFlyBeginMotionEnd{ false };
 	bool bHurtGroundMotionEnd{ false }; 
 	bool bHurtRecoverMotionEnd{ false };
+	bool bDashEnd{ false };
 private:
 	bool bFrameCurrentCharacterInput = false;
 private:
 
 private:
 	bool bAttacking{ false };
-
+	bool bCheat = false;
 	bool bSneakKeyCheck{ false };
 	bool bJumpKeyCheck{ false };
 	bool bMoveKeyCheck{ false };
 	bool bAttackKeyCheck{ false };
+	bool bDashKeyCheck{ false };
+	
+
 	bool bDownKeyCheck{ false };
+
+	vec3 AtDashDir{};
 public :	
+	
+	bool bDashRangeRender = false; 
 	bool bFatal = false;
 	bool bInit = false;
 	bool bSneak{ false };
@@ -136,14 +147,19 @@ public :
 	bool bCurWallRideCollision{ false };
 	bool bWallJump{ false };
 	float InvincibleTime = 0.f;
+	// 테스트끝나고수정
+	const float DashCoolTime = 2.f;
+	// 
+	float CurDashCoolTime = 0.f;
 	void JumpWallRide();
+
+	float CurDashRange = 0.f;
 
 	bool IsEqItem()const&;;
 
 	void EqItem(std::shared_ptr<class Item> _Item);
 private:
 	std::optional<vec3 > AtAttackDir;
-
 	float RollEffectDelta = 0.0025f;
 	float WallRideEffectDelta = 0.1f;
 	float CurAttackCoolTime = 0.0f;
@@ -151,5 +167,8 @@ private:
 	std::shared_ptr<class Attack_Slash> _SpAttackSlash{};
 	std::shared_ptr<class Battery> _SpBattery{};
 	std::shared_ptr<class Item> _SpCurItem{};
+
+	std::weak_ptr<class object> _CurDoor;
+
 };
 

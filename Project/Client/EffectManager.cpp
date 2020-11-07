@@ -27,6 +27,10 @@ void EffectManager::Render()
 
 	vec3 CameraPos = global::CameraPos;
 
+	std::sort(std::begin(_Effects), std::end(_Effects), [](const EffectInfo& _EftLhs, const EffectInfo& _EftRhs)->bool {
+		return _EftLhs.Layer < _EftRhs.Layer;
+	});
+
 	for (auto& _Effect : _Effects)
 	{
 		matrix MWorld, MTrans, MRotZ, MScale, MJoom;
@@ -67,25 +71,29 @@ void EffectManager::Render()
 			_Color.b = 0;
 		}
 
-		auto TexInfo = TextureManager::instance().Get_TexInfo(_Effect.ObjKey, _Effect.StateKey, _Effect.DrawID);
-		RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width , TexInfo->ImageInfo.Height };
-		vec3 Center = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
-		GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
-		GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
-			&_srcRT, &Center, nullptr, _Color);
-
-		if (_Effect.bRecord && global::IsPlay() && RecordManager::instance().bUpdate)
+		if ( (_Effect.bFlash && _Effect.bFlashRender )|| !_Effect.bFlash)
 		{
-			Record::Info _Info;
-			_Info.Alpha = 255;
-			_Info.DrawID = _Effect.DrawID;
-			_Info.MWorld = MWorld;
-			_Info.ObjKey = _Effect.ObjKey;
-			_Info.StateKey = _Effect.StateKey;
-			_Info.Timing = Timing;
-			_Info.OwnerY = _Effect.Pos.y;
-			_Info._Color = RecordColor;
-			_Record._Infos.insert({ Timing ,_Info });
+			auto TexInfo = TextureManager::instance().Get_TexInfo(_Effect.ObjKey, _Effect.StateKey, _Effect.DrawID);
+			RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width , TexInfo->ImageInfo.Height };
+			vec3 Center = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+			GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+				&_srcRT, &Center, nullptr, _Color);
+
+
+			if (_Effect.bRecord && global::IsPlay() && RecordManager::instance().bUpdate)
+			{
+				Record::Info _Info;
+				_Info.Alpha = 255;
+				_Info.DrawID = _Effect.DrawID;
+				_Info.MWorld = MWorld;
+				_Info.ObjKey = _Effect.ObjKey;
+				_Info.StateKey = _Effect.StateKey;
+				_Info.Timing = Timing;
+				_Info.OwnerY = _Effect.Pos.y;
+				_Info._Color = RecordColor;
+				_Record._Infos.insert({ Timing ,_Info });
+			}
 		}
 	}
 };
@@ -100,6 +108,19 @@ void EffectManager::Update()
 		auto& _Effect = _Effects[Idx];
 		_Effect.T += dt;
 		_Effect.CurrentDelta += dt;
+
+		// ±ôºýÀÓ Ã³¸®
+		{
+			if (_Effect.bFlash)
+			{
+				_Effect.FlashDt += dt;
+				if (_Effect.FlashDt >= _Effect.FlashRepeat)
+				{
+					_Effect.FlashDt = 0.f;
+					_Effect.bFlashRender = !_Effect.bFlashRender;
+				}
+			}
+		}
 
 		if (_Effect.CurrentDelta > _Effect.AnimDelta)
 		{
@@ -347,6 +368,11 @@ D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCO
 		_Color.b = 255;
 		_Color.g = 255;
 		break;
+	case OBJECT_ID::DRAGON_DASH:
+		_Color.r = 0;
+		_Color.b = 235;
+		_Color.g = 199;
+		break;
 	case OBJECT_ID::GRUNT_SLASH:
 		break;
 	case OBJECT_ID::GRUNT:
@@ -410,7 +436,10 @@ void EffectManager::EffectPush
 	int32_t Alpha ,
 	bool bAlphaLerp , 
 	float T,
-	float RotZ, float RotZAcc, uint8_t _StartID)
+	float RotZ, float RotZAcc, uint8_t _StartID,
+	bool bFlash,
+	float FlashRepeat,
+	int32_t Layer)
 {
 	EffectInfo _Info;
 	_Info.ObjKey = _ObjKey;
@@ -435,7 +464,9 @@ void EffectManager::EffectPush
 	_Info.Alpha = Alpha; 
 	_Info.bAlphaLerp = bAlphaLerp;
 	_Info.bRecord = bRecord;
-
+	_Info.bFlash = bFlash;
+	_Info.FlashRepeat=FlashRepeat; 
+	_Info.Layer=Layer;
 	_Effects.emplace_back(std::move(_Info));
 }
 

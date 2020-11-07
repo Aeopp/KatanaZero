@@ -14,6 +14,8 @@
 #include "SceneManager.h"
 #include "Gangster.h"
 #include "GO.h"
+#include "Door.h"
+
 
 void SceneBunkerMansion::Initialize()
 {
@@ -38,6 +40,13 @@ void SceneBunkerMansion::Initialize()
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<HUD>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<UITimer>());
 
+	/*for (int i = 0; i < 1; ++i)
+	{
+		auto spDoor = ObjectManager::instance().InsertObject<Door>({ 1300+(float)i*100,2048,0 });
+		spDoor->SetUpInitState(i%4, 0);
+		ObjectManager::instance()._Doors.push_back(spDoor);
+		SceneManageObjs.push_back(spDoor);
+	}*/
+	
 	Scene::Initialize();
-
 }

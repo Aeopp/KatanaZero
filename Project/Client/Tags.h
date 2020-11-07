@@ -7,6 +7,8 @@ namespace OBJECT_ID
 	// 태그 다음 집합
 	enum EID : uint8_t
 	{
+		DOOR,
+		DRAGON_DASH,
 		SMOKE_CLOUD,
 		REFLECT,
 		DRUM,

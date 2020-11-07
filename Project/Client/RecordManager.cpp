@@ -64,6 +64,11 @@ void RecordManager::ReWindUpdate()
 void RecordManager::ReWindStart()
 {
 	global::_CurGameState = global::ECurGameState::ReWind;
+	RewindSpeed =  -(Timing / 100);
+	if (RewindSpeed >= -1)
+	{
+		RewindSpeed = -1;
+	}
 	//	InputManager::instance().Clear();
 };
 
@@ -89,7 +94,7 @@ void RecordManager::ReWindEnd()
 	ObjectManager::instance()._Camera.lock()->bUpdate = true;
 	Time::instance()._T = 0;
 
-	RewindSpeed = -2;
+	RewindSpeed = -8;
 	TimingSpeed = 1;
 	EndTiming = 0;
 	bPause = false;

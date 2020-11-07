@@ -15,6 +15,7 @@
 #include "GO.h"
 #include "Item.h"
 #include "Drum.h"
+#include "Door.h"
 
 
 
@@ -76,6 +77,7 @@ void Scene::LoadObjectInfo()
 		file_output >> _ObjectInfo;
 		ObjectInfo::ESpawnID _SpawnID = (ObjectInfo::ESpawnID)_ObjectInfo._ObjectID;
 		std::shared_ptr<class object> _SpawnObj;
+		std::shared_ptr<class Door> _Door;
 
 		switch (_SpawnID)
 		{
@@ -128,9 +130,31 @@ void Scene::LoadObjectInfo()
 			_SpawnObj = ObjectManager::instance().InsertObject<Drum>(_ObjectInfo.Position);
 			SceneManageObjs.push_back(_SpawnObj);
 			break;
+		case ObjectInfo::DoorWood:
+			_SpawnObj = ObjectManager::instance().InsertObject<Door>(_ObjectInfo.Position);
+			_Door = std::dynamic_pointer_cast<Door>(_SpawnObj);
+			_Door->SetUpInitState(1, 0);
+			SceneManageObjs.push_back(_SpawnObj);
+			ObjectManager::instance()._Doors.push_back(_Door);
+			break;
+		case ObjectInfo::DoorPrison:
+			_SpawnObj = ObjectManager::instance().InsertObject<Door>(_ObjectInfo.Position);
+			_Door = std::dynamic_pointer_cast<Door>(_SpawnObj);
+			_Door->SetUpInitState(2, 0);
+			SceneManageObjs.push_back(_SpawnObj);
+			ObjectManager::instance()._Doors.push_back(_Door);
+
+			break;
+		case ObjectInfo::DoorMansion:
+			_SpawnObj = ObjectManager::instance().InsertObject<Door>(_ObjectInfo.Position);
+			_Door = std::dynamic_pointer_cast<Door>(_SpawnObj);
+			_Door->SetUpInitState(3, 0);
+			SceneManageObjs.push_back(_SpawnObj);
+			ObjectManager::instance()._Doors.push_back(_Door);
+
+			break;
 		default:
 			break;
 		}
 	}
 }
-

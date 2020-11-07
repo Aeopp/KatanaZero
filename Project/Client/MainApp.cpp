@@ -20,7 +20,7 @@ HRESULT App::Initialize()
 	ShowCursor(false);
 
 #pragma region Application Initialize
-	static constexpr bool bAppWindowScreenMode = FALSE;
+	static constexpr bool bAppWindowScreenMode = TRUE;
 	static constexpr uint32_t AppFrameLimit = 60ul;
 
 	GraphicDevice& GraphicDeviceRef = GraphicDevice::instance();

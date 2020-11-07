@@ -60,8 +60,8 @@ void Attack_Slash::Initialize() & noexcept
     _CollisionComp->bCollision = false;
     _CollisionComp->_Tag = CollisionComponent::ETag::EPlayerAttack;
     _CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
-    _CollisionComp->_CollisionInfo.Height = 30;
-    _CollisionComp->_CollisionInfo.Width = 25;
+    _CollisionComp->_CollisionInfo.Height = 50;
+    _CollisionComp->_CollisionInfo.Width = 33;
     _CollisionComp->PushForce = 500.f;
 
     _PhysicComp->bGravity = false;
@@ -173,6 +173,40 @@ void Attack_Slash::Hit(std::weak_ptr<class object> _Target, math::Collision::Hit
 void Attack_Slash::Move(vec3 Dir, const float AddSpeed)
 {
     Super::Move(Dir, AddSpeed);
+}
+
+void Attack_Slash::DashAttackStart(vec3 AttackPos, vec3 Dir)
+{
+    RenderComponent::NotifyType _Notify;
+
+    _Notify[5] = [this]()
+    {
+        bSlashEffectEnd = true;
+    };
+
+    _RenderComp->Anim(true, false, L"spr_master_slash", 5, 0.2f*0.01f, std::move(_Notify));
+    _RenderComp->bRender = true;
+    _RenderComp->AfterImgOn();
+
+    if (global::_CurGameState == global::ECurGameState::PlaySlow)
+    {
+        _OldSlash1->Anim(true, false, L"spr_oldslash", 13, 0.3f * 0.01f);
+        _OldSlash1->bRender = true;
+        _OldSlash1->AfterImgOn();
+
+        _OldSlash2->Anim(true, false, L"spr_oldslash2", 7, 0.3f * 0.01f);
+        _OldSlash2->bRender = true;
+        _OldSlash2->AfterImgOn();
+    }
+
+    _CollisionComp->bCollision = true;
+
+    _PhysicComp->Dir = Dir;
+    _PhysicComp->Position = std::move(AttackPos);
+    _CollisionComp->CurrentPushDir = Dir;
+
+    D3DXVec3Normalize(&Dir, &Dir);
+    _PhysicComp->Rotation.z = atan2f(Dir.y, Dir.x);
 }
 
 void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)

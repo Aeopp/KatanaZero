@@ -19,14 +19,14 @@ private:
 	static  inline std::random_device rd;
 public:
 	static constexpr float GRAVITY = 370.f;
-	static constexpr float GRAVITY_ACC = 133.f;
+	static constexpr float GRAVITY_ACC = 100.f;
 	static constexpr float PI = 3.14159265f;
 
 	template<typename Type>
 	auto LOOP(std::pair<Type, Type> Range, Type Target);
 
 	static vec3 RandVec( std::pair<float, float> Range);
-	
+	/*static vec3 RandRotVec();*/
 
 	template<typename Ty>
 	static Ty Rand_Normal(std::pair<Ty, Ty> range);

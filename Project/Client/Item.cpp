@@ -147,27 +147,25 @@ void Item::ExplosiveInteraction(math::Collision::HitInfo _Info)
         { 4,4,0 }, false, true, false, true, 33, 33,
         255, false, 0.f, 0.f, 0.f, 0);
 
-    BulletInteraction(_Info);
+ //   BulletInteraction(_Info);
 }
 
 void Item::SmokeInteraction(math::Collision::HitInfo _Info)
 {
-    BulletInteraction(_Info);
+    //BulletInteraction(_Info);
     
     const vec3 Location = _Info.Position; // -(_Info.PosDir * 100.f);
 
-    int i = 10;
     for (auto& _spSmoke : _Smoke)
     {
-        ++i;
-        vec3 randvec = vec3{ 1,0,0 };
-        randvec = math::RotationVec(randvec, math::Rand<float>({ -1000,1000 }));
-        _spSmoke->Alpha = math::Rand<int32_t>({ 100,255 });
+        vec3 Dir = { math::Rand<float>({1,2}),math::Rand<float>({1,2}),0 };
+        Dir =math::RotationVec(Dir, math::Rand<float>({ -360,360 }));
+      //  D3DXVec3Normalize(&Dir, &Dir);
+        _spSmoke->Alpha = math::Rand<int32_t>({ 125,255 });
+        _spSmoke->_TransformComp->Position = Location; 
+        _spSmoke->_PhysicComp->Move(Dir * math::Rand<float>({ 12,65 }), 0, 1.5f, { 0,0,0 }, 0);
+        _spSmoke->_PhysicComp->Mass = 0.f;
         _spSmoke->Start();
-        _spSmoke->_TransformComp->Position = Location;
-
-        _spSmoke->_PhysicComp->Move(randvec * i * 5, 5, 1.f, randvec, 0);
-
     }
 
   /*  for (int outer = 0; outer < Outer; ++outer)

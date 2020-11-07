@@ -58,7 +58,7 @@ void Camera::Update()
 	/*	global::CameraPos.x = std::clamp<float>(Goal.x, CameraLockLT.x, CameraLockRB.x - global::ClientSize.first + global::ClientSize.first * 0.1);
 		global::CameraPos.y = std::clamp<float>(Goal.y, CameraLockLT.y, CameraLockRB.y - global::ClientSize.second + global::ClientSize.second * 0.1);*/
 
-		global::CameraPos = math::lerp(global::CameraPos, Goal, 0.6f, Time::instance().Delta());
+		global::CameraPos = math::lerp(global::CameraPos, Goal, 0.45f, Time::instance().Delta());
 
 		return;
 	}
@@ -74,7 +74,7 @@ void Camera::Update()
 		Shaking(Dt);
 		Goal += _Shake;
 		_Shake = { 0,0 ,0 };
-		global::CameraPos = math::lerp(global::CameraPos, Goal, 0.6f, Time::instance().Delta());
+		global::CameraPos = math::lerp(global::CameraPos, Goal, 0.45f, Time::instance().Delta());
 		return;
 	}
 };
