@@ -164,6 +164,7 @@
     <ClInclude Include="AttackObject.h" />
     <ClInclude Include="AttackSlash.h" />
     <ClInclude Include="Battery.h" />
+    <ClInclude Include="Boss.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Character.h" />
@@ -187,6 +188,7 @@
     <ClInclude Include="global.h" />
     <ClInclude Include="GO.h" />
     <ClInclude Include="GraphicDevice.h" />
+    <ClInclude Include="Grenade.h" />
     <ClInclude Include="Grunt.h" />
     <ClInclude Include="Grunt_Slash.h" />
     <ClInclude Include="HUD.h" />
@@ -243,6 +245,7 @@
     <ClCompile Include="AttackObject.cpp" />
     <ClCompile Include="AttackSlash.cpp" />
     <ClCompile Include="Battery.cpp" />
+    <ClCompile Include="Boss.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Character.cpp" />
@@ -265,6 +268,7 @@
     <ClCompile Include="global.cpp" />
     <ClCompile Include="GO.cpp" />
     <ClCompile Include="GraphicDevice.cpp" />
+    <ClCompile Include="Grenade.cpp" />
     <ClCompile Include="Grunt.cpp" />
     <ClCompile Include="Grunt_Slash.cpp" />
     <ClCompile Include="HUD.cpp" />

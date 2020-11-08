@@ -17,6 +17,9 @@ public:
     float XDir = 1.f;
 
 
+    float XRange = 250.f;
+
+    vec2 InitScreenPos;
 
     std::shared_ptr<class CollisionComponent > _CollisionComponent{};
     float ClearCheckTime = 2.f;

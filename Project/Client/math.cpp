@@ -92,6 +92,11 @@ float math::AngleFromVec(vec3 Dir)
 	return std::atan2(Dir.y, Dir.x);
 }
 
+float math::lerp(float start, float goal, float t)
+{
+	return start + ((goal - start)*t);
+}
+
 float math::lerp(float start, float goal, float goal_time, float dt)
 {
 	float f = goal - start;

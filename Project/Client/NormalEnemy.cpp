@@ -48,7 +48,7 @@ void NormalEnemy::Initialize() & noexcept
 		}
 
 		constexpr float DetectionRangeLineWidth = 2.f;
-		constexpr uint32_t CirclePointCount = 18;
+		constexpr uint32_t CirclePointCount = 36;
 		constexpr float _2PI = math::PI;
 		constexpr float PointBetWeenAngle = _2PI / (float)CirclePointCount;
 

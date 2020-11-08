@@ -244,6 +244,8 @@
     <ClInclude Include="Drum.h" />
     <ClInclude Include="SmokeCloud.h" />
     <ClInclude Include="Door.h" />
+    <ClInclude Include="Boss.h" />
+    <ClInclude Include="Grenade.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -403,6 +405,8 @@
     <ClCompile Include="Drum.cpp" />
     <ClCompile Include="SmokeCloud.cpp" />
     <ClCompile Include="Door.cpp" />
+    <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="Grenade.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

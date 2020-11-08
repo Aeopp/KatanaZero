@@ -44,6 +44,7 @@ private:
 		CollisionComponent::ETag::ECollisionEffect,
 		CollisionComponent::ETag::EItem,
 		CollisionComponent::ETag::ESmoke_Cloud,
+		CollisionComponent::ETag::REFLECT,
 	};
 };
 

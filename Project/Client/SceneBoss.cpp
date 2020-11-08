@@ -18,6 +18,8 @@
 #include "Item.h"
 #include "Drum.h"
 #include "SmokeCloud.h"
+#include "Boss.h"
+
 // 
 //
 // 
@@ -47,63 +49,8 @@ void SceneBoss::Initialize()
 
 	Scene::Initialize();
 
-	//auto _Grunt = ObjectManager::instance().InsertObject<Grunt>(vec3{ 2100,1400 ,0 });
-	//SceneManageObjs.push_back(_Grunt);
-
-	// // _Grunt->_TransformComp->Position = ;
-
-	/////////// TESTCODE 
-	{
-		auto _Item = ObjectManager::instance().InsertObject<Item>();
-		_Item->SetUpInitState(EItem::Knife);
-		_Item->_TransformComp->Position = vec3{ 1500,1800,0 };
-		SceneManageObjs.push_back(_Item);
-
-		_Item = ObjectManager::instance().InsertObject<Item>();
-		_Item->SetUpInitState(EItem::Explosive);
-		_Item->_TransformComp->Position = vec3{ 1700, 1800,0 };
-		SceneManageObjs.push_back(_Item);
-
-		_Item = ObjectManager::instance().InsertObject<Item>();
-		_Item->SetUpInitState(EItem::Smoke);
-		_Item->_TransformComp->Position = vec3{ 1900, 1800,0 };
-		SceneManageObjs.push_back(_Item);
-
-		_Item = ObjectManager::instance().InsertObject<Item>();
-		_Item->SetUpInitState(EItem::Smoke);
-		_Item->_TransformComp->Position = vec3{ 2000, 1800,0 };
-		SceneManageObjs.push_back(_Item);
-
-		_Item = ObjectManager::instance().InsertObject<Item>();
-		_Item->SetUpInitState(EItem::Smoke);
-		_Item->_TransformComp->Position = vec3{ 2100, 1800,0 };
-		SceneManageObjs.push_back(_Item);
-
-		_Item = ObjectManager::instance().InsertObject<Item>();
-		_Item->SetUpInitState(EItem::Smoke);
-		_Item->_TransformComp->Position = vec3{ 1800, 1800,0 };
-		SceneManageObjs.push_back(_Item);
-
-		_Item = ObjectManager::instance().InsertObject<Item>();
-		_Item->SetUpInitState(EItem::Smoke);
-		_Item->_TransformComp->Position = vec3{ 1700, 1800,0 };
-		SceneManageObjs.push_back(_Item);
-
-
-		vec3 InitLocation = { 1500, 1800, 0 };
-
-		for (int i = 0; i < 12; ++i)
-		{
-			auto _Drum = ObjectManager::instance().InsertObject<Drum>();
-			_Drum->_TransformComp->Position = InitLocation;
-			SceneManageObjs.push_back(_Drum);
-			InitLocation.x += 100;
-
-			auto _Smoke = ObjectManager::instance().InsertObject<SmokeCloud>(InitLocation);
-			SceneManageObjs.push_back(_Smoke);
-		}	
-
-		
-	}
-	///////////
+	auto _Boss =ObjectManager::instance().InsertObject<Boss>({ 2650,1697,0 });
+	SceneManageObjs.push_back(_Boss);
+	ObjectManager::instance()._Boss = _Boss;
+	// 2468 1697 
 }

@@ -26,9 +26,5 @@ public:
 	void AttackStart(vec3 AttackPos, vec3 Dir);
 	bool bSlashEffectEnd{ false };
 private:
-
-
 	std::set<int32_t> _ReflectBulletIDs;
-
 };
-

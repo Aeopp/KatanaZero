@@ -7,6 +7,12 @@ namespace OBJECT_ID
 	// 태그 다음 집합
 	enum EID : uint8_t
 	{
+		BOSS_RECOVER_BOMB,
+		GRENADE,
+		BOSS_JUMP,
+		BOSS_LASER,
+		BOSS_DASH,
+		BOSS,
 		DOOR_KICK_IMPACT,
 		DOOR,
 		DRAGON_DASH,
@@ -59,6 +65,8 @@ namespace OBJECT_TAG
 	// 집합
 	enum ETAG : uint8_t
 	{
+		REFELECT,
+		BOSS,
 		SMOKE_CLOUD,
 		INTERACTION_OBJECT,
 		ITEM,
@@ -70,7 +78,6 @@ namespace OBJECT_TAG
 		EOBJECT,
 		EENEMY,
 		EPLAYER,
-		EBOSS,
 		EEFFECT,
 		EUI,
 		ENONE,

@@ -122,6 +122,9 @@ void EffectManager::Update()
 			}
 		}
 
+		
+
+
 		if (_Effect.CurrentDelta > _Effect.AnimDelta)
 		{
 			_Effect.CurrentDelta -= _Effect.AnimDelta;
@@ -140,12 +143,17 @@ void EffectManager::Update()
 			}
 		}
 
+		// 스케일 선형 보간
+		if (_Effect.bScaleLerp)
+		{
+			D3DXVec3Lerp(&_Effect.Scale, &_Effect.ScaleStart, &_Effect.ScaleGoal, _Effect.T / _Effect.MaxT);
+		}
+
 		if (_Effect.T > _Effect.MaxT)
 		{
 			_Effect = std::move(_Effects.back());
 			_Effects.pop_back();
 		}
-		/// 
 
 		_Effect.RotZ += _Effect.RotZAcc * dt;
 		_Effect.Pos += _Effect.Dir * dt;
@@ -275,6 +283,17 @@ D3DXCOLOR EffectManager::SwitchColorFromGameState(OBJECT_ID::EID _EffectID, D3DX
 		_Color.g = 255;
 		_Color.b = 255;
 		break;
+	case OBJECT_ID::BOSS_DASH:
+		_Color.r = 255;
+		_Color.b = 0;
+		_Color.g = 0;
+		break;
+
+	case OBJECT_ID::BOSS_JUMP:
+		_Color.r = 255;
+		_Color.g = 0;
+		_Color.b = 255;
+		break;
 	case OBJECT_ID::EXPLOSION:
 		break;
 	case OBJECT_ID::ITEM:
@@ -373,6 +392,16 @@ D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCO
 		_Color.b = 235;
 		_Color.g = 199;
 		break;
+	case OBJECT_ID::BOSS_DASH:
+		_Color.r = 255;
+		_Color.b = 0;
+		_Color.g = 0;
+		break;
+	case OBJECT_ID::BOSS_JUMP:
+		_Color.r = 255;
+		_Color.g = 0;
+		_Color.b = 255;
+		break;
 	case OBJECT_ID::GRUNT_SLASH:
 		break;
 	case OBJECT_ID::GRUNT:
@@ -439,7 +468,10 @@ void EffectManager::EffectPush
 	float RotZ, float RotZAcc, uint8_t _StartID,
 	bool bFlash,
 	float FlashRepeat,
-	int32_t Layer)
+	int32_t Layer,
+	bool bScaleLerp ,
+	vec3 ScaleStart,
+	vec3 ScaleGoal)
 {
 	EffectInfo _Info;
 	_Info.ObjKey = _ObjKey;
@@ -467,6 +499,18 @@ void EffectManager::EffectPush
 	_Info.bFlash = bFlash;
 	_Info.FlashRepeat=FlashRepeat; 
 	_Info.Layer=Layer;
+	_Info.bScaleLerp = bScaleLerp;
+	if (bScaleLerp)
+	{
+		_Info.ScaleGoal = ScaleGoal;
+		_Info.ScaleStart = ScaleStart;
+	}
+	else
+	{
+		_Info.ScaleGoal = _Info.Scale;
+		_Info.ScaleStart = _Info.Scale;
+	}
+	
 	_Effects.emplace_back(std::move(_Info));
 }
 

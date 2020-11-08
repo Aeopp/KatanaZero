@@ -23,6 +23,10 @@
 #include "Texture_Manager.h"
 #include "GraphicDevice.h"
 #include "Door.h"
+#include "Boss.h"
+
+
+
 
 using namespace std;
 
@@ -289,6 +293,265 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 	if (IsInvisible())return;
 	if (bHurt)return;
 
+	if (_CollisionInfo._ID == OBJECT_ID::BOSS_RECOVER_BOMB)
+	{
+		vec3 UpDir = { 0,-1,0 };
+		vec3 Dir =_TransformComp->Position - ObjectManager::instance()._Boss.lock()->_TransformComp->Position;
+		D3DXVec3Normalize(&Dir, &Dir);
+
+		if (Dir.y > 0.f)Dir.y *= -1.f;
+
+		_CollisionInfo.PosDir = Dir;
+
+		D3DXVec3Lerp(&_CollisionInfo.PosDir, &_CollisionInfo.PosDir,&UpDir, 0.25f);
+		
+		_CollisionInfo.PushForce = 400.f;
+
+		_PhysicComp->Move((_CollisionInfo.PosDir) * (_CollisionInfo.PushForce * 4.5f),
+			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
+			0.3f,
+			_CollisionInfo.PosDir);
+
+		float ImpactRotZ = atan2f(-_CollisionInfo.PosDir.y, -_CollisionInfo.PosDir.x);
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			_PhysicComp->Position + -_CollisionInfo.PosDir * 77,
+			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+			255, false, 0, ImpactRotZ, 0, 0);
+
+		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PosDir * 4000);
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			_CollisionInfo.PushForce * 2.f, _CollisionInfo.PosDir, 0.3f);
+
+		Time::instance().TimeScale = 0.2f;
+		Time::instance().TimerRegist(0.02f, 0.02f, 0.02f, [this]() {
+
+			if (global::ECurGameState::PlaySlow != global::_CurGameState)
+			{
+				Time::instance().TimeScale = 1.f;
+			}
+			return true; });
+
+		_RenderComp->AfterImgOn();
+		_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+		{
+			_RenderComp->AfterImgOff();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+			return true;
+		});
+
+		HurtFlyBegin();
+	}
+
+	if (_CollisionInfo._ID == OBJECT_ID::EID::EXPLOSION)
+	{
+		_CollisionInfo.PushDir = { 0,-1,0 };
+		_CollisionInfo.PushDir += _CollisionInfo.PosDir;
+		D3DXVec3Normalize(&_CollisionInfo.PushDir, &_CollisionInfo.PushDir);
+
+		_CollisionInfo.PushForce = 500.f;
+
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
+			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
+			0.3f,
+			_CollisionInfo.PushDir);
+
+		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
+			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+			255, false, 0, ImpactRotZ, 0, 0);
+
+		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
+		BloodInit(_CollisionInfo.PushDir);
+
+		if (!bCheat)
+			bFatal = true;
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			2500.f, _CollisionInfo.PushDir, 0.2f);
+
+		Time::instance().TimeScale = 0.2f;
+		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]() {
+
+			if (global::ECurGameState::PlaySlow != global::_CurGameState)
+			{
+				Time::instance().TimeScale = 1.f;
+			}
+			return true; });
+
+		_RenderComp->AfterImgOn();
+		_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+		{
+			_RenderComp->AfterImgOff();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+			return true;
+		});
+
+		HurtFlyBegin();
+		return;
+	}
+
+	if (_CollisionInfo._ID == OBJECT_ID::EID::BOSS_LASER)
+	{
+		/*auto _RefEftInfo = _CollisionInfo._Variable._Cast<std::reference_wrapper<EffectInfo>>();
+		_RefEftInfo->get().bPhysic = false;*/
+
+		_CollisionInfo.PushDir = _CollisionInfo.PosDir;
+		_CollisionInfo.PushForce = 700;
+
+		_CollisionInfo.PushDir.y -= 0.6f;
+
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 2.5f),
+			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
+			0.3f,
+			_CollisionInfo.PushDir);
+
+		BloodInit(_CollisionInfo.PushDir);
+
+		if (!bCheat)
+			bFatal = true;
+
+		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
+			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+			255, false, 0, ImpactRotZ, 0, 0);
+
+		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false, Pos,
+			_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
+			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
+			0, 0);
+
+		{
+			vec3 Location = _TransformComp->Position;
+			float ExplosiveRepeatTime = 0.1f;
+
+			for (int i = 0; i < 15; ++i)
+			{
+				vec3 InitLoc = Location + math::RandVec({ -1,1 }) * math::Rand<float>({40,140});
+				EffectManager::instance().EffectPush(L"Effect", L"spr_explosion_1",
+					11, 0.1f, 11 * 0.1f + 0.01f, OBJECT_ID::EID::EXPLOSION, true,
+					InitLoc, { 0,0,0 },
+					{ 3,3,0 }, false, true, false, true, 33, 33,
+					255, false, 0.f, 0.f, 0.f, 0);
+			}
+		}
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			_CollisionInfo.PushForce * 9, _CollisionInfo.PushDir, 0.3f);
+
+		Time::instance().TimeScale = 0.2f;
+		Time::instance().TimerRegist(0.08f, 0.08f, 0.08f, [this]() {
+
+			if (global::ECurGameState::PlaySlow != global::_CurGameState)
+			{
+				Time::instance().TimeScale = 1.f;
+			}
+			return true; });
+
+		_RenderComp->AfterImgOn();
+		_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+		Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+		{
+			_RenderComp->AfterImgOff();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+			return true;
+		});
+
+		HurtFlyBegin();
+	}
+	if (_CollisionInfo._ID == OBJECT_ID::EID::BOSS)
+	{
+		auto spObj =_CollisionInfo._Target.lock();
+		auto spBoss = std::dynamic_pointer_cast<Boss>(spObj);
+
+		if (spBoss->IsAttacking())
+		{
+			_CollisionInfo.PushDir = _CollisionInfo.PosDir;
+			_CollisionInfo.PushForce = 400;
+
+			_CollisionInfo.PushDir.y -= 0.f;
+
+			vec3 UpDir = { 0,-1,0 };
+
+			/*_CollisionInfo.PushDir =*/ D3DXVec3Lerp(&_CollisionInfo.PushDir, &_CollisionInfo.PushDir,
+				&UpDir, 0.5f);
+
+			 //_CollisionInfo.PushDir.y -= 0.3f;
+
+			_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 5.f),
+				_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
+				0.3f,
+				_CollisionInfo.PushDir);
+
+			BloodInit(_CollisionInfo.PushDir);
+
+			if (!bCheat)
+				bFatal = true;
+
+
+			EffectManager::instance().EffectPush(L"Effect",
+				L"spr_slashfx", 5, 0.02f,
+				0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
+				{ 0,0,0 }, { 2.9,2.9,0 });
+
+			float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
+			EffectManager::instance().EffectPush(L"Effect",
+				L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+				_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
+				{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+				255, false, 0, ImpactRotZ, 0, 0);
+
+			vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
+
+			EffectManager::instance().EffectPush(L"Effect",
+				L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false, Pos,
+				_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
+				, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
+				0, 0);
+
+
+			ObjectManager::instance()._Camera.lock()->CameraShake(
+				_CollisionInfo.PushForce * 3, _CollisionInfo.PushDir, 0.3f);
+
+			Time::instance().TimeScale = 0.2f;
+			Time::instance().TimerRegist(0.05f, 0.05f, 0.05f, [this]() {
+
+				if (global::ECurGameState::PlaySlow != global::_CurGameState)
+				{
+					Time::instance().TimeScale = 1.f;
+				}
+				return true; });
+
+			_RenderComp->AfterImgOn();
+			_RenderComp->NormalAfterImgPushDelta *= 1.f;
+
+			Time::instance().TimerRegist(0.1f, 0.1f, 0.1f, [this]()
+			{
+				_RenderComp->AfterImgOff();
+				_RenderComp->NormalAfterImgPushDelta *= 1.f;
+				return true;
+			});
+
+			HurtFlyBegin();
+			// 여기서 피격 처리.........
+		}
+	}
+
 	if (!bInAreaSmoke && _CollisionInfo._ID == OBJECT_ID::EID::SMOKE_CLOUD)
 	{
 		bInAreaSmoke = true;
@@ -333,11 +596,10 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		if(!bCheat)
 			bFatal = true;
 
-
-		EffectManager::instance().EffectPush(L"Effect",
+		/*EffectManager::instance().EffectPush(L"Effect",
 			L"spr_slashfx", 5, 0.02f,
 			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
-			{ 0,0,0 }, { 2.9,2.9,0 });
+			{ 0,0,0 }, { 2.9,2.9,0 });*/
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 		EffectManager::instance().EffectPush(L"Effect",
@@ -417,7 +679,6 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 			_CollisionInfo.PushDir * 50000, { 50,3,0 }, false, false, false, false
 			, 0, 0, 125, true, 0, atan2f(_CollisionInfo.PushDir.y, _CollisionInfo.PushDir.x),
 			0, 0);
-
 
 		ObjectManager::instance()._Camera.lock()->CameraShake(
 			_CollisionInfo.PushForce * 5, _CollisionInfo.PushDir, 0.3f);
@@ -1198,8 +1459,6 @@ void Player::HurtFlyBegin()
 	_RenderComp->Anim(false, false, L"spr_dragon_hurtfly_begin", 2, 0.2f, std::move(_Notify));
 
 	bHurt = true;
-
-	
 };
 
 void Player::HurtFlyBeginState()
@@ -1217,12 +1476,16 @@ void Player::HurtFly()
 	_PhysicComp->Flying();
 	_CurrentState = Player::State::HurtFly;
 	_RenderComp->Anim(false, true, L"spr_dragon_hurtfly", 4, 0.4f);
+	if(bFatal)
+		bBlooding = true;
+
 }
 void Player::HurtFlyState()
 {
 	// 여기서 땅에닿았다고 판정되면 그라운드 호출 !!
 	if (_PhysicComp->bLand)
 	{
+			bBlooding = false;
 		HurtGround();
 	}
 }
@@ -1285,9 +1548,12 @@ void Player::HurtGround()
 	_CurrentState = Player::State::Hurt_Ground;
 	RenderComponent::NotifyType _Notify;
 	bHurt = true;
+	if(bFatal)
+		bBloodingOverHead = true;
 
 	_Notify[6] = [this]() 
 	{
+		bBloodingOverHead = false;
 		bHurtGroundMotionEnd = true; 
 	};
 	_RenderComp->Anim(false, false, L"spr_dragon_hurtground", 6, 0.5f, std::move(_Notify));
@@ -1447,8 +1713,6 @@ void Player::WallRide()
 		EffectManager::instance().EffectPush(L"Effect",
 			L"spr_dustcloud", 7, 0.06f, 7 * 0.06f + 0.01f, OBJECT_ID::EID::DustCloud, true, Pos, Dir, { 2.5,2.5,0 });
 	}
-	
-
 }
 void Player::WallRideState()
 {

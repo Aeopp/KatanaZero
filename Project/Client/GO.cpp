@@ -44,7 +44,9 @@ void GO::Initialize() & noexcept
     ScreenPos.x = 200;
     ScreenPos.y = 300;
 
-    _RenderComp->_RenderAfterEvent = [this]() {
+
+    _RenderComp->_RenderAfterEvent = [this]() 
+    {
         {
             auto spTexInfo = TextureManager::instance().Get_TexInfo(L"Go", L"Go", 1);
             if (!spTexInfo)return;
@@ -84,7 +86,10 @@ void GO::Initialize() & noexcept
 
 void GO::Update()
 {
-    ClearCheckTime  -= Time::instance().Delta();
+    const float dt = Time::instance().Delta();
+    const float T = Time::instance().T();
+
+    ClearCheckTime  -= dt;
 
     if (ClearCheckTime < 0.f)
     {
@@ -109,6 +114,8 @@ void GO::Update()
             bClear = true;
         }
     }
+
+    ScreenPos.x = InitScreenPos.x + std::sinf(T) * XRange;
 }
 
 void GO::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
@@ -144,13 +151,14 @@ void GO::SetUpInitState(float XDir, int32_t InitState)
 {
     if (XDir > 0)
     {
-        ScreenPos.x = 1720.f;
-        ScreenPos.y = 300;
+
+        InitScreenPos.x =   ScreenPos.x = 1720.f;
+        InitScreenPos.y= ScreenPos.y = 300;
     }
     else
     {
-        ScreenPos.x = 200.f;
-        ScreenPos.y = 300;
+        InitScreenPos.x = ScreenPos.x = 200.f;
+        InitScreenPos.y= ScreenPos.y = 300;
     }
     this->XDir = XDir;
 

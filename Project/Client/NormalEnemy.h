@@ -21,7 +21,6 @@ public :
     virtual ~NormalEnemy()noexcept = default;
 
     NormalEnemy::State _EnemyState = NormalEnemy::State::Idle;
-
 protected:
     static inline std::pair<float, float> IsSamefloorRange{-169.f,+48.f};
     bool IsSamefloor(vec3 TargetPos);

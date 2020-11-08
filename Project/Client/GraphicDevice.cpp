@@ -69,8 +69,8 @@ HRESULT GraphicDevice::Initialize(const bool bFullScreen)
 	D3DXFONT_DESCW FontInfo;
 	ZeroMemory(&FontInfo, sizeof(D3DXFONT_DESCW));
 
-	FontInfo.Height = 40;
-	FontInfo.Width = 20;
+	FontInfo.Height = 20;
+	FontInfo.Width = 10;
 	FontInfo.Weight = FW_HEAVY;
 	FontInfo.CharSet = HANGUL_CHARSET;
 	lstrcpy(FontInfo.FaceName, L"ÈÞ¸Õ¿¾Ã¼");

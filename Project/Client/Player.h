@@ -137,7 +137,6 @@ private:
 
 	vec3 AtDashDir{};
 public :	
-	
 	bool bDashRangeRender = false; 
 	bool bFatal = false;
 	bool bInit = false;

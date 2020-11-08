@@ -11,7 +11,7 @@
 #include "CollisionComponent.h"
 #include "object.h"
 #include "Player.h"
-
+#include "Character.h"
 
 
 
@@ -195,9 +195,11 @@ void CollisionLineManager::Update()&
 			if (!_spCollision->bLineCollision)continue;
 			auto _Owner = _spCollision->_Owner.lock();
 			// 벽타기 가능한 선분이랑 상호작용가능한 타입
-			if (_Owner->GetID() != OBJECT_ID::EPLAYER)continue;
-			auto _Player = std::dynamic_pointer_cast<Player>(_Owner);
-			auto _PhysicComp =std::dynamic_pointer_cast<PhysicTransformComponent>(_Player->_TransformComp);
+			if ( !(_Owner->GetID() == OBJECT_ID::EPLAYER ||
+				_Owner->GetID() == OBJECT_ID::BOSS) )continue;
+
+			std::shared_ptr<Character> _Character= std::dynamic_pointer_cast<Character>(_Owner);
+			auto _PhysicComp =std::dynamic_pointer_cast<PhysicTransformComponent>(_Character->_TransformComp);
 			//if (_PhysicComp->bLand)continue;
 			//if (!_PhysicComp->bFly)continue;
 
@@ -232,14 +234,14 @@ void CollisionLineManager::Update()&
 																-1 : 1;
 
 					_HitInfo._Variable = WallRideLineNormal;
-					_Player->MapHit(std::move(_HitInfo));
+					_Character->MapHit(std::move(_HitInfo));
 					break;
 				}
 			}
 
 			if (!bCollision || _PhysicComp->bLand)
 			{
-				_Player->_PhysicComp->GravityCoefficient = 1.f; 
+				_Character->_PhysicComp->GravityCoefficient = 1.f; 
 			}
 		}
 	}

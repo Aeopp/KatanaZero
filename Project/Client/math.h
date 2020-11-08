@@ -7,6 +7,8 @@
 #include <memory>
 #include "Tags.h"
 #include <any>
+#include <numeric>
+#include <numbers>
 
 using float_t = float;
 
@@ -18,7 +20,7 @@ private:
 public:
 	static constexpr float GRAVITY = 330.f;
 	static constexpr float GRAVITY_ACC = 100.f;
-	static constexpr float PI = 3.14159265f;
+	static constexpr float PI = std::numbers::pi;
 
 	template<typename Type>
 	auto LOOP(std::pair<Type, Type> Range, Type Target);
@@ -34,6 +36,8 @@ public:
 	static Ty Rand(std::pair<Ty, Ty> range);
 
 	static float AngleFromVec(vec3 Dir);
+	static float lerp(float start, float goal, float t);
+
 	static float lerp(float start, float goal, float goal_time, float dt);
 	static vec3 lerp(const vec3 start, const vec3 goal, float goal_time, float dt);
 	static D3DXCOLOR lerp(D3DXCOLOR start, D3DXCOLOR goal, float goal_time, float dt);

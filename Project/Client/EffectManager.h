@@ -57,6 +57,11 @@ struct EffectInfo
 	int32_t _ID = EffectInfo::MakeID();
 
 	int32_t Layer = 0;
+
+	// 스케일을 선형보간하고싶다면 세팅해주세요.
+	vec3 ScaleStart{ 1,1,1 };
+	vec3 ScaleGoal{1,1,1};
+	bool bScaleLerp = false;
 };
 
 class EffectManager : public singleton_interface<EffectManager>
@@ -100,7 +105,10 @@ public :
 		uint8_t _StartID = 0,
 		bool bFlash=false ,
 		float FlashRepeat=0.4f,
-		int32_t Layer=0);
+		int32_t Layer=0,
+		bool bScaleLerp=false ,
+		vec3 ScaleStart = { 1,1,1 },
+		vec3 ScaleGoal = { 1,1,1 });
 
 	std::set<CollisionComponent::ETag> _EffectCollisionTagSet;
 
