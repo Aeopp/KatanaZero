@@ -130,6 +130,7 @@ void Boss::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
 		|| _CollisionInfo._ID == OBJECT_ID::DRAGON_DASH)
 	{
 		_PhysicComp->ForceClear();
+		_PhysicComp->bGravity = true;
 
 		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
@@ -225,15 +226,6 @@ int32_t Boss::AnimAimRifleID()
 	ToTargetDir.x = std::abs(ToTargetDir.x);
 	float Radian = atan2f(ToTargetDir.y, ToTargetDir.x);
 
-	/*if (Radian < 0.f)
-	{
-		Radian = max(Radian, math::PI / -2.f);
-	}
-	else
-	{
-		Radian -= math::PI / 2.f;
-	}*/
-
 	int32_t Idx = 9;
 
 	float PIDiff= (math::PI/2.f) / 9.f;
@@ -307,6 +299,18 @@ void Boss::FSM()
 		break;
 	case Boss::State::Recover:
 		RecoverState();
+		break;
+	case Boss::State::TelePortIn:
+		TelePortInState();
+		break;
+	case Boss::State::TelePortOut:
+		TelePortOutState();
+		break;
+	case Boss::State::TelePortInGround:
+		TelePortInGroundState();
+		break;
+	case Boss::State::TelePortOutGround:
+		TelePortOutGroundState();
 		break;
 	default:
 		break;
@@ -1044,6 +1048,7 @@ void Boss::HurtFly()
 	_PhysicComp->bLand = false;
 	_RenderComp->Anim(false, true, L"spr_headhunter_hurtfly", 4, 0.5f, {});
 	_PhysicComp->bGravity = true;
+	
 }
 
 void Boss::HurtFlyState()
@@ -1059,7 +1064,7 @@ void Boss::Dice()
 	int32_t _Dice;
 	
 	do {
-		_Dice = math::Rand<int32_t>({ 0,3 });
+		_Dice = math::Rand<int32_t>({ 0,4 });
 	} while (_Dice == PrevDice);
 
 	PrevDice = _Dice;
@@ -1076,6 +1081,10 @@ void Boss::Dice()
 		break;
 	case 3:
 		TakeOutGun();
+		break;
+	case 4:
+		CurTpCount = TpCount;
+		TelePortIn();
 		break;
 	default:
 		break;
@@ -1151,6 +1160,101 @@ void Boss::Recover()
 	_RenderComp->Anim(false, false, L"spr_headhunter_recover",
 		4, 0.5f, std::move(_Notify), D3DCOLOR_ARGB(255, 255, 255, 255));
 }
+
+void Boss::TelePortIn()
+{
+	_PhysicComp->bGravity = false;
+	_CollisionComp->bCollision = false;
+
+	_PhysicComp->Position.x = math::Rand<float>(TpXRange);
+	_PhysicComp->Position.y = CeilY;
+
+	_BossState = Boss::State::TelePortIn;
+	RenderComponent::NotifyType _Notify;
+
+	_Notify[4] = [this]()
+	{
+		bTelePortInEnd = true;
+	};
+	
+	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_in", 4, 0.5f, std::move(_Notify));
+};
+
+void Boss::TelePortInState()
+{
+	if (bTelePortInEnd)
+	{
+		bTelePortInEnd = false;
+		TelePortOut();
+	}
+};
+
+void Boss::TelePortOut()
+{
+	_BossState = Boss::State::TelePortOut;
+	RenderComponent::NotifyType _Notify;
+	_Notify[4] = [this]()
+	{
+		bTelePortOutEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_out", 4, 0.5f, std::move(_Notify));
+};
+
+void Boss::TelePortOutState()
+{
+	if (bTelePortOutEnd)
+	{
+		bTelePortOutEnd = false;
+		--CurTpCount;
+		_CollisionComp->bCollision = true;
+
+		if (CurTpCount > 0)
+		{
+			TelePortIn();
+		}
+		else
+		{
+			_PhysicComp->Position.x = math::Rand<int32_t>({ 0,1 }) ? TpXRange.first : TpXRange.second;
+			_PhysicComp->Position.y = StageStandY;
+			Dice();
+		}
+	}
+}
+void Boss::TelePortInGround()
+{
+	_BossState = Boss::State::TelePortInGround;
+	RenderComponent::NotifyType _Notify;
+	_Notify[4] = [this]() {
+		bTelePortInGroundEnd = true;
+	}; 
+	//_RenderComp->Anim()
+}
+void Boss::TelePortInGroundState()
+{
+	if (bTelePortInGroundEnd)
+	{
+		bTelePortInGroundEnd = false;
+		
+	}
+}
+void Boss::TelePortOutGround()
+{
+	_BossState = Boss::State::TelePortOutGround;
+	RenderComponent::NotifyType _Notify;
+	_Notify[4] = [this]() {
+		bTelePortOutGroundEnd = true;
+	};
+
+}
+void Boss::TelePortOutGroundState()
+{
+	if (bTelePortOutGroundEnd)
+	{
+		bTelePortOutGroundEnd = false;
+
+	}
+}
+;
 
 
 

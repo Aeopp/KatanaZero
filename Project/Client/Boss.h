@@ -27,6 +27,10 @@ private:
         PutBackGun,
         PutBackRifle,
         Recover,
+        TelePortIn,
+        TelePortOut,
+        TelePortInGround,
+        TelePortOutGround,
     };
 public:
     using Super = Enemy;
@@ -88,6 +92,14 @@ private:
     void PutBackRifleState();
     void RecoverState();
     void Recover();
+    void TelePortIn();
+    void TelePortInState();
+    void TelePortOut();
+    void TelePortOutState();
+    void TelePortInGround();
+    void TelePortInGroundState();
+    void TelePortOutGround();
+    void TelePortOutGroundState();
 private:
     bool bPreDashEnd{ false };
     bool bDashEnd{ false };
@@ -104,6 +116,10 @@ private:
     bool bPutBackGunEnd{ false };
     bool bPutBackRifleEnd{ false };
     bool bRecoverEnd{ false };
+    bool bTelePortInEnd{ false };
+    bool bTelePortOutEnd{ false };
+    bool bTelePortInGroundEnd{ false };
+    bool bTelePortOutGroundEnd{ false };
 
     vec3 DashEndLocation{ 0,0,0 };
     vec3 DashStartLocation{ 0 ,0 , 0 };
@@ -114,6 +130,11 @@ private:
 
     const float BossStateFloor = 1800.f;
     const float BossStageCenterAxisX = 2000.f;
+    
+    static inline constexpr float StageStandY = 1747;
+    const std::pair<float, float> StageStandRangeX = { 1366 ,2648};
+    static inline constexpr float CeilY = { 1230.f };
+    const std::pair<float, float> TpXRange = { 1217.f,2717.f };
 
     float WallRideEffectDelta = 0.f;
 
@@ -126,6 +147,8 @@ private:
 
     int32_t CurHitCount = 0;
     int32_t CurShootCount = 0;
+    static inline constexpr  int32_t TpCount = 5;
+    int32_t CurTpCount = 5;
     bool bCurAnimLoopShoot = false;
 
     inline bool IsHurt()const& 
@@ -143,8 +166,9 @@ private:
 
 inline bool Boss::IsAttacking() const&
 {
-    return _BossState == Boss::State::Dash; 
-}
+    return _BossState == Boss::State::Dash;
+};
+
 //타격 플라이일때 블러딩 트루
 //
 //타격 플라이 스테이트에서 땅에 닿았다는 판정 생기면 블러딩 펄스
