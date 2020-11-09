@@ -69,6 +69,7 @@ private:
     void WallIdle();
     void WallIdleState();
     void WallJump();
+    void WallJumpEnd();
     void WallJumpState();
     void WallJumpLandState();
     void WallJumpLand();

@@ -114,7 +114,24 @@ void Grenade::LateUpdate()
         }
         else
         {
+           
             _TransformComp->Rotation.z += dt * 5.f;
+
+            if (_PhysicComp->Position.y < 1230)
+            {
+                vec3 Normal = { 0,1,0 };
+                vec3 Reverse = (-_TransformComp->Dir);
+
+                float dot = D3DXVec3Dot(&Reverse, &Normal);
+
+                vec3    Proj = dot * Normal;
+
+                _TransformComp->Dir += (Proj * 2.f);
+
+                D3DXVec3Normalize(&_TransformComp->Dir, &_TransformComp->Dir);
+
+                _TransformComp->Dir *= Friction;
+            }
         }
     }
     
@@ -139,26 +156,7 @@ void Grenade::LateUpdate()
                 if (!bCircleFade)
                 {
                     bCircleFade = true;
-                   
-                    // 여기서 점을 채운다.
-                    /*constexpr float LineWidth = 2.f;
-                    constexpr float _2PI = math::PI;
-                    constexpr float PointBetWeenAngle = _2PI / (float)CirclePointCount;
-
-                    vec3 Center = _PhysicComp->Position;
-                    
-                    for (uint32_t i = 0; i < CirclePointCount * 2 + 2; ++i)
-                    {
-                        vec2 Pos = (Center +
-                            vec3{ cosf(PointBetWeenAngle * i) * CurRadius,
-                            sinf(PointBetWeenAngle * i) * CurRadius ,0.f });
-                        CirclePts[i] = std::move(Pos);
-                        CirclePts[i].x -= global::CameraPos.x;
-                        CirclePts[i].y -= global::CameraPos.y;
-                        D3DXVec2TransformCoord(&CirclePts[i], &CirclePts[i],
-                            &math::GetCameraJoomMatrix(global::JoomScale,
-                                vec3{ global::ClientSize.first,global::ClientSize.second,0.f }));
-                    }*/
+                  
                 }
                 else
                 {

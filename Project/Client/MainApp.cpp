@@ -50,7 +50,7 @@ HRESULT App::Initialize()
 	SceneManager& SceneMgrRef = SceneManager::instance();
 	SceneMgrRef.Initialize();
 	
-	SceneMgrRef.Scene_Change(ESceneID::EBoss);
+	SceneMgrRef.Scene_Change(ESceneID::EBunkerMansion);
 
 	//TimeRef.TimerRegist(10.f, 10.f, 10.f, [&]()
 	//{

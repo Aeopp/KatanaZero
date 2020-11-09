@@ -47,7 +47,7 @@ public:
 
     float CurIgniteTime = IgniteTime;
     float MovementTime = 2.f;
-    float Friction = 0.5f;
+    float Friction = 0.4f;
     Grenade::State _CurState = Grenade::State::AfterExplosion;
 };
 

@@ -129,7 +129,8 @@ void Boss::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
 	if (_CollisionInfo._ID == OBJECT_ID::ATTACK_SLASH
 		|| _CollisionInfo._ID == OBJECT_ID::DRAGON_DASH)
 	{
-		
+		_PhysicComp->ForceClear();
+
 		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
@@ -542,12 +543,13 @@ void Boss::AimRifle()
 	constexpr float ReadyLaserInitRich = 300.f;
 
 	vec3 Location = _PhysicComp->Position;
-	vec3 TargetLocation = _Target->_PhysicComp->Position;
-	vec3 ToTarget = TargetLocation - Location;
-	vec3 ToTargetDir;
+	//vec3 TargetLocation = _Target->_PhysicComp->Position;
+	//vec3 ToTarget = TargetLocation - Location;
+	//vec3 ToTargetDir;
+	vec3 ToTargetDir = _PhysicComp->Dir;
 	const vec3 InitScale = { 20,1.25f,0 };
 	vec3 GoalScale = { 0,0.5f,0 };
-	D3DXVec3Normalize(&ToTargetDir, &ToTarget);
+	//D3DXVec3Normalize(&ToTargetDir, &ToTarget);
 	
 	 vec3 InitLocation = Location;
 	 InitLocation.y -= 18;
@@ -754,10 +756,10 @@ void Boss::WallJump()
 
 	WallJumpT = 0.f;
 	WallJumpInitPos = _PhysicComp->Position;
+
 	_PhysicComp->bGravity = false;
 	_PhysicComp->bLand = false;
 	CurWallJumpFireAngle = 0.f;
-
 
 	float factor = WallJumpDir.x < 0.f ? -1 : +1;
 	vec3 Dir = WallJumpDir.x < 0.f ? vec3{ -1.f,0,0 } : vec3{ 1,0,0 };
@@ -767,14 +769,18 @@ void Boss::WallJump()
 	EffectManager::instance().EffectPush(L"Effect", L"spr_jumpcloud", 4, 0.05f, 0.05f * 4 + 0.01f,
 		OBJECT_ID::EID::JUMP_CLOUD, true, CurWallRideLinePos + Dir, { 0,0,0 }, { 2.5,2.5,2.5 }, false
 		, false, false, false, 0, 0, 255, false, 0, RotZ);
-};
+}
+void Boss::WallJumpEnd()
+{
+	bWallJumpEnd = false;
+	_PhysicComp->bGravity = true;
+}
+;
 
 void Boss::WallJumpState()
 {
 	if (_PhysicComp->bLand && bWallJumpEnd)
 	{
-		bWallJumpEnd = false;
-		_PhysicComp->bGravity = true;
 		WallJumpLand();
 	}
 	else
@@ -867,6 +873,7 @@ void Boss::WallJumpLandState()
 
 void Boss::WallJumpLand()
 {
+	WallJumpEnd();
 	UpdateBossDir();
 	_BossState = Boss::State::WallJumpLand;
 	RenderComponent::NotifyType _Notify;
@@ -916,14 +923,14 @@ void Boss::Shoot()
 			bCurAnimLoopShoot = true;
 			// ÃÑÀ» ½ð´Ù.
 			constexpr float Rich = 100.f;
-			constexpr float InitSpeed = 1800.f;
+			constexpr float InitSpeed = 2500.f;
 			vec3 InitLocation = _TransformComp->Position + _TransformComp->Dir * Rich;
 			InitLocation.y -= 20.f;
 
 			vec3 LookDir = _TransformComp->Dir;
 			vec3 Up = { 0,-1,0 };
 			vec3 InitDir;
-			D3DXVec3Lerp(&InitDir, &LookDir, &Up, math::Rand<float>({ 1,3 })*0.1f);
+			D3DXVec3Lerp(&InitDir, &LookDir, &Up, math::Rand<float>({ 3,7 })*0.1f);
 			D3DXVec3Normalize(&InitDir, &InitDir);
 
 			_Grenades[CurShootCount]->Shoot(InitLocation, InitDir, InitSpeed);

@@ -295,6 +295,11 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 	if (_CollisionInfo._ID == OBJECT_ID::BOSS_RECOVER_BOMB)
 	{
+		if (global::IsSlow())
+		{
+			Time::instance().Return();
+		}
+
 		vec3 UpDir = { 0,-1,0 };
 		vec3 Dir =_TransformComp->Position - ObjectManager::instance()._Boss.lock()->_TransformComp->Position;
 		D3DXVec3Normalize(&Dir, &Dir);
@@ -349,6 +354,10 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 	if (_CollisionInfo._ID == OBJECT_ID::EID::EXPLOSION)
 	{
+		if (global::IsSlow())
+		{
+			Time::instance().Return();
+		}
 		_CollisionInfo.PushDir = { 0,-1,0 };
 		_CollisionInfo.PushDir += _CollisionInfo.PosDir;
 		D3DXVec3Normalize(&_CollisionInfo.PushDir, &_CollisionInfo.PushDir);
@@ -401,8 +410,10 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 	if (_CollisionInfo._ID == OBJECT_ID::EID::BOSS_LASER)
 	{
-		/*auto _RefEftInfo = _CollisionInfo._Variable._Cast<std::reference_wrapper<EffectInfo>>();
-		_RefEftInfo->get().bPhysic = false;*/
+		if (global::IsSlow())
+		{
+			Time::instance().Return();
+		}
 
 		_CollisionInfo.PushDir = _CollisionInfo.PosDir;
 		_CollisionInfo.PushForce = 700;
@@ -481,6 +492,11 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		if (spBoss->IsAttacking())
 		{
+			if (global::IsSlow())
+			{
+				Time::instance().Return();
+			}
+
 			_CollisionInfo.PushDir = _CollisionInfo.PosDir;
 			_CollisionInfo.PushForce = 400;
 
@@ -591,6 +607,11 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 			0.3f,
 			_CollisionInfo.PushDir);
 
+		if (global::IsSlow())
+		{
+			Time::instance().Return();
+		}
+
 		BloodInit(_CollisionInfo.PushDir);
 
 		if(!bCheat)
@@ -653,6 +674,11 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);
+
+		if (global::IsSlow())
+		{
+			Time::instance().Return();
+		}
 
 		BloodInit(_CollisionInfo.PushDir);
 
