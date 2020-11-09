@@ -1,5 +1,7 @@
 #pragma once
 #include "Enemy.h"
+#include <queue>
+
 class Boss :
     public Enemy
 {
@@ -11,7 +13,6 @@ private:
         PreDash,
         Dash,
         DashEndGround,
-        Die,
         TakeOutRifle,
         AimRifle,
         PreJump,
@@ -31,6 +32,11 @@ private:
         TelePortOut,
         TelePortInGround,
         TelePortOutGround,
+        DodgeRoll,
+        Exit,
+        DieFly,
+        DieLand,
+        Dead,
     };
 public:
     using Super = Enemy;
@@ -43,7 +49,7 @@ public:
     virtual OBJECT_ID::EID   GetID()override ;
     virtual OBJECT_TAG::ETAG GetTag()override;
     virtual std::wstring_view GetName()const& override;
-    void Die()& override ;
+    virtual void Die()& override;
     void UpdateBossDir();
 public :
     inline bool IsAttacking() const&;
@@ -51,7 +57,9 @@ private:
     int32_t AnimAimRifleID();
     void AnyState();
     void FSM();
-    Boss::State _BossState = Boss::State::None;
+    void Dice();
+    void Escape();
+    Boss::State _BossState = Boss::State::Recover;
 private:
     void PreDash();
     void PreDashState();
@@ -85,7 +93,7 @@ private:
     void HurtState();
     void HurtFly();
     void HurtFlyState();
-    void Dice();
+   
     void PutBackGun();
     void PutBackGunState();
     void PutBackRifle();
@@ -100,6 +108,20 @@ private:
     void TelePortInGroundState();
     void TelePortOutGround();
     void TelePortOutGroundState();
+
+    void DoegeRoll();
+    void DoegeRollState();
+    void Exit();
+    void ExitState();
+    void DieFly();
+    void DieFlyState();
+    void DieLand();
+    void DieLandState();
+    void Dead();
+    void DeadState();
+private:
+    inline bool IsTelePortable()const&;
+    inline bool IsFly()const&;
 private:
     bool bPreDashEnd{ false };
     bool bDashEnd{ false };
@@ -120,6 +142,10 @@ private:
     bool bTelePortOutEnd{ false };
     bool bTelePortInGroundEnd{ false };
     bool bTelePortOutGroundEnd{ false };
+    bool bDodgeRollEnd{ false };
+    bool bExitEnd{ false };
+    bool bDieLandEnd{ false };
+    bool bDeadEnd{ false };
 
     vec3 DashEndLocation{ 0,0,0 };
     vec3 DashStartLocation{ 0 ,0 , 0 };
@@ -147,33 +173,48 @@ private:
 
     int32_t CurHitCount = 0;
     int32_t CurShootCount = 0;
-    static inline constexpr  int32_t TpCount = 5;
     int32_t CurTpCount = 5;
     bool bCurAnimLoopShoot = false;
 
     inline bool IsHurt()const& 
     {
         return _BossState == Boss::State::Hurt || _BossState == Boss::State::Recover ||
-            _BossState == Boss::State::HurtFly;
+             _BossState == Boss::State::HurtFly  || _BossState == Boss::State::Dead 
+            || _BossState == Boss::State::DieFly|| _BossState == Boss::State::DieLand;
     };
 private:
     static inline constexpr int32_t GrenadeNum = 3;
     std::array< std::shared_ptr<class Grenade>, GrenadeNum > _Grenades;
-
+    bool bEvasion = true;
     int32_t PrevDice = -1;
+    std::list<int> PatternQ
+    {
+        1,0,2,1,2,0
+    };
 };
-
 
 inline bool Boss::IsAttacking() const&
 {
     return _BossState == Boss::State::Dash;
 };
 
+inline bool Boss::IsTelePortable() const&
+{
+    return _BossState == Boss::State::TelePortOut ||
+              _BossState == Boss::State::TelePortOutGround ||
+            _BossState == Boss::State::Recover ||
+            _BossState == Boss::State::Exit;
+}
+inline bool Boss::IsFly() const&
+{
+    return _BossState == Boss::State::WallJump ||
+        _BossState == Boss::State::WallIdle ||
+        _BossState == Boss::State::Jump;
+};
 //타격 플라이일때 블러딩 트루
 //
 //타격 플라이 스테이트에서 땅에 닿았다는 판정 생기면 블러딩 펄스
 //
 //허트 그라운드 진입시 블러딩 오버헤드 트루
-//
-//애니메이션 노티파이 걸어서 적당히 펄스로 만들기
+
 

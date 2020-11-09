@@ -96,6 +96,53 @@ void EffectManager::Render()
 			}
 		}
 	}
+
+	DebugRender();
+}
+void EffectManager::DebugRender()
+{
+	if (!global::bDebug)return;
+
+	static constexpr float DebugLineWidth = 2.f;
+
+	std::pair<float, float > CameraPos{ 0.f,0.f };
+	float JoomScale = global::JoomScale;
+
+	matrix MJoom;
+	CameraPos.first = global::CameraPos.x;
+	CameraPos.second = global::CameraPos.y;
+
+	GraphicDevice::instance().GetSprite()->End();
+	GraphicDevice::instance().GetLine()->SetWidth(DebugLineWidth);
+
+	MJoom = math::GetCameraJoomMatrix(JoomScale,
+		vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
+
+	for (auto& _Effect : _Effects)
+	{
+		if (!_Effect.bPhysic)continue;
+		matrix MWorld, MTrans, MRotZ, MScale;
+
+		D3DXMatrixScaling(&MScale, _Effect.Scale.x, _Effect.Scale.y, _Effect.Scale.z);
+		D3DXMatrixRotationZ(&MRotZ, 0/*-_Effect.RotZ*/);
+		D3DXMatrixTranslation(&MTrans, _Effect.Pos.x, _Effect.Pos.y, _Effect.Pos.z);
+		MWorld = MScale * MRotZ * MTrans;
+
+		auto _EffectWorldRectPT = math::GetWorldRectPt(MWorld, _Effect.Width, _Effect.Height);
+		std::array<vec2, 5ul> _RenderCollisionEft{};
+
+		for (size_t i = 0; i < _EffectWorldRectPT.size(); ++i)
+		{
+			_RenderCollisionEft[i] = { _EffectWorldRectPT[i].x-
+				 CameraPos.first   ,  _EffectWorldRectPT[i].y-CameraPos.second };
+		};
+
+		_RenderCollisionEft.back() = _RenderCollisionEft.front();
+		GraphicDevice::instance().GetLine()->Draw(_RenderCollisionEft.data(),
+		_RenderCollisionEft.size(), D3DCOLOR_ARGB(255,255,0,0));
+	}
+
+	GraphicDevice::instance().GetSprite()->Begin(D3DXSPRITE_ALPHABLEND);
 };
 
 void EffectManager::Update()
@@ -121,9 +168,6 @@ void EffectManager::Update()
 				}
 			}
 		}
-
-		
-
 
 		if (_Effect.CurrentDelta > _Effect.AnimDelta)
 		{
@@ -172,12 +216,12 @@ void EffectManager::Update()
 					auto WorldRectPT = spCmp->GetWorldRectPt();
 					vec3 OwnerPos = math::GetCenter(WorldRectPT);// spOwner->_TransformComp->Position;
 					vec3 ToEffect = OwnerPos - _Effect.Pos;
-					if (500.f > D3DXVec3Length(&ToEffect))
+					if (1000.f> D3DXVec3Length(&ToEffect))
 					{
 						matrix MWorld, MTrans, MRotZ, MScale;
 
 						D3DXMatrixScaling(&MScale, _Effect.Scale.x, _Effect.Scale.y, _Effect.Scale.z);
-						D3DXMatrixRotationZ(&MRotZ, /*_Effect.RotZ*/0);
+						D3DXMatrixRotationZ(&MRotZ, 0/*-_Effect.RotZ*/);
 						D3DXMatrixTranslation(&MTrans, _Effect.Pos.x, _Effect.Pos.y, _Effect.Pos.z);
 						MWorld = MScale * MRotZ * MTrans;
 					

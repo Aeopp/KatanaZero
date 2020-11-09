@@ -46,6 +46,7 @@ void ComponentManager::LateUpdate()
 		for (auto spCompIter = std::begin(OuterIter->second); spCompIter != std::end(OuterIter->second); ++spCompIter)
 		{
 			auto spComp = *spCompIter;
+			if (!spComp)continue;
 
 			if (!spComp || spComp->bDie)
 			{

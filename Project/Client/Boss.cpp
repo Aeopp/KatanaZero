@@ -31,6 +31,11 @@ std::wstring_view Boss::GetName() const&
 	return L"Boss"sv;
 }
 
+void Boss::Die()&
+{
+
+}
+
 void Boss::Initialize() & noexcept
 {
 	Super::Initialize();
@@ -82,9 +87,11 @@ void Boss::Initialize() & noexcept
 		[this]() 
 	{
 		_TransformComp->Dir ={ -1,0,0 };
-		PreDash();
+		Dice();
 		return true; 
 	});
+
+	
 }
 
 void Boss::LateUpdate()
@@ -92,9 +99,7 @@ void Boss::LateUpdate()
 	if (!global::IsPlay())return;
 	if (!ObjectManager::instance().bEnemyUpdate)return;
 
-
 	Super::LateUpdate();
-
 	const float Dt = Time::instance().Delta();
 	WallRideEffectDelta -= Dt;
 	if (bWallJumpFire)
@@ -102,9 +107,10 @@ void Boss::LateUpdate()
 		CurWallJumpFireDt -= Dt;
 	}
 
-	// -=dt;
-
-	
+	if (_BossState == Boss::State::Dead)
+	{
+		_PhysicComp->Position += _PhysicComp->Dir * 100.f * Dt;
+	}
 }
 
 void Boss::Update()
@@ -121,7 +127,7 @@ void Boss::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
 {
 	Super::Hit(_Target, _CollisionInfo); 
 
-	if (_BossState == Boss::State::Die || IsHurt())
+	if (IsHurt())
 	{
 		return; 
 	}
@@ -129,6 +135,26 @@ void Boss::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
 	if (_CollisionInfo._ID == OBJECT_ID::ATTACK_SLASH
 		|| _CollisionInfo._ID == OBJECT_ID::DRAGON_DASH)
 	{
+		if (_BossState == Boss::State::DodgeRoll || _BossState == Boss::State::Exit ||
+			 _BossState == Boss::State::Dash)
+		{
+			// 회피상태일때
+			return;
+		}
+
+		if (bEvasion && !IsFly () )
+		{
+			bEvasion = false;
+			DoegeRoll();
+			return;
+			// 여기서 회피기동?
+		}
+		else
+		{
+			bEvasion = true;
+		}
+
+		// 한번 피격 직후엔 다음 피격시 무조건 회피
 		_PhysicComp->ForceClear();
 		_PhysicComp->bGravity = true;
 
@@ -186,9 +212,12 @@ void Boss::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
 		++CurHitCount;
 		if (CurHitCount >= 5)
 		{
-			Die();
+			DieFly();
 		}
-		HurtFly();
+		else
+		{
+			HurtFly();
+		}
 	}
 }
 
@@ -211,6 +240,7 @@ void Boss::MapHit(math::Collision::HitInfo _CollisionInfo)
 	{
 		_PhysicComp->bLand = true;
 		_PhysicComp->Position.y = BossStateFloor - (35 * 2.5f) / 2.f;
+		_PhysicComp->Position.x = std::clamp<float>(_PhysicComp->Position.x, StageStandRangeX.first, StageStandRangeX.second);
 		//WallJumpLand();
 	}
 }
@@ -254,9 +284,6 @@ void Boss::FSM()
 		break;
 	case Boss::State::DashEndGround:
 		DashAndGroundState(); 
-		break;
-	case Boss::State::Die:
-		DieState(); 
 		break;
 	case Boss::State::TakeOutRifle:
 		TakeOutRifleState();
@@ -312,6 +339,21 @@ void Boss::FSM()
 	case Boss::State::TelePortOutGround:
 		TelePortOutGroundState();
 		break;
+	case Boss::State::DodgeRoll :
+		DoegeRollState();
+		break;
+	case Boss::State::Exit:
+		ExitState();
+		break;
+	case Boss::State::DieFly:
+		DieFlyState();
+		break;
+	case Boss::State::Dead:
+		DeadState();
+		break;
+	case Boss::State::DieLand:
+		DieLandState();
+		break;
 	default:
 		break;
 	}
@@ -343,7 +385,7 @@ void Boss::PreDash()
 	vec3 GoalScale = { 0.f,0.f,0 };
 
 	vec3 InitLocation = _PhysicComp->Position;
-	InitLocation.y -= 18;
+	InitLocation.y = 1755;
 
 	for (int32_t i = 0; i < ReadyNumber; ++i)
 	{
@@ -441,22 +483,8 @@ void Boss::DashState()
 		}
 	}
 }
-
-void Boss::Die()&
-{
-
-}
-
 void Boss::UpdateBossDir()
 {
-	/*vec3 TargetLocation  = _Target->_TransformComp->Position;
-	vec3 Location = _TransformComp->Position;
-	vec3 ToTarget = TargetLocation - Location;
-
-	vec3 ToTargetDir;
-	D3DXVec3Normalize(&ToTargetDir, &ToTarget);
-	
-	_TransformComp->Dir = ToTargetDir;*/
 	if (_TransformComp->Position.x < BossStageCenterAxisX)
 	{
 		_TransformComp->Dir = { 1,0,0 };
@@ -465,15 +493,7 @@ void Boss::UpdateBossDir()
 	{
 		_TransformComp->Dir = { -1,0,0 };
 	}
-	
 
-	/*_RenderComp->AnimDir = 1.f;
-
-	if (ToTarget.x < 0.f)
-	{
-		_RenderComp->AnimDir = 1.f;
-		
-	}*/
 }
 
 
@@ -493,7 +513,7 @@ void Boss::DashAndGround()
 		bDashAndGroundEnd = true;
 	};
 	_RenderComp->Anim(false, false, L"spr_headhunter_dash_end_ground",
-		10, 0.6f, std::move(_Notify), D3DCOLOR_ARGB(255, 255, 255, 255),
+		10, 0.77f, std::move(_Notify), D3DCOLOR_ARGB(255, 255, 255, 255),
 		0, { 1,1 }, L"HeadHunter", LAYER::ELAYER::EOBJECT);
 };
 
@@ -529,6 +549,10 @@ void Boss::TakeOutRifleState()
 		bTakeOutRifleEnd = false;
 		AimRifle();
 	}
+	else
+	{
+		Escape();
+	}
 }
 
 void Boss::AimRifle()
@@ -547,13 +571,12 @@ void Boss::AimRifle()
 	constexpr float ReadyLaserInitRich = 300.f;
 
 	vec3 Location = _PhysicComp->Position;
-	//vec3 TargetLocation = _Target->_PhysicComp->Position;
-	//vec3 ToTarget = TargetLocation - Location;
-	//vec3 ToTargetDir;
-	vec3 ToTargetDir = _PhysicComp->Dir;
+	vec3 TargetLocation = _Target->_PhysicComp->Position;
+	vec3 ToTarget = TargetLocation - Location;
+	vec3 ToTargetDir;
 	const vec3 InitScale = { 20,1.25f,0 };
 	vec3 GoalScale = { 0,0.5f,0 };
-	//D3DXVec3Normalize(&ToTargetDir, &ToTarget);
+	D3DXVec3Normalize(&ToTargetDir, &ToTarget);
 	
 	 vec3 InitLocation = Location;
 	 InitLocation.y -= 18;
@@ -590,7 +613,7 @@ void Boss::AimRifle()
 	});
 
 	Time::instance().TimerRegist(RifleLaserReadyTime+ 0.5f, RifleLaserReadyTime+ 0.5f, RifleLaserReadyTime+ 0.5f,
-		[this,InitLocation, ToTargetDir]()
+		[this,InitLocation, ToTargetDir,InitScale,GoalScale]()
 	{
 		if (_BossState != State::AimRifle)return true;
 
@@ -600,11 +623,32 @@ void Boss::AimRifle()
 
 		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
 			2, 0.2f, 0.5f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
-			StartScale, true, false, false, false, 2048, 30, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
+			StartScale, true, true, false, false, 2048, 30, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
 			0, 0, false, false, 0, true, StartScale, GoalScale);
+
+		Time::instance().TimerRegist(0.5f,0.5f,  0.5f,
+			[this, InitLocation, ToTargetDir,InitScale, GoalScale]()
+		{
+			for (int32_t i = 0; i < ReadyLaserNumber; ++i)
+			{
+				vec3 CurInitScale = InitScale;
+				CurInitScale.x = math::Rand<float>({ InitScale.x / 2.f,InitScale.x });
+				vec3 ReadyLaserLocation = InitLocation + ToTargetDir *
+					(i * ReadyLaserDiff + ReadyLaserInitRich);
+				ReadyLaserLocation.y += math::Rand<float>({ -2,2 });
+
+				EffectManager::instance().EffectPush(L"Effect",
+					L"spr_bullet", 1, FLT_MAX, RifleLaserReadyTime, OBJECT_ID::EID::ENONE,
+					true, ReadyLaserLocation, { 0,0,0 }, CurInitScale, false, false, false, false, 0, 0,
+					255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x), 0, 0, false, 0, 0, true, CurInitScale, GoalScale);
+			};
+			return true;
+		});
 
 		return true;
 	});
+
+
 
 	Time::instance().TimerRegist(2.f, 2.f, 2.f, [this]() {
 		if (_BossState != State::AimRifle)return true;
@@ -621,6 +665,10 @@ void Boss::AimRifleState()
 
 	
 		//PreJump();
+	}
+	else
+	{
+		Escape();
 	}
 };
 
@@ -660,7 +708,7 @@ void Boss::Jump()
 	constexpr float Force = 800.f;
 	_PhysicComp->Move(JumpDir * Force, 0.f, FLT_MAX);
 
-	_RenderComp->Anim(false, true, L"spr_headhunter_jump",1, 1.f, {});
+	_RenderComp->Anim(false, true, L"spr_headhunter_jump",1, 0.5f, {});
 };
 
 void Boss::JumpState()
@@ -708,7 +756,7 @@ void Boss::WallIdle()
 		bWallIdleEnd = true;
 	};
 	_RenderComp->Anim(false, false, L"spr_headhunter_wall_idle",
-		3, 0.8f, std::move(_Notify), D3DCOLOR_ARGB(255, 255, 255, 255));
+		3, 0.3f, std::move(_Notify), D3DCOLOR_ARGB(255, 255, 255, 255));
 };
 
 void Boss::WallIdleState()
@@ -910,6 +958,10 @@ void Boss::TakeOutGunState()
 		bTakeOutGunEnd = false;
 		Shoot();
 	}
+	else
+	{
+		Escape();
+	}
 }
 
 void Boss::Shoot()
@@ -969,6 +1021,10 @@ void Boss::ShootState()
 		//TakeOutRifle();
 		//PreDash();
 		//AimRifle();
+	}
+	else
+	{
+		Escape();
 	}
 }
 
@@ -1062,12 +1118,20 @@ void Boss::HurtFlyState()
 void Boss::Dice()
 {
 	int32_t _Dice;
-	
-	do {
-		_Dice = math::Rand<int32_t>({ 0,4 });
-	} while (_Dice == PrevDice);
 
-	PrevDice = _Dice;
+	if (PatternQ.empty())
+	{
+		do {
+			_Dice = math::Rand<int32_t>({ 0,4 });
+		} while (_Dice == PrevDice);
+		PrevDice = _Dice;
+	}
+	else
+	{
+		PrevDice  = _Dice = PatternQ.front();
+		PatternQ.pop_front();
+	}
+
 	switch (_Dice)
 	{
 	case 0:
@@ -1076,18 +1140,58 @@ void Boss::Dice()
 	case 1:
 		PreDash();
 		break;
+	//case 2:
+	//	PreJump();
+	//	break;
 	case 2:
-		PreJump();
-		break;
-	case 3:
 		TakeOutGun();
 		break;
+	case 3:
+		if (!IsTelePortable())
+		{
+			Dice();
+		}
+		else
+		{
+			CurTpCount = 4;
+			TelePortIn();
+		}
+		break;
 	case 4:
-		CurTpCount = TpCount;
-		TelePortIn();
+		if (!IsTelePortable())
+		{
+			Dice();
+		}
+		else
+		{
+			CurTpCount = 1;
+			TelePortInGround();
+		}
 		break;
 	default:
 		break;
+	}
+}
+
+void Boss::Escape()
+{
+	vec3 TargetLocation = _Target->_TransformComp->Position;
+	vec3 MyLocation = _TransformComp->Position;
+	vec3 ToTarget = TargetLocation - MyLocation;
+	float Distance = D3DXVec3Length(&ToTarget);
+
+	if (Distance < 200.f)
+	{
+		int32_t Rd = math::Rand<int32_t>({ 0,9 });
+
+		if (Rd < 3)
+		{
+			DoegeRoll();
+		}
+		else
+		{
+			PreJump();
+		}
 	}
 }
 
@@ -1110,7 +1214,10 @@ void Boss::PutBackGunState()
 		bPutBackGunEnd = false;
 		Dice();
 	}
-	
+	else
+	{
+		Escape();
+	}
 }
 
 void Boss::PutBackRifle()
@@ -1133,7 +1240,11 @@ void Boss::PutBackRifleState()
 
 		// 상태전이..
 		Dice();
-	};
+	}
+	else
+	{
+		Escape();
+	}
 }
 
 void Boss::RecoverState()
@@ -1177,7 +1288,86 @@ void Boss::TelePortIn()
 		bTelePortInEnd = true;
 	};
 	
-	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_in", 4, 0.5f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_in", 4, 0.4f, std::move(_Notify));
+
+	//////////////////
+	constexpr float RifleLaserReadyTime = 0.5f;
+	constexpr float ReadyLaserNumber = 10;
+	constexpr float ReadyLaserDiff = 2000.f / ReadyLaserNumber;
+	constexpr float ReadyLaserInitRich = 300.f;
+
+	vec3 Location = _PhysicComp->Position;
+	vec3 ToTargetDir = vec3{ 0,1,0 };
+	const vec3 InitScale = { 20,3,0 };
+	vec3 GoalScale = { 0,0,0 };
+	//D3DXVec3Normalize(&ToTargetDir, &ToTarget);
+
+	vec3 InitLocation = Location;
+	InitLocation.y -= 18;
+
+	for (int32_t i = 0; i < ReadyLaserNumber; ++i)
+	{
+		vec3 CurInitScale = InitScale;
+		CurInitScale.x = math::Rand<float>({ InitScale.x / 2.f,InitScale.x });
+		vec3 ReadyLaserLocation = InitLocation + ToTargetDir *
+			(i * ReadyLaserDiff + ReadyLaserInitRich);
+		ReadyLaserLocation.y += math::Rand<float>({ -2,2 });
+
+		EffectManager::instance().EffectPush(L"Effect",
+			L"spr_bullet", 1, FLT_MAX, RifleLaserReadyTime, OBJECT_ID::EID::ENONE,
+			true, ReadyLaserLocation, { 0,0,0 }, CurInitScale, false, false, false, false, 0, 0,
+			255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x), 0, 0, false, 0, 0, true, CurInitScale, GoalScale);
+	};
+
+	Time::instance().TimerRegist(RifleLaserReadyTime+0.4f, RifleLaserReadyTime + 0.4f, RifleLaserReadyTime + 0.4f,
+		[this, InitLocation, ToTargetDir]()
+	{
+		vec3 LaserMiddle = InitLocation + ToTargetDir * (1024 + 50);
+		vec3 StartScale{ 1,1,1 };
+		vec3 GoalScale{ 1,1,1 };
+
+		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
+			2, 0.2f, 0.5f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
+			StartScale, true, true, false, false, 30, 2048, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
+			0, 0, false, false, 0, true, StartScale, GoalScale);
+
+		return true;
+	});
+
+	Time::instance().TimerRegist(RifleLaserReadyTime + 1.4f, RifleLaserReadyTime + 1.4f, RifleLaserReadyTime + 1.4f,
+		[this, InitLocation, ToTargetDir]()
+	{
+		vec3 LaserMiddle = InitLocation + ToTargetDir * (1024 + 50);
+		vec3 StartScale{ 1,1,1 };
+		vec3 GoalScale{ 1,0,1 };
+
+		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
+			2, 0.2f, 0.5f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
+			StartScale, true, true, false, false, 30, 2048, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
+			0, 0, false, false, 0, true, StartScale, GoalScale);
+
+		return true;
+	});
+
+	Time::instance().TimerRegist(RifleLaserReadyTime + 1.9f, RifleLaserReadyTime + 1.9f, RifleLaserReadyTime + 1.9f,
+		[this, InitLocation, ToTargetDir,InitScale,GoalScale]()
+	{
+		for (int32_t i = 0; i < ReadyLaserNumber; ++i)
+		{
+			vec3 CurInitScale = InitScale;
+			CurInitScale.x = math::Rand<float>({ InitScale.x / 2.f,InitScale.x });
+			vec3 ReadyLaserLocation = InitLocation + ToTargetDir *
+				(i * ReadyLaserDiff + ReadyLaserInitRich);
+			ReadyLaserLocation.y += math::Rand<float>({ -2,2 });
+
+			EffectManager::instance().EffectPush(L"Effect",
+				L"spr_bullet", 1, FLT_MAX, RifleLaserReadyTime, OBJECT_ID::EID::ENONE,
+				true, ReadyLaserLocation, { 0,0,0 }, CurInitScale, false, false, false, false, 0, 0,
+				255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x), 0, 0, false, 0, 0, true, CurInitScale, GoalScale);
+		};
+
+		return true;
+	});
 };
 
 void Boss::TelePortInState()
@@ -1197,7 +1387,7 @@ void Boss::TelePortOut()
 	{
 		bTelePortOutEnd = true;
 	};
-	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_out", 4, 0.5f, std::move(_Notify));
+	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_out", 4, 0.4f, std::move(_Notify));
 };
 
 void Boss::TelePortOutState()
@@ -1207,6 +1397,7 @@ void Boss::TelePortOutState()
 		bTelePortOutEnd = false;
 		--CurTpCount;
 		_CollisionComp->bCollision = true;
+		_PhysicComp->bGravity = true;
 
 		if (CurTpCount > 0)
 		{
@@ -1214,7 +1405,7 @@ void Boss::TelePortOutState()
 		}
 		else
 		{
-			_PhysicComp->Position.x = math::Rand<int32_t>({ 0,1 }) ? TpXRange.first : TpXRange.second;
+			_PhysicComp->Position.x = math::Rand<int32_t>({ 0,1 }) ? StageStandRangeX.first : StageStandRangeX.second;
 			_PhysicComp->Position.y = StageStandY;
 			Dice();
 		}
@@ -1227,14 +1418,108 @@ void Boss::TelePortInGround()
 	_Notify[4] = [this]() {
 		bTelePortInGroundEnd = true;
 	}; 
-	//_RenderComp->Anim()
+	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_in_grount", 4,
+		0.4f, std::move(_Notify));
+
+	_PhysicComp->bGravity = false;
+	_CollisionComp->bCollision = false;
+
+	_PhysicComp->Position.x = math::Rand<int32_t>({ 0,1 }) ? StageStandRangeX.first : StageStandRangeX.second;
+	_PhysicComp->Position.y = StageStandY;
+	UpdateBossDir();
+
+	//////////////////
+	constexpr float RifleLaserReadyTime = 0.4f;
+	constexpr float ReadyLaserNumber = 10;
+	constexpr float ReadyLaserDiff = 2000.f / ReadyLaserNumber;
+	constexpr float ReadyLaserInitRich = 300.f;
+
+	vec3 Location = _PhysicComp->Position;
+	vec3 ToTargetDir = _PhysicComp->Dir;
+	const vec3 InitScale = { 20,3,0 };
+	vec3 GoalScale = { 0,0,0 };
+	//D3DXVec3Normalize(&ToTargetDir, &ToTarget);
+
+	vec3 InitLocation = Location;
+	InitLocation.y -= 18;
+
+	Time::instance().TimerRegist(0.4f, 0.4f, 0.4f,
+		[this, InitLocation, ToTargetDir ,InitScale ,GoalScale ]()
+	{
+		for (int32_t i = 0; i < ReadyLaserNumber; ++i)
+		{
+			vec3 CurInitScale = InitScale;
+			CurInitScale.x = math::Rand<float>({ InitScale.x / 2.f,InitScale.x });
+			vec3 ReadyLaserLocation = InitLocation + ToTargetDir *
+				(i * ReadyLaserDiff + ReadyLaserInitRich);
+			ReadyLaserLocation.y += math::Rand<float>({ -2,2 });
+
+			EffectManager::instance().EffectPush(L"Effect",
+				L"spr_bullet", 1, FLT_MAX, RifleLaserReadyTime, OBJECT_ID::EID::ENONE,
+				true, ReadyLaserLocation, { 0,0,0 }, CurInitScale, false, false, false, false, 0, 0,
+				255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x), 0, 0, false, 0, 0, true, CurInitScale, GoalScale);
+		};
+		return true;
+	});
+
+
+	Time::instance().TimerRegist(RifleLaserReadyTime + 0.4f, RifleLaserReadyTime + 0.4f, RifleLaserReadyTime + 0.4f,
+		[this, InitLocation, ToTargetDir]()
+	{
+		vec3 LaserMiddle = InitLocation + ToTargetDir * (1024 + 50);
+		vec3 StartScale{ 1,1,1 };
+		vec3 GoalScale{ 1,1,1 };
+
+		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
+			2, 0.2f, 0.4f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
+			StartScale, true, true, false, false, 2048, 30, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
+			0, 0, false, false, 0, true, StartScale, GoalScale);
+
+		return true;
+	});
+
+	Time::instance().TimerRegist(RifleLaserReadyTime + 0.8f, RifleLaserReadyTime + 0.8f, RifleLaserReadyTime + 0.8f,
+		[this, InitLocation, ToTargetDir]()
+	{
+		vec3 LaserMiddle = InitLocation + ToTargetDir * (1024 + 50);
+		vec3 StartScale{ 1,1,1 };
+		vec3 GoalScale{ 1,0,1 };
+
+		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
+			2, 0.2f, 0.4f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
+			StartScale, true, true, false, false, 2048, 30, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
+			0, 0, false, false, 0, true, StartScale, GoalScale);
+
+		return true;
+	});
+
+	Time::instance().TimerRegist(RifleLaserReadyTime + 1.2f, RifleLaserReadyTime + 1.2f, RifleLaserReadyTime + 1.2f,
+		[this, InitLocation, ToTargetDir, InitScale, GoalScale]()
+	{
+		for (int32_t i = 0; i < ReadyLaserNumber; ++i)
+		{
+			vec3 CurInitScale = InitScale;
+			CurInitScale.x = math::Rand<float>({ InitScale.x / 2.f,InitScale.x });
+			vec3 ReadyLaserLocation = InitLocation + ToTargetDir *
+				(i * ReadyLaserDiff + ReadyLaserInitRich);
+			ReadyLaserLocation.y += math::Rand<float>({ -2,2 });
+
+			EffectManager::instance().EffectPush(L"Effect",
+				L"spr_bullet", 1, FLT_MAX, RifleLaserReadyTime, OBJECT_ID::EID::ENONE,
+				true, ReadyLaserLocation, { 0,0,0 }, CurInitScale, false, false, false, false, 0, 0,
+				255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x), 0, 0, false, 0, 0, true, CurInitScale, GoalScale);
+		};
+
+		return true;
+	});
+
 }
 void Boss::TelePortInGroundState()
 {
 	if (bTelePortInGroundEnd)
 	{
 		bTelePortInGroundEnd = false;
-		
+		TelePortOutGround();
 	}
 }
 void Boss::TelePortOutGround()
@@ -1244,18 +1529,207 @@ void Boss::TelePortOutGround()
 	_Notify[4] = [this]() {
 		bTelePortOutGroundEnd = true;
 	};
-
+	
+	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_out_ground",
+		4, 0.4f, std::move(_Notify));
 }
 void Boss::TelePortOutGroundState()
 {
 	if (bTelePortOutGroundEnd)
 	{
 		bTelePortOutGroundEnd = false;
+		--CurTpCount;
+		_CollisionComp->bCollision = true;
+		_PhysicComp->bGravity = true;
 
+		if (CurTpCount > 0)
+		{
+			TelePortInGround();
+		}
+		else
+		{
+			_PhysicComp->Position.x = math::Rand<int32_t>({ 0,1 }) ? StageStandRangeX.first : StageStandRangeX.second;
+			_PhysicComp->Position.y = StageStandY;
+			Dice();
+		}
 	}
 }
-;
 
+void Boss::DoegeRoll()
+{
+	UpdateBossDir();
+	_BossState = Boss::State::DodgeRoll;
+	RenderComponent::NotifyType _Notify;
+	_Notify[7] = [this]() {
+		bDodgeRollEnd = true;
+	};
+	_RenderComp->Anim(false, false, L"spr_headhunter_dodgeroll",
+		7, 0.7f, std::move(_Notify));
+	_PhysicComp->ForceClear();
+	_PhysicComp->Move(_PhysicComp->Dir * 600.f, 0.f, 0.7f);
+	_RenderComp->AfterImgOn();
+	_RenderComp->PlayGoalColor = D3DCOLOR_ARGB(0, 255, 0, 255);
+	_RenderComp->PlayStartColor= D3DCOLOR_ARGB(150, 255, 0, 255);
+	_RenderComp->NormalAfterImgPushDelta = 0.0125f;
+}
+
+void Boss::DoegeRollState()
+{
+	if (bDodgeRollEnd)
+	{
+		_RenderComp->AfterImgOff();
+		bDodgeRollEnd = false;
+		Exit();
+	}
+	else
+	{
+		//constexpr float EftTime = 0.4f;
+		//constexpr float LerpDiff = 3.f;
+		//constexpr float AfterAlpha = 140;
+
+		//// 현재와 과거 사이 위치를 선형보간해서 잔상 이펙트를 뿌린다.
+		//vec3 Past = _TransformComp->PastLocation;
+		//vec3 Cur = _TransformComp->Position;
+		//vec3 InBetWeen;
+		//int32_t i = 0;
+
+		//while (true)
+		//{
+		//	const float CurLerp = LerpDiff * i;
+		//	D3DXVec3Lerp(&InBetWeen, &Past, &Cur, CurLerp);
+		//	if (CurLerp >= 0.1f)break;
+		//	EffectManager::instance().EffectPush(L"HeadHunter",
+		//		L"spr_headhunter_dodgeroll",
+		//		1, EftTime, EftTime, OBJECT_ID::EID::BOSS_JUMP,
+		//		false, InBetWeen, { 0,0,0 }, _PhysicComp->Scale,
+		//		false, false, false, false, 0, 0, AfterAlpha, true, 0, 0, 0,
+		//		_RenderComp->_Info.GetCurFrame(), 0, 0, 0, false);
+		//	++i;
+		//}
+	}
+}
+
+void Boss::Exit()
+{
+	_BossState = Boss::State::Exit;
+	RenderComponent::NotifyType _Notify;
+	_Notify[3] = [this]() {
+		bExitEnd= true;
+	};
+	_RenderComp->Anim(false, false, L"spr_headhunter_exit_door",
+		3, 0.6f, std::move(_Notify));
+}
+
+void Boss::ExitState()
+{
+	if (bExitEnd)
+	{
+		bExitEnd = false;
+		_PhysicComp->Position.y = StageStandY;
+		_PhysicComp->Position.x = math::Rand<int32_t>({ 0,1 }) ? StageStandRangeX.first: StageStandRangeX.second;
+		Dice();
+	}
+	else
+	{
+		//constexpr float EftTime = 0.8f;
+		//constexpr float LerpDiff = 3.f;
+		//constexpr float AfterAlpha = 140;
+
+		//// 현재와 과거 사이 위치를 선형보간해서 잔상 이펙트를 뿌린다.
+		//vec3 Past = _TransformComp->PastLocation;
+		//vec3 Cur = _TransformComp->Position;
+		//vec3 InBetWeen;
+		//int32_t i = 0;
+
+		//while (true)
+		//{
+		//	const float CurLerp = LerpDiff * i;
+		//	D3DXVec3Lerp(&InBetWeen, &Past, &Cur, CurLerp);
+		//	if (CurLerp >= 1.f)break;
+		//	EffectManager::instance().EffectPush(L"HeadHunter",
+		//		L"spr_headhunter_exit_door",
+		//		1, EftTime, EftTime, OBJECT_ID::EID::BOSS_JUMP,
+		//		false, InBetWeen, { 0,0,0 }, _PhysicComp->Scale,
+		//		false, false, false, false, 0, 0, AfterAlpha, true, 0, 0, 0,
+		//		_RenderComp->_Info.GetCurFrame(), 0, 0, 0, false);
+		//	++i;
+		//}
+	}
+}
+
+void Boss::DieFly()
+{
+	bBlooding = true;
+	_PhysicComp->bFly = true;
+	_PhysicComp->bLand = false;
+
+	_BossState = Boss::State::DieFly;
+	_RenderComp->Anim(false, true, L"spr_headhunter_diefly", 4, 1);
+	vec3 Dir = _PhysicComp->Dir;
+	D3DXVec3Lerp(&Dir, &vec3{ 0,-1,0 }, &Dir, 0.5f);
+
+	//_PhysicComp->Move(Dir * 1000.f, 0.f, 1.f);
+}
+
+void Boss::DieFlyState()
+{
+	if (_PhysicComp->bLand)
+	{
+		DieLand();
+	}
+}
+
+void Boss::DieLand()
+{
+	bBlooding = false;
+	
+	bBloodingOverHead = true;
+	_BossState = Boss::State::DieLand;
+	RenderComponent::NotifyType _Notify;
+	_Notify[4] = [this]() {bBloodingOverHead = false;  };
+	_Notify[8] = [this]() {      bDieLandEnd = true;  }; 
+	_RenderComp->Anim(false, false, L"spr_headhunter_dieland", 8, 1.1f, std::move(_Notify));
+}
+
+void Boss::DieLandState()
+{
+	if (bDieLandEnd)
+	{
+		bDieLandEnd = false;
+		Dead();
+	}
+}
+
+void Boss::Dead()
+{
+	UpdateBossDir();
+
+	_BossState = Boss::State::Dead;
+	RenderComponent::NotifyType _Notify;
+	_Notify[19] = [this]() {
+		bDeadEnd = true;
+	};
+	_RenderComp->Anim(false, true, L"spr_headhunter_dead", 19, 2.5f,std::move(_Notify));
+	UpdateBossDir();
+	//_PhysicComp->Mass = 0.f;
+
+	/*_PhysicComp->Move(_TransformComp->Dir * 110.f, 0, FLT_MAX);*/
+	_RenderComp->PositionCorrection += vec3{ 0,+33,0 };
+}
+
+void Boss::DeadState()
+{
+	const float Dt = Time::instance().Delta();
+
+	_PhysicComp->Position += _PhysicComp->Dir * 100.f * Dt;
+
+	/*if (bDeadEnd)
+	{
+		bDeadEnd = false;
+		DieFly();
+		_RenderComp->PositionCorrection += vec3{ 0,-30,0 };
+	}*/
+}
 
 
 

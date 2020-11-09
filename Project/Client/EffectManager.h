@@ -69,6 +69,7 @@ class EffectManager : public singleton_interface<EffectManager>
 public :
 	void Initialize() & noexcept;
 	void Render();
+	void DebugRender();
 	void Update();
 	void RecordRender();
 	void Clear();
