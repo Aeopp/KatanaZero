@@ -36,10 +36,17 @@ void RenderComponent::Render()
 	matrix MWorld = spOwner->_TransformComp->CalcWorldMatrix(true);
 
 	MWorld = MWorld * math::GetCameraJoomMatrix(JoomScale, vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
+	if (bFixedScale)
+	{
+		MWorld._11 = MWorld._11* (FixedScale.x / MWorld._11);
+		MWorld._22 = MWorld._22 * (FixedScale.y / MWorld._22);
+		//MWorld._33 = MWorld._33 * (FixedScale.z / MWorld._33);
+	}
 	MWorld._11 *= AnimDir;
 	MWorld._41 += PositionCorrection.x;
 	MWorld._42 += PositionCorrection.y;
 	MWorld._43 += PositionCorrection.z;
+	
 	CurRenderWorld = MWorld;
 
 	const auto LocalPoints = math::GetLocalRect(vec2{ (float)spTexInfo->ImageInfo.Width,(float)spTexInfo->ImageInfo.Height });

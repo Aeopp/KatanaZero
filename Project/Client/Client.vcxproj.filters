@@ -246,6 +246,8 @@
     <ClInclude Include="Door.h" />
     <ClInclude Include="Boss.h" />
     <ClInclude Include="Grenade.h" />
+    <ClInclude Include="PanicSwitch.h" />
+    <ClInclude Include="LaserTrap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -407,6 +409,8 @@
     <ClCompile Include="Door.cpp" />
     <ClCompile Include="Boss.cpp" />
     <ClCompile Include="Grenade.cpp" />
+    <ClCompile Include="PanicSwitch.cpp" />
+    <ClCompile Include="LaserTrap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">

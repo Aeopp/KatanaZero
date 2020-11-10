@@ -45,6 +45,7 @@ public:
     void Update()override;
     void Hit(std::weak_ptr<class object>_Target, math::Collision::HitInfo _CollisionInfo)override;
     void MapHit(math::Collision::HitInfo _CollisionInfo)override;
+    bool IsAlive()const& override;
     virtual ~Boss()noexcept = default;
     virtual OBJECT_ID::EID   GetID()override ;
     virtual OBJECT_TAG::ETAG GetTag()override;

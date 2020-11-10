@@ -36,7 +36,11 @@ void CollisionManager::Update()
 				auto RhsRect = _CollisionCompRhs->GetWorldRectPt();
 
 				vec3 Distance = LhsRect[0] - RhsRect[0];
-				if (D3DXVec3LengthSq(&Distance) > DistanceCheckMinSq)continue;
+
+				if (  !( _CollisionCompLhs->_Tag == CollisionComponent::ETag::ELASER_TRAP || _CollisionCompRhs->_Tag == CollisionComponent::ETag::ELASER_TRAP) ) 
+				{
+					if (D3DXVec3LengthSq(&Distance) > DistanceCheckMinSq)continue;
+				}
 
 				auto oToRhs = math::Collision::RectAndRect({ LhsRect, RhsRect }, false);
 

@@ -195,12 +195,14 @@
     <ClInclude Include="HUD.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="LaserTrap.h" />
     <ClInclude Include="MainApp.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="Multi_Texture.h" />
     <ClInclude Include="NormalEnemy.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="PanicSwitch.h" />
     <ClInclude Include="RenderComponent.h" />
     <ClInclude Include="RenderManager.h" />
     <ClInclude Include="Record.h" />
@@ -275,6 +277,7 @@
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Item.cpp" />
+    <ClCompile Include="LaserTrap.cpp" />
     <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -282,6 +285,7 @@
     <ClCompile Include="NormalEnemy.cpp" />
     <ClCompile Include="object.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
+    <ClCompile Include="PanicSwitch.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderComponent.cpp" />
     <ClCompile Include="RenderManager.cpp" />

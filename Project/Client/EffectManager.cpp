@@ -74,7 +74,7 @@ void EffectManager::Render()
 		if ( (_Effect.bFlash && _Effect.bFlashRender )|| !_Effect.bFlash)
 		{
 			auto TexInfo = TextureManager::instance().Get_TexInfo(_Effect.ObjKey, _Effect.StateKey, _Effect.DrawID);
-			RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width , TexInfo->ImageInfo.Height };
+			RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width * _Effect.SrcScale.x, TexInfo->ImageInfo.Height   * _Effect.SrcScale.y  };
 			vec3 Center = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
 			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
 			GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
@@ -84,6 +84,7 @@ void EffectManager::Render()
 			if (_Effect.bRecord && global::IsPlay() && RecordManager::instance().bUpdate)
 			{
 				Record::Info _Info;
+				_Info.SrcScale = _Effect.SrcScale;
 				_Info.Alpha = 255;
 				_Info.DrawID = _Effect.DrawID;
 				_Info.MWorld = MWorld;
@@ -192,6 +193,8 @@ void EffectManager::Update()
 		{
 			D3DXVec3Lerp(&_Effect.Scale, &_Effect.ScaleStart, &_Effect.ScaleGoal, _Effect.T / _Effect.MaxT);
 		}
+
+		D3DXVec2Lerp(&_Effect.SrcScale, &_Effect.SrcScaleStart, &_Effect.SrcScaleGoal, _Effect.T / _Effect.MaxT);
 
 		if (_Effect.T > _Effect.MaxT)
 		{
@@ -332,7 +335,11 @@ D3DXCOLOR EffectManager::SwitchColorFromGameState(OBJECT_ID::EID _EffectID, D3DX
 		_Color.b = 0;
 		_Color.g = 0;
 		break;
-
+	case OBJECT_ID::LASER_DEAD:
+		_Color.r = 255;
+		_Color.g = 255;
+		_Color.b = 0;
+		break;
 	case OBJECT_ID::BOSS_JUMP:
 		_Color.r = 255;
 		_Color.g = 0;
@@ -446,6 +453,11 @@ D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCO
 		_Color.g = 0;
 		_Color.b = 255;
 		break;
+	case OBJECT_ID::LASER_DEAD:
+		_Color.r = 255;
+		_Color.g = 255;
+		_Color.b = 0;
+		break;
 	case OBJECT_ID::GRUNT_SLASH:
 		break;
 	case OBJECT_ID::GRUNT:
@@ -515,7 +527,10 @@ void EffectManager::EffectPush
 	int32_t Layer,
 	bool bScaleLerp ,
 	vec3 ScaleStart,
-	vec3 ScaleGoal)
+	vec3 ScaleGoal,
+	vec2 SrcScaleStart,
+	vec2 SrcScaleGoal
+	)
 {
 	EffectInfo _Info;
 	_Info.ObjKey = _ObjKey;
@@ -544,6 +559,8 @@ void EffectManager::EffectPush
 	_Info.FlashRepeat=FlashRepeat; 
 	_Info.Layer=Layer;
 	_Info.bScaleLerp = bScaleLerp;
+	_Info.SrcScaleGoal = SrcScaleGoal;
+	_Info.SrcScaleStart = SrcScaleStart;
 	if (bScaleLerp)
 	{
 		_Info.ScaleGoal = ScaleGoal;

@@ -47,6 +47,7 @@ public:
 	virtual void MapHit(typename math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Hit(std::weak_ptr<class object>_Target, math::Collision::HitInfo _CollisionInfo)override;
 	virtual void Move(vec3 Dir, const float AddSpeed)override; 
+	virtual bool IsAlive()const& override;
 	bool IsInvisible() { return  _CurrentState == Player::State::Roll || (InvincibleTime > 0.f )  || _CurrentState == Player::State::Dash ||(_CurrentState == Player::State::Flip); };
 	void HurtGround();
 	bool bHurt{ false };
@@ -58,6 +59,7 @@ private:
 	void AttackSlash();
 	void TimeRegist();
 	void KeyBinding() & noexcept;
+	void ReWindStart();
 private:
 	//State 
 	void Idle(); 
@@ -158,6 +160,8 @@ public :
 	bool IsEqItem()const&;;
 
 	void EqItem(std::shared_ptr<class Item> _Item);
+
+	std::weak_ptr<class object> _CurPanitSwitch;
 private:
 	std::optional<vec3 > AtAttackDir;
 	float RollEffectDelta = 0.0025f;
@@ -169,6 +173,5 @@ private:
 	std::shared_ptr<class Item> _SpCurItem{};
 
 	std::weak_ptr<class object> _CurDoor;
-
 };
 

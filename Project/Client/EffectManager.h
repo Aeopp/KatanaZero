@@ -62,6 +62,10 @@ struct EffectInfo
 	vec3 ScaleStart{ 1,1,1 };
 	vec3 ScaleGoal{1,1,1};
 	bool bScaleLerp = false;
+
+	vec2 SrcScale{ 1,1 };
+	vec2 SrcScaleStart{ 1,1 };
+	vec2 SrcScaleGoal{ 1,1 };
 };
 
 class EffectManager : public singleton_interface<EffectManager>
@@ -109,7 +113,9 @@ public :
 		int32_t Layer=0,
 		bool bScaleLerp=false ,
 		vec3 ScaleStart = { 1,1,1 },
-		vec3 ScaleGoal = { 1,1,1 });
+		vec3 ScaleGoal = { 1,1,1 } ,
+		vec2 SrcScaleStart = { 1,1 },
+		vec2 SrcScaleGoal = { 1,1 }  );
 
 	std::set<CollisionComponent::ETag> _EffectCollisionTagSet;
 

@@ -245,6 +245,11 @@ void Boss::MapHit(math::Collision::HitInfo _CollisionInfo)
 	}
 }
 
+bool Boss::IsAlive() const&
+{
+	return true;
+}
+
 int32_t Boss::AnimAimRifleID()
 {
 	vec3 TargetLocation = _Target->_TransformComp->Position;
@@ -1184,7 +1189,7 @@ void Boss::Escape()
 	{
 		int32_t Rd = math::Rand<int32_t>({ 0,9 });
 
-		if (Rd < 3)
+		if (Rd < 2)
 		{
 			DoegeRoll();
 		}

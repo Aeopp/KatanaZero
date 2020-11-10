@@ -25,6 +25,8 @@ std::wstring_view Drum::GetName() const&
 
 void Drum::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
+    Super::Hit(_Target, _CollisionInfo);
+
     if (_CollisionInfo._ID == OBJECT_ID::EID::EXPLOSION)
     {
         constexpr float ExplosiveRange = 50;

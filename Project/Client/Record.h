@@ -15,6 +15,7 @@ public:
 		std::wstring StateKey;
 		uint8_t DrawID;
 		D3DXCOLOR _Color;
+		vec2 SrcScale{ 1,1 };
 	};
 public:
 	// 매틱마다 호출해주세요.

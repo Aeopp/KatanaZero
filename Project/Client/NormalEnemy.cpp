@@ -123,6 +123,37 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 		return;
 	}
 
+	if (_CollisionInfo._ID == OBJECT_ID::LASER_TRAP)
+	{
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			500.f, math::Rand<int32_t>({ 0,1 }) ? vec3{ 1,0,0 } : vec3{ -1,0,0 }, 0.7);
+
+		_MsgRenderComp->bRender = false;
+		_EnemyState = NormalEnemy::State::Die;
+		_RenderComp->bRender = false;
+		vec3 Scale = _TransformComp->Scale;
+		Scale.x *= _RenderComp->AnimDir;
+
+		EffectManager::instance().EffectPush(_RenderComp->_Info.ObjectKey,
+			_RenderComp->_Info.StateKey, _RenderComp->_Info.GetCurFrame() + 1, 2.f, 2.f, OBJECT_ID::EID::LASER_DEAD,
+			true, _TransformComp->Position, { 0,0,0 }, Scale, false, false, false, false, 0, 0, 255, true, 0, 0, 0, _RenderComp->_Info.GetCurFrame(), false,
+			0, 0, false, Scale, Scale, { 1,1 }, { 1,0 });
+
+		for (size_t i = 0; i < 7; ++i)
+		{
+			Time::instance().TimerRegist(0.75f, (std::numeric_limits<float>::min)(), 2.f, [this, Observer = _This, SparkParticleLocation = _TransformComp->Position]() {
+				if (Observer.expired())return true;
+				vec3 ScaleStart = { math::Rand<float>({10,20}),math::Rand<float>({10,20}),1 };
+
+				EffectManager::instance().EffectPush(L"Effect", L"spr_spark_particle", 1, 1.f, 2.f, OBJECT_ID::EID::ENONE,
+					true, SparkParticleLocation, math::RotationVec({ 1,0,0 }, math::Rand<float>({ -360,360 }))* math::Rand<float>({ 100,300 }), ScaleStart,
+					true, false, false, false, 0, 0, 255, true, 0, 0, 0, 0, false, false, 0, true, ScaleStart, { 0,0,0 }, { 1,1 }, { 1,1 });
+
+				return false; });
+		}
+	}
+
 	if (_CollisionInfo._ID == OBJECT_ID::DOOR_KICK_IMPACT)
 	{
 			vec3 PushDir = { 1,0,0 };
@@ -433,6 +464,11 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 
 		Die();
 	}
+}
+
+bool NormalEnemy::IsAlive() const&
+{
+		return 	_EnemyState != NormalEnemy::State::Die;
 }
 
 

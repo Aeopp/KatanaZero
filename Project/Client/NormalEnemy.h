@@ -19,6 +19,7 @@ public :
 
     virtual void SetUpInitState(float DirX,int32_t StateID)abstract;
     virtual ~NormalEnemy()noexcept = default;
+    virtual bool IsAlive()const& override;
 
     NormalEnemy::State _EnemyState = NormalEnemy::State::Idle;
 protected:

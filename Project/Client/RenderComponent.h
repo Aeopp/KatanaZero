@@ -88,6 +88,8 @@ public :
 	float SlowAfterImgPushDelta = 0.05f;
 	float NormalAfterImgPushDelta = 0.0125f;
 	
+	bool bFixedScale = false;
+	vec3 FixedScale = { 1,1,1 };
 	bool bSmokeAffected = true;
 	bool bSlowRender = true;
 	std::function<void()> _RenderAfterEvent;

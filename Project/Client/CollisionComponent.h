@@ -12,6 +12,7 @@ public:
         ENone,
         ESmoke_Cloud,
         EDoor,
+        ELASER_TRAP,
         EInteractionObject,
         ETrigger,
         EEnemy,

@@ -24,8 +24,7 @@
 #include "GraphicDevice.h"
 #include "Door.h"
 #include "Boss.h"
-
-
+#include "PanicSwitch.h"
 
 
 using namespace std;
@@ -60,7 +59,6 @@ void Player::Initialize() & noexcept
 	_RenderComp->PositionCorrection = vec3{ 0.f,-8.f,0.f };
 	_RenderComp->SlowDeltaCoefft = 0.05f;
 	_RenderComp->NormalAfterImgPushDelta *= 1.f;
-
 	
 	_CollisionComp->_CollisionInfo._ShapeType =
 		CollisionComponent::CollisionInfo::EShapeType::Rect;
@@ -292,6 +290,54 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 	Super::Hit(_Target, _CollisionInfo);
 	if (IsInvisible())return;
 	if (bHurt)return;
+
+	if (_CollisionInfo._ID == OBJECT_ID::LASER_TRAP  )
+	{
+		if (global::IsSlow())
+		{
+			Time::instance().Return();
+		}
+		bFatal = true;
+		bHurt = true;
+
+		ObjectManager::instance()._Camera.lock()->CameraShake(
+			500.f, math::Rand<int32_t>({ 0,1 }) ? vec3{ 1,0,0 } : vec3{ -1,0,0 }, 0.7f);
+		
+		Time::instance().TimeScale = 0.2f;
+		Time::instance().TimerRegist(0.02f, 0.02f, 0.02f, [this]() {
+
+			if (global::ECurGameState::PlaySlow != global::_CurGameState)
+			{
+				Time::instance().TimeScale = 1.f;
+			}
+			return true; });
+
+		_RenderComp->bRender = false;
+		vec3 Scale = _TransformComp->Scale;
+		Scale.x *= _RenderComp->AnimDir;
+
+		EffectManager::instance().EffectPush(_RenderComp->_Info.ObjectKey,
+			_RenderComp->_Info.StateKey, _RenderComp->_Info.GetCurFrame() + 1, 2.f, 2.f, OBJECT_ID::EID::LASER_DEAD,
+			true, _TransformComp->Position, { 0,0,0 }, Scale, false, false, false, false, 0, 0, 255, true, 0, 0, 0, _RenderComp->_Info.GetCurFrame(), false,
+			0, 0, false, Scale, Scale, { 1,1 }, { 1,0 });
+
+		for (size_t i = 0; i < 7; ++i)
+		{
+			Time::instance().TimerRegist(0.75f, (std::numeric_limits<float>::min)(), 2.f, [this, Observer = _This, SparkParticleLocation = _TransformComp->Position]() {
+				if (Observer.expired())return true;
+				vec3 ScaleStart = { math::Rand<float>({10,20}),math::Rand<float>({10,20}),1 };
+
+				EffectManager::instance().EffectPush(L"Effect", L"spr_spark_particle", 1, 1.f, 2.f, OBJECT_ID::EID::ENONE,
+					true, SparkParticleLocation, math::RotationVec({ 1,0,0 }, math::Rand<float>({ -360,360 }))* math::Rand<float>({ 100,300 }), ScaleStart,
+					true, false, false, false, 0, 0, 255, true, 0, 0, 0, 0, false, false, 0, true, ScaleStart, { 0,0,0 }, { 1,1 }, { 1,1 });
+
+				return false; });
+		}
+
+		_CurrentState = Player::State::Hurt_Ground;
+		bHurtGroundMotionEnd = true;
+		ReWindStart();
+	}
 
 	if (_CollisionInfo._ID == OBJECT_ID::BOSS_RECOVER_BOMB)
 	{
@@ -758,6 +804,11 @@ void Player::Move(vec3 Dir,const float AddSpeed)
 	Super::Move(Dir, AddSpeed);
 }
 
+bool Player::IsAlive() const&
+{
+	return _CurrentState !=Player::State::Hurt_Ground;
+}
+
 void Player::Idle()
 {
 	_RenderComp->PositionCorrection = vec3{ 0.f,-8.f,0.f };
@@ -1204,6 +1255,18 @@ void Player::KeyBinding() & noexcept
 	},
 		VK_SHIFT, InputManager::EKEY_STATE::DOWN));
 
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	{
+		if (!object::IsValid(Observer))return;
+		if (_CurPanitSwitch.expired())return;
+
+		auto _Obj = _CurPanitSwitch.lock();
+		auto _PanicSwitch = std::dynamic_pointer_cast<PanicSwitch>(_Obj);
+		_PanicSwitch->Interaction();
+	},
+		VK_SPACE, InputManager::EKEY_STATE::DOWN));
+
+
 	_Anys.emplace_back(InputManager::instance().EventRegist([this ,Observer]()
 	{
 		if (!object::IsValid(Observer))return;
@@ -1245,6 +1308,25 @@ void Player::KeyBinding() & noexcept
 		RecordManager::instance().ReplayStart();
 	},
 		VK_F1, InputManager::EKEY_STATE::DOWN));
+}
+
+void Player::ReWindStart()
+{
+	vec3 ScreenCenter = global::CameraPos;
+	ScreenCenter.x += global::ClientSize.first / 2.f;
+	ScreenCenter.y += global::ClientSize.second / 2.f;
+	ObjectManager::instance()._Camera.lock()->bUpdate = false;
+	ObjectManager::instance().bEnemyUpdate = false;
+
+	RecordManager::instance().bUpdate = false;
+
+	EffectManager::instance().EffectPush(L"Effect", L"NothingBack", 1, 0.2f,
+		FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 },
+		false, false, false, false, 0, 0, 255, false, 0, 0, 0, 0, false, 0, 0);
+
+	EffectManager::instance().EffectPush(L"Effect", L"Nothing", 1, 0.2f,
+		FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 }, false
+		, false, false, false, 0, 0, 255, false, 0, 0, 0, 0, true, 0.4f, 1);
 }
 
 void Player::JumpState()
@@ -1587,21 +1669,8 @@ void Player::HurtGround()
 
 	if (bFatal)
 	{
-		vec3 ScreenCenter = global::CameraPos;
-		ScreenCenter.x += global::ClientSize.first / 2.f;
-		ScreenCenter.y += global::ClientSize.second / 2.f;
-		ObjectManager::instance()._Camera.lock()->bUpdate = false;
-		ObjectManager::instance().bEnemyUpdate = false;
+		ReWindStart();
 
-		RecordManager::instance().bUpdate = false;
-
-		EffectManager::instance().EffectPush(L"Effect", L"NothingBack", 1, 0.2f,
-			FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 },
-			false,false,false,false,0,0,255,false,0,0,0,0,false,0,0);
-
-		EffectManager::instance().EffectPush(L"Effect", L"Nothing", 1, 0.2f,
-			FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 },false
-		,false,false,false,0,0,255,false,0,0,0,0,true,0.4f,1);
 	};
 }
 void Player::HurtGroundState()

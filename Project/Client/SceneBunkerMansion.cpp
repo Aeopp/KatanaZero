@@ -15,7 +15,7 @@
 #include "Gangster.h"
 #include "GO.h"
 #include "Door.h"
-
+#include "PanicSwitch.h"
 
 void SceneBunkerMansion::Initialize()
 {
@@ -39,6 +39,19 @@ void SceneBunkerMansion::Initialize()
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Mouse>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<HUD>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<UITimer>());
+
+
+	auto _Panic = ObjectManager::instance().InsertObject<PanicSwitch>(
+		vec3{ 1060,2000,0 });
+
+	_Panic->PushTrap({ 1100,2000,0 }, 1, vec3{ 1,0,0 }*100, 2.f);
+	_Panic->PushTrap({ 1500,2000,0 }, 2, vec3{ -1,0,0 }*100, 2.f);
+	_Panic->PushTrap({ 1300,2000,0 }, 3, vec3{ 1,0,0 }*200, 3.f);
+	_Panic->PushTrap({ 1400,2000,0 }, 4, vec3{ 1,0,0 }*200, 3.f);
+	_Panic->PushTrap({ 1500,2000,0 }, 5.f, {0,0,0}, 0.f);
+	_Panic->PushTrap({ 1600,2000,0 }, 6.f, {0,0,0}, 0.f);
+
+	SceneManageObjs.push_back(_Panic);
 
 	/*for (int i = 0; i < 1; ++i)
 	{
