@@ -43,6 +43,7 @@ public:
         ////////////////////////////////
     };
 
+    bool bObjectSlide = true;
     bool bLineCollision = true;
     bool bTileCollision = true;
     //bool bLhsSlide = false;

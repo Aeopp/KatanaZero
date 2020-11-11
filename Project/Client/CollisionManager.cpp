@@ -58,7 +58,7 @@ void CollisionManager::Update()
 					else
 						Normal.x = 0;
 
-					if (_CollisionCompRhs->_Tag == CollisionComponent::ETag::EDoor)
+					if (_CollisionCompRhs->_Tag == CollisionComponent::ETag::EDoor && _CollisionCompLhs->bObjectSlide)
 					{
 						vec3 Diff = LhsOwner->_TransformComp->Position - RhsOwner->_TransformComp->Position;
 						if(Diff.x<0)

@@ -27,10 +27,12 @@ protected:
 	bool bBlooding = false;
 	float BloodingDelta = 0.1f;
 	float BloodingOverHeadDelta = 0.1f;
-	const float BloodingSoundTime = 0.3f;
+	const float BloodingSoundTime = 0.5f;
 	float CurBloodingSoundTime = BloodingSoundTime;
 
-	const float BloodSplatSoundTime = 0.3f;
+	bool bDeadHeadSound = false;
+
+	const float BloodSplatSoundTime = 0.5f;
 	float CurBloodSplatSoundTime = BloodSplatSoundTime;
 
 	// 피격 마무리

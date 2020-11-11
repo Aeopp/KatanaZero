@@ -52,6 +52,7 @@ void SmokeCloud::Initialize() & noexcept
     _CollisionComp->bCollision = false;
     _CollisionComp->bLineCollision = false;
     _CollisionComp->bTileCollision = false;
+    _CollisionComp->bDownJump = true;
 
     _PhysicComp->bMapSlide = true;
     _PhysicComp->bGravity = false;

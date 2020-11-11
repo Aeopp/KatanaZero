@@ -419,7 +419,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		_CollisionInfo.PushForce = 500.f;
 
-		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.5f),
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 2.f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);
@@ -477,7 +477,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		_CollisionInfo.PushDir.y -= 0.6f;
 
-		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 2.5f),
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 1.6f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);
@@ -509,6 +509,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		{
 			vec3 Location = _TransformComp->Position;
 			float ExplosiveRepeatTime = 0.1f;
+			RAND_SOUNDPLAY("explosion", { 1,3 }, 1.f);
 
 			for (int i = 0; i < 15; ++i)
 			{
@@ -518,7 +519,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 					InitLoc, { 0,0,0 },
 					{ 3,3,0 }, false, true, false, true, 33, 33,
 					255, false, 0.f, 0.f, 0.f, 0);
-				RAND_SOUNDPLAY("explosion", { 1,3 }, 1.f);
+				
 
 			}
 		}
@@ -571,7 +572,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 			 //_CollisionInfo.PushDir.y -= 0.3f;
 
-			_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 5.f),
+			_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 2.5f),
 				_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 				0.3f,
 				_CollisionInfo.PushDir);
@@ -1180,7 +1181,6 @@ void Player::KeyBinding() & noexcept
 		InputManager::instance().EventRegist([]() {Time::instance().bTimeInfoRender = !Time::instance().bTimeInfoRender; }, 'O', InputManager::EKEY_STATE::DOWN)
 	);
 
-
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{		
 		if (!object::IsValid(Observer))return;
@@ -1237,7 +1237,7 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		if (global::IsReWind() && global::IsReplay())return;
+		if (global::IsReWind() || global::IsReplay())return;
 
 		if (!bInit)
 		{
@@ -1257,7 +1257,7 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		if (global::IsReWind() && global::IsReplay())return;
+		if (global::IsReWind() || global::IsReplay())return;
 
 		if (global::IsSlow() && CurDashCoolTime<0.f)
 		{
@@ -1274,7 +1274,7 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		if (global::IsReWind() && global::IsReplay())return;
+		if (global::IsReWind() || global::IsReplay())return;
 		if (_SpBattery->IsUse() && CurDashCoolTime < 0.f)
 		{
 			Time::instance().SlowDownTime();
@@ -1337,7 +1337,7 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		if (global::IsReWind() && global::IsReplay())return;
+		if (global::IsReWind() || global::IsReplay())return;
 		RecordManager::instance().ReplayStart();
 	},
 		VK_F1, InputManager::EKEY_STATE::DOWN));
@@ -1345,7 +1345,7 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		if (global::IsReWind() && global::IsReplay())return;
+		if (global::IsReWind() || global::IsReplay())return;
 
 		bCheat = !bCheat;
 	},
@@ -1354,8 +1354,9 @@ void Player::KeyBinding() & noexcept
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		if (global::IsReWind() && global::IsReplay())return;
-		ReWindStart();
+		if (global::IsReWind() || global::IsReplay())return;
+
+		RecordManager::instance().ReWindStart();
 	},
 		VK_F3, InputManager::EKEY_STATE::DOWN));
 }
@@ -1419,7 +1420,7 @@ void Player::Attack()
 	_Physics.T = 0.f;
 	_PhysicComp->Move(std::move(_Physics));
 	
-	_SpAttackSlash->AttackStart(Dir *30.f, Dir);
+	_SpAttackSlash->AttackStart(Dir *10.f, Dir);
 	AtAttackDir = Dir;
 
 	_RenderComp->AfterImgOn();
@@ -1666,9 +1667,16 @@ void Player::Dash()
 
 	_PhysicComp->Flying();
 	RenderComponent::NotifyType _Notify;
+
 	_Notify[1] = [this]()
 	{
-		_SpAttackSlash->DashAttackStart(AtDashDir * 80.f, AtDashDir);
+		vec3 Dir;
+		if (AtDashDir.x < 0.f)
+			Dir = { -1,0,0 };
+		else 
+			Dir = { +1,0,0 };
+
+		_SpAttackSlash->DashAttackStart(Dir * 80.f, Dir);
 	};
 
 	_Notify[2] = [this]() {

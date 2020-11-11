@@ -63,9 +63,10 @@ void Attack_Slash::Initialize() & noexcept
     _CollisionComp->bCollision = false;
     _CollisionComp->_Tag = CollisionComponent::ETag::EPlayerAttack;
     _CollisionComp->_CollisionInfo._ShapeType = CollisionComponent::CollisionInfo::EShapeType::Rect;
-    _CollisionComp->_CollisionInfo.Height = 50;
-    _CollisionComp->_CollisionInfo.Width = 33;
+    _CollisionComp->_CollisionInfo.Height = 30;
+    _CollisionComp->_CollisionInfo.Width = 30;
     _CollisionComp->PushForce = 500.f;
+    _CollisionComp->bObjectSlide = false;
 
     _PhysicComp->bGravity = false;
     _PhysicComp->Position = vec3{ 0.f ,0.f ,0.f };
@@ -164,7 +165,7 @@ void Attack_Slash::Hit(std::weak_ptr<class object> _Target, math::Collision::Hit
         EffectManager::instance().EffectPush(L"Effect",L"spr_bulletreflect",
             5, 0.13f,5* 0.13f +0.01f,OBJECT_ID::EID::REFLECT,true,_CollisionInfo.Position,
             {0,0,0}, { 2.25,2.25,0 },false,false,false,false,0,0,255,false,0,
-            atan2f(initDir.y, initDir.x));
+            atan2f(initDir.y, initDir.x),0,0,false,false,100);
 
         sound_mgr::instance().Play("slash_bullet", false, 0.75f);
 

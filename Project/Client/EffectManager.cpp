@@ -61,6 +61,8 @@ void EffectManager::Render()
 		};
 
 		D3DXCOLOR RecordColor = _Color;
+		if (_Effect.OBJ_ID == OBJECT_ID::LASER_DEAD)
+			RecordColor.b = 255;
 
 		_Color = SwitchColorFromGameState(_Effect.OBJ_ID,_Color);
 
@@ -219,7 +221,9 @@ void EffectManager::Update()
 					auto WorldRectPT = spCmp->GetWorldRectPt();
 					vec3 OwnerPos = math::GetCenter(WorldRectPT);// spOwner->_TransformComp->Position;
 					vec3 ToEffect = OwnerPos - _Effect.Pos;
-					if (1000.f> D3DXVec3Length(&ToEffect))
+
+					if (CollisionCheckDistanceMinSq > D3DXVec3LengthSq(&ToEffect) ||
+						_Effect.OBJ_ID == OBJECT_ID::BOSS_LASER)
 					{
 						matrix MWorld, MTrans, MRotZ, MScale;
 

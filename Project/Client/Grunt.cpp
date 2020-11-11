@@ -50,19 +50,21 @@ void Grunt::Initialize() & noexcept
 
 	Speed = 700.f ;
 	MoveGoalTime = 2.f;
-	DetectionRange = 800.f;
+	DetectionRange = 1100.f;
 	AttackRange = 100.f;
 
 	_CurrentState = Grunt::State::Idle;
 
 	PursuitRange = 800.f;
-	NarrowRange = 360.f;
+	NarrowRange = 6;
+
+	//IsSamefloorRange = { -169.f,+60.f};
+	IsSamefloorRange = { -250.f,+120.f };
 
 	_SpAttack = ObjectManager::instance().InsertObject < Grunt_Slash>();
 	_SpAttack->SetOwner(_This);
 	DelayAfterAttack = 0.4f;
 	//_RenderComp->SlowColor = D3DCOLOR_ARGB(255, 255, 0, 0);
-
 }
 
 void Grunt::Update()
@@ -70,6 +72,7 @@ void Grunt::Update()
 	if (!global::IsPlay())return;
 	if ( ! ObjectManager::instance().bEnemyUpdate)return;
 
+	
 	Super::Update();
 
 	FSM();
@@ -79,16 +82,12 @@ void Grunt::LateUpdate()
 {
 	if (!global::IsPlay())return;
 	if (!ObjectManager::instance().bEnemyUpdate)return;
-
+	
 
 	Super::LateUpdate();
 
 	const float Dt = Time::instance().Delta();
 	DoorTurnDuration -= Dt;
-
-	CurRunSoundTime -= Dt;
-	CurWalkSoundTime -= Dt;
-
 
 	//bFrameCurrentCharacterInput = false;
 	//bMoveKeyCheck = false;
@@ -267,7 +266,10 @@ void Grunt::HurtFly()
 
 void Grunt::HurtFlyState()
 {
-	if (_PhysicComp->bLand)
+	const float dt = Time::instance().Delta();
+	HurtFlyTime += dt;
+
+	if (_PhysicComp->bLand || HurtFlyTime >= HurtFlyLimitTime)
 	{
 		bBlooding = false;
 		HurtGround();
@@ -301,7 +303,13 @@ void Grunt::HurtGroundState()
 	if (bHurtGroundMotionEnd)
 	{
 		bHurtGroundMotionEnd = false;
-		RAND_SOUNDPLAY("sound_head", { 1,2 }, 0.65f);
+		if (!bDeadHeadSound)
+		{
+			bDeadHeadSound = true;
+			RAND_SOUNDPLAY("sound_head", { 1,2 }, 0.65f);
+		}
+
+		
 	}
 }
 
@@ -343,6 +351,7 @@ void Grunt::IdleState()
 void Grunt::Run()
 {
 	if (!global::IsPlay())return;
+	RAND_SOUNDPLAY("sound_generic_enemy_run", { 1,4 }, 0.6f);
 
 	_CurrentState = Grunt::State::Run;
 	_RenderComp->Anim(false, true, L"spr_grunt_run", 10, 0.6f);
@@ -400,12 +409,6 @@ void Grunt::RunState()
 	
 
 
-	if (CurRunSoundTime < 0.f)
-	{
-		CurRunSoundTime = RunSoundTime;
-		RAND_SOUNDPLAY("sound_generic_enemy_run", { 1,4 }, 0.6f);
-	}
-
 
 
 	Move(_PhysicComp->Dir, Speed);
@@ -457,6 +460,7 @@ void Grunt::Walk()
 	_CurrentState = Grunt::State::Walk;
 	_RenderComp->Anim(false, true, L"spr_grunt_walk",
 		10, 0.68f);
+	RAND_SOUNDPLAY("sound_generic_enemy_walk", { 1,4 }, 0.6f);
 }
 
 void Grunt::WalkState()
@@ -485,12 +489,6 @@ void Grunt::WalkState()
 		}
 	};
 
-
-	if (CurWalkSoundTime < 0.f)
-	{
-		CurWalkSoundTime = WalkSoundTime;
-		RAND_SOUNDPLAY("sound_generic_enemy_walk", { 1,4 }, 0.6f);
-	}
 
 
 	Move(_PhysicComp->Dir, Speed *0.25f);
@@ -592,7 +590,7 @@ void Grunt::FollowRouteProcedure()
 
 	vec3 ToPath = CurMoveMark - _PhysicComp->Position;
 	_Y = ToPath.y;
-	if (ToPath.y > 40.f && _PhysicComp->bLineMode)
+	if (ToPath.y > 40.f)
 	{
 		_CollisionComp->bDownJump = true;
 	}

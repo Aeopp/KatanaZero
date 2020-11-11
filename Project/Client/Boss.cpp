@@ -159,7 +159,7 @@ void Boss::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
 		_PhysicComp->ForceClear();
 		_PhysicComp->bGravity = true;
 
-		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 3.f),
+		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce * 2.f),
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);
@@ -209,6 +209,8 @@ void Boss::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
 			_RenderComp->NormalAfterImgPushDelta *= 1.f;
 			return true;
 		});
+
+		
 
 		++CurHitCount;
 		if (CurHitCount >= 5)
@@ -382,6 +384,8 @@ void Boss::PreDash()
 		8, DashReadyTime, std::move(_Notify), D3DCOLOR_ARGB(255, 255, 255, 255),
 		0, { 1,1 }, L"HeadHunter", LAYER::ELAYER::EOBJECT);
 	
+	SOUNDPLAY("sound_boss_huntressknife_prep_01", 0.35f);
+
 	constexpr float ReadyNumber = 10;
 	constexpr float ReadyDashDiff = 2000.f / ReadyNumber;
 	constexpr float ReadyInitRich = 300.f;
@@ -445,10 +449,13 @@ void Boss::Dash()
 	{
 		bDashEnd = true;
 	};
+
 	_RenderComp->Anim(false, false, L"spr_headhunter_dash", 1, DashTime,
 		std::move(_Notify), D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 }, L"HeadHunter",
 		LAYER::ELAYER::EOBJECT);
 	
+	SOUNDPLAY("sound_boss_huntress_dash_01", 0.6f);
+
 	_PhysicComp->Move(_TransformComp->Dir * DashSpeed, 0, DashTime, { 0,0,0 }, 0);
 }
 
@@ -587,6 +594,8 @@ void Boss::AimRifle()
 	 vec3 InitLocation = Location;
 	 InitLocation.y -= 18;
 
+	 SOUNDPLAY("sound_boss_huntresslaser_lockon_01", 0.35f);
+
 	for (int32_t i = 0; i < ReadyLaserNumber; ++i)
 	{
 		vec3 CurInitScale = InitScale;
@@ -605,11 +614,12 @@ void Boss::AimRifle()
 		[this,InitLocation, ToTargetDir]()
 	{
 		if (_BossState != State::AimRifle)return true;
+		SOUNDPLAY("sound_boss_huntresslaser_swipe_01", 0.5f);
 
 		vec3 LaserMiddle = InitLocation + ToTargetDir*(1024+50);
 		vec3 StartScale{ 1,1,1 };
 		vec3 GoalScale{ 1,1,1 };
-
+		RAND_SOUNDPLAY("sound_boss_huntresslaser_shot", { 1,3 }, 0.45f);
 		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
 			2, 0.2f, 0.5f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
 			StartScale, true, true, false, false, 2048, 30, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
@@ -622,6 +632,7 @@ void Boss::AimRifle()
 		[this,InitLocation, ToTargetDir,InitScale,GoalScale]()
 	{
 		if (_BossState != State::AimRifle)return true;
+		SOUNDPLAY("sound_boss_huntresslaser_swipe_01", 0.5f);
 
 		vec3 LaserMiddle = InitLocation + ToTargetDir * (1024+50);
 		vec3 StartScale{ 1,1,1 };
@@ -705,6 +716,7 @@ void Boss::Jump()
 {
 	UpdateBossDir();
 	_BossState = Boss::State::Jump;
+	SOUNDPLAY("sound_boss_huntress_jump_01", 0.4f);
 
 	/*_PhysicComp->bFly = true;
 	_PhysicComp->bLand = false;*/
@@ -799,7 +811,15 @@ void Boss::WallJump()
 
 	_BossState = Boss::State::WallJump;
 	RenderComponent::NotifyType _Notify;
-	_Notify[1] = [this]() {bWallJumpFire = true; };
+
+	_Notify[1] = [this]() 
+	{
+		if (!bWallJumpFire)
+		{
+			SOUNDPLAY("sound_boss_huntress_gatling_01", 0.7f);
+		}
+		bWallJumpFire = true;
+	};
 	_Notify[5] = [this]() {bWallJumpFire = false; };
 	_Notify[7] = [this]()
 	{
@@ -807,6 +827,12 @@ void Boss::WallJump()
 	};
 	_RenderComp->Anim(false, false, L"spr_headhunter_walljump", AnimNum,
 		AnimDt, std::move(_Notify));
+
+
+	RAND_SOUNDPLAY("sound_voiceboss_huntress_walljump", { 1,3 }, 0.4f);
+
+	SOUNDPLAY("sound_boss_huntress_wallslam_01", 0.7f);
+	//SOUNDPLAY("sound_boss_huntress_jump_01", 0.4f);
 
 	vec3 UpDir = { 0,-1,0 };
 
@@ -954,6 +980,8 @@ void Boss::TakeOutGun()
 	_BossState = Boss::State::TakeOutGun;
 	RenderComponent::NotifyType _Notify;
 
+	SOUNDPLAY("sound_boss_huntressgun_prep_01", 0.4f);
+
 	_Notify[7] = [this]()
 	{
 		bTakeOutGunEnd = true;
@@ -988,6 +1016,7 @@ void Boss::Shoot()
 		{
 			bCurAnimLoopShoot = true;
 			// ÃÑÀ» ½ð´Ù.
+			SOUNDPLAY("sound_boss_huntressbomb_shot_01", 0.4f);
 			constexpr float Rich = 100.f;
 			constexpr float InitSpeed = 2500.f;
 			vec3 InitLocation = _TransformComp->Position + _TransformComp->Dir * Rich;
@@ -1058,6 +1087,10 @@ void Boss::HurtState()
 		constexpr float CloudScale = 2.5f;
 		vec3 Location = _TransformComp->Position;
 		vec3 Floor = Location + vec3{ 0,25,0 };
+		// SOUND
+		{
+			SOUNDPLAY("sound_boss_huntress_vanish_01", 1.f);
+		}
 		// ·£µå Å¬¶ó¿ìµå
 		{
 			EffectManager::instance().EffectPush(L"Effect", L"spr_landcloud",
@@ -1115,6 +1148,7 @@ void Boss::HurtFly()
 	_RenderComp->Anim(false, true, L"spr_headhunter_hurtfly", 4, 0.5f, {});
 	_PhysicComp->bGravity = true;
 	
+	RAND_SOUNDPLAY("sound_voiceboss_huntress_hurt", { 1,3 }, 0.4);
 }
 
 void Boss::HurtFlyState()
@@ -1132,7 +1166,14 @@ void Boss::Dice()
 	if (PatternQ.empty())
 	{
 		do {
-			_Dice = math::Rand<int32_t>({ 0,4 });
+			if (_BossState == Boss::State::Recover)
+			{
+				_Dice = math::Rand<int32_t>({ 3,4 });
+			}
+			else
+			{
+				_Dice = math::Rand<int32_t>({ 0,4 });
+			}
 		} while (_Dice == PrevDice);
 		PrevDice = _Dice;
 	}
@@ -1174,7 +1215,7 @@ void Boss::Dice()
 		}
 		else
 		{
-			CurTpCount = 1;
+			CurTpCount = 2;
 			TelePortInGround();
 		}
 		break;
@@ -1300,6 +1341,10 @@ void Boss::TelePortIn()
 	
 	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_in", 4, 0.4f, std::move(_Notify));
 
+	SOUNDPLAY("sound_boss_huntress_appear_2", 0.7f);
+	SOUNDPLAY("sound_boss_huntress_appear_1", 0.7f);
+	SOUNDPLAY("sound_boss_huntress_appear_3", 0.7f);
+
 	//////////////////
 	constexpr float RifleLaserReadyTime = 0.5f;
 	constexpr float ReadyLaserNumber = 10;
@@ -1336,6 +1381,9 @@ void Boss::TelePortIn()
 		vec3 StartScale{ 1,1,1 };
 		vec3 GoalScale{ 1,1,1 };
 
+		RAND_SOUNDPLAY("sound_boss_huntresslaser_vertical", { 1,3 }, 0.5f);
+		SOUNDPLAY("sound_boss_huntresslaser_swipe_01", 0.5f);
+
 		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
 			2, 0.2f, 0.5f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
 			StartScale, true, true, false, false, 30, 2048, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
@@ -1350,6 +1398,8 @@ void Boss::TelePortIn()
 		vec3 LaserMiddle = InitLocation + ToTargetDir * (1024 + 50);
 		vec3 StartScale{ 1,1,1 };
 		vec3 GoalScale{ 1,0,1 };
+		RAND_SOUNDPLAY("sound_boss_huntresslaser_vertical", { 1,3 }, 0.5f);
+		SOUNDPLAY("sound_boss_huntresslaser_swipe_01", 0.5f);
 
 		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
 			2, 0.2f, 0.5f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
@@ -1425,21 +1475,26 @@ void Boss::TelePortInGround()
 {
 	_BossState = Boss::State::TelePortInGround;
 	RenderComponent::NotifyType _Notify;
+
 	_Notify[4] = [this]() {
 		bTelePortInGroundEnd = true;
 	}; 
 	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_in_grount", 4,
-		0.4f, std::move(_Notify));
+		0.8f, std::move(_Notify));
 
 	_PhysicComp->bGravity = false;
 	_CollisionComp->bCollision = false;
 
-	_PhysicComp->Position.x = math::Rand<int32_t>({ 0,1 }) ? StageStandRangeX.first : StageStandRangeX.second;
+	_PhysicComp->Position.x = CurTpCount == 1 ? StageStandRangeX.first : StageStandRangeX.second;
 	_PhysicComp->Position.y = StageStandY;
 	UpdateBossDir();
 
+	SOUNDPLAY("sound_boss_huntress_appear_2", 0.7f);
+	SOUNDPLAY("sound_boss_huntress_appear_1", 0.7f);
+	SOUNDPLAY("sound_boss_huntress_appear_3", 0.7f);
+
 	//////////////////
-	constexpr float RifleLaserReadyTime = 0.4f;
+	constexpr float RifleLaserReadyTime = 0.8f;
 	constexpr float ReadyLaserNumber = 10;
 	constexpr float ReadyLaserDiff = 2000.f / ReadyLaserNumber;
 	constexpr float ReadyLaserInitRich = 300.f;
@@ -1453,7 +1508,7 @@ void Boss::TelePortInGround()
 	vec3 InitLocation = Location;
 	InitLocation.y -= 18;
 
-	Time::instance().TimerRegist(0.4f, 0.4f, 0.4f,
+	Time::instance().TimerRegist(0.8f, 0.8f, 0.8f,
 		[this, InitLocation, ToTargetDir ,InitScale ,GoalScale ]()
 	{
 		for (int32_t i = 0; i < ReadyLaserNumber; ++i)
@@ -1473,27 +1528,13 @@ void Boss::TelePortInGround()
 	});
 
 
-	Time::instance().TimerRegist(RifleLaserReadyTime + 0.4f, RifleLaserReadyTime + 0.4f, RifleLaserReadyTime + 0.4f,
-		[this, InitLocation, ToTargetDir]()
-	{
-		vec3 LaserMiddle = InitLocation + ToTargetDir * (1024 + 50);
-		vec3 StartScale{ 1,1,1 };
-		vec3 GoalScale{ 1,1,1 };
-
-		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
-			2, 0.2f, 0.4f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
-			StartScale, true, true, false, false, 2048, 30, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
-			0, 0, false, false, 0, true, StartScale, GoalScale);
-
-		return true;
-	});
-
 	Time::instance().TimerRegist(RifleLaserReadyTime + 0.8f, RifleLaserReadyTime + 0.8f, RifleLaserReadyTime + 0.8f,
 		[this, InitLocation, ToTargetDir]()
 	{
 		vec3 LaserMiddle = InitLocation + ToTargetDir * (1024 + 50);
 		vec3 StartScale{ 1,1,1 };
-		vec3 GoalScale{ 1,0,1 };
+		vec3 GoalScale{ 1,1,1 };
+		SOUNDPLAY("sound_boss_huntresslaser_swipe_01", 0.5f);
 
 		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
 			2, 0.2f, 0.4f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
@@ -1503,7 +1544,23 @@ void Boss::TelePortInGround()
 		return true;
 	});
 
-	Time::instance().TimerRegist(RifleLaserReadyTime + 1.2f, RifleLaserReadyTime + 1.2f, RifleLaserReadyTime + 1.2f,
+	Time::instance().TimerRegist(RifleLaserReadyTime + 1.6f, RifleLaserReadyTime + 1.6f, RifleLaserReadyTime + 1.6f,
+		[this, InitLocation, ToTargetDir]()
+	{
+		vec3 LaserMiddle = InitLocation + ToTargetDir * (1024 + 50);
+		vec3 StartScale{ 1,1,1 };
+		vec3 GoalScale{ 1,0,1 };
+		SOUNDPLAY("sound_boss_huntresslaser_swipe_01", 0.5f);
+
+		EffectManager::instance().EffectPush(L"HeadHunter", L"Laser",
+			2, 0.2f, 0.4f, OBJECT_ID::EID::BOSS_LASER, true, LaserMiddle, { 0,0,0 },
+			StartScale, true, true, false, false, 2048, 30, 255, false, 0, atan2f(ToTargetDir.y, ToTargetDir.x),
+			0, 0, false, false, 0, true, StartScale, GoalScale);
+
+		return true;
+	});
+
+	Time::instance().TimerRegist(RifleLaserReadyTime + 2.2f, RifleLaserReadyTime + 2.2f, RifleLaserReadyTime + 2.2f,
 		[this, InitLocation, ToTargetDir, InitScale, GoalScale]()
 	{
 		for (int32_t i = 0; i < ReadyLaserNumber; ++i)
@@ -1541,7 +1598,7 @@ void Boss::TelePortOutGround()
 	};
 	
 	_RenderComp->Anim(false, false, L"spr_headhunter_teleport_out_ground",
-		4, 0.4f, std::move(_Notify));
+		4, 0.8f, std::move(_Notify));
 }
 void Boss::TelePortOutGroundState()
 {
@@ -1678,6 +1735,9 @@ void Boss::DieFly()
 	vec3 Dir = _PhysicComp->Dir;
 	D3DXVec3Lerp(&Dir, &vec3{ 0,-1,0 }, &Dir, 0.5f);
 
+	SOUNDPLAY("sound_voiceboss_huntress_ko_01", 0.4f);
+
+	SOUNDPLAY("sound_boss_huntress_floorhit_01", 0.7f);
 	//_PhysicComp->Move(Dir * 1000.f, 0.f, 1.f);
 }
 

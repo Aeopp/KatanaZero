@@ -65,7 +65,6 @@ public :
 
 	void InSmoke();
 	void InSmokeState();
-	
 private:
 	void AnyState();
 	void FSM();
@@ -78,6 +77,9 @@ private:
 	float CurRunSoundTime = RunSoundTime;
 	const float WalkSoundTime = 0.5f;
 	float CurWalkSoundTime = WalkSoundTime;
+private:
+	const float HurtFlyLimitTime = 2.f;
+	float HurtFlyTime = 0.f;
 public:
 	bool bTurnMotionEnd{ false };
 	bool bWhipMotionEnd{ false };

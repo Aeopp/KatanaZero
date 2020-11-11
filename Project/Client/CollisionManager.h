@@ -25,7 +25,7 @@ public :
         
         //{Tag::EDoor , {Tag::EPlayer,Tag::EEnemy} } , 
         { Tag::EEnemyAttack, {Tag::EPlayer} },
-        {Tag::EPlayerAttack ,{Tag::EEnemy } },
+        {Tag::EPlayerAttack ,{Tag::EEnemy ,Tag::EDoor} },
          { Tag::ETrigger,{ Tag::EPlayer} },
        {Tag::EItem  ,{Tag::EEnemy ,Tag::EPlayer} },
     };

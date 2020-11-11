@@ -60,13 +60,13 @@ void Gangster::Initialize() & noexcept
 
 	Speed = 633.f;
 	MoveGoalTime = 2.f;
-	DetectionRange = 1000.f;
+	DetectionRange = 1100.f;
 	AttackRange = 870.f;
 
 	_CurrentState = Gangster::State::Idle;
 
 	PursuitRange = 700.f;
-	NarrowRange = 360.f;
+	NarrowRange = 500.f;
 	//TODO::
 	/*_SpAttack = ObjectManager::instance().InsertObject < Grunt_Slash>();
 	_SpAttack->SetOwner(_This);*/
@@ -78,7 +78,8 @@ void Gangster::Initialize() & noexcept
 	_SpArm = ObjectManager::instance().InsertObject<GangsterArm>();
 	_SpArm->SetOwner(_This);
 
-	IsSamefloorRange = { -169.f,+60.f};
+	//IsSamefloorRange = { -169.f,+60.f};
+	IsSamefloorRange = { -250.f,+120.f};
 
 	DetectionRange = AttackRange;
 }
@@ -100,11 +101,12 @@ void Gangster::LateUpdate()
 {
 	if (!global::IsPlay())return;
 	if (!ObjectManager::instance().bEnemyUpdate)return;
-
+	
 	if (_EnemyState == NormalEnemy::State::Die)
 	{
 		_SpArm->_RenderComp->bRender = false;
 		_SpGun->_RenderComp->bRender = false;
+	
 	}
 
 	Super::LateUpdate();
@@ -240,6 +242,8 @@ void Gangster::Attack()
 
 void Gangster::AttackState()
 {
+	if (_EnemyState == NormalEnemy::State::Die)return;
+
 	if (_Target->bInAreaSmoke && _CurrentState != Gangster::State::InSmoke)
 	{
 		InSmoke();
@@ -355,7 +359,10 @@ void Gangster::HurtFly()
 
 void Gangster::HurtFlyState()
 {
-	if (_PhysicComp->bLand)
+	const float dt = Time::instance().Delta();
+	HurtFlyTime += dt;
+
+	if (_PhysicComp->bLand || HurtFlyTime >= HurtFlyLimitTime)
 	{
 		bBlooding = false;
 		HurtGround();
@@ -390,7 +397,12 @@ void Gangster::HurtGroundState()
 	if (bHurtGroundMotionEnd)
 	{
 		bHurtGroundMotionEnd = false;
-		RAND_SOUNDPLAY("sound_head", { 1,2 }, 0.65f);
+		if (!bDeadHeadSound)
+		{
+			bDeadHeadSound = true;
+			RAND_SOUNDPLAY("sound_head", { 1,2 }, 0.65f);
+		}
+		
 	}
 }
 
@@ -705,7 +717,7 @@ void Gangster::FollowRouteProcedure()
 
 	vec3 ToPath = CurMoveMark - _PhysicComp->Position;
 	_Y = ToPath.y;
-	if (ToPath.y > 40.f &&_TransformComp->bLineMode)
+	if (ToPath.y > 40.f)
 	{
 		_CollisionComp->bDownJump = true;
 	}

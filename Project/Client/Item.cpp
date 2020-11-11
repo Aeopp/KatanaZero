@@ -60,7 +60,8 @@ void Item::Initialize() & noexcept
     _CollisionComp->_CollisionInfo.Width = 16;
     _CollisionComp->_Tag = CollisionComponent::ETag::EItem;
     _CollisionComp->bCollision = true;
-    
+    _CollisionComp->bDownJump = true;
+
     _PhysicComp->bMapSlide = true;
     _PhysicComp->bGravity = false;
     _PhysicComp->bFollowOwner = false;

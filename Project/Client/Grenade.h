@@ -49,5 +49,7 @@ public:
     float MovementTime = 2.f;
     float Friction = 0.4f;
     Grenade::State _CurState = Grenade::State::AfterExplosion;
+
+    bool bExplosionSound = false;
 };
 

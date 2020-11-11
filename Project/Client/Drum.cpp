@@ -34,11 +34,13 @@ void Drum::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
         vec3 Location = _TransformComp->Position;
         float ExplosiveRepeatTime = 0.05f;
 
+        RAND_SOUNDPLAY("explosion", { 1,3 }, 1.f);
+
         Time::instance().TimerRegist(0.0f, 0.1f, 0.5f, [Location]() {
-            RAND_SOUNDPLAY("explosion", { 1,3 }, 1.f);
+          
             vec3 InitLoc = Location + math::RandVec({ -1,1 })* math::Rand<float>({ 40,70 });
             EffectManager::instance().EffectPush(L"Effect", L"spr_explosion_1",
-                11, 0.1f, 11 * 0.1f + 0.01f, OBJECT_ID::EID::EXPLOSION, true,
+                11, 0.05f, 11 * 0.05f + 0.01f, OBJECT_ID::EID::EXPLOSION, true,
                 InitLoc, { 0,0,0 },
                 { 3,3,0 }, false, true, false, true, 33, 33,
                 255, false, 0.f, 0.f, 0.f, 0);

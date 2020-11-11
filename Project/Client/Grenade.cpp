@@ -8,6 +8,8 @@
 #include "ComponentManager.h"
 #include "GraphicDevice.h"
 #include "EffectManager.h"
+#include "sound_mgr.h"
+
 
 OBJECT_ID::EID Grenade::GetID()
 {
@@ -139,6 +141,12 @@ void Grenade::LateUpdate()
     {
         CurIgniteTime -= dt;
 
+        if (CurIgniteTime < 0.2f&&!bExplosionSound)
+        {
+            bExplosionSound = true;
+            SOUNDPLAY("sound_boss_huntressbomb_armed_01", 0.6f);
+        }
+
         if (CurIgniteTime < 0.f)
         {
             Explosion();
@@ -228,6 +236,8 @@ void Grenade::Ignite()
         CircleDrawSet.insert(i);
     }
 
+    SOUNDPLAY("sound_boss_huntressmines_armed_01", 0.75f);
+
     _PhysicComp->bGravity = false;
     _PhysicComp->GravityAcceleration = 0.f;
     _PhysicComp->ForceClear();
@@ -243,6 +253,8 @@ void Grenade::Explosion()
 
     vec3 Axis = { 1,0,0 };
 
+    SOUNDPLAY("sound_boss_huntress_explosion_01", 1.f);
+    
     for (int32_t i = 0; i < ExplosionNum; ++i)
     {
         vec3 Dir = math::RotationVec(Axis, math::Rand<float>({ -360,360 }));

@@ -19,10 +19,10 @@
 		 if (global::IsReplay()) ObjKey += L"BW";
 
 		 D3DXCOLOR _CurRenderColor = _Info._Color;
+
 		 if (global::IsReplay() && _Info.ObjKey == L"Blood")
-		 {
 			 _CurRenderColor = D3DCOLOR_ARGB(255, 255, 255, 255);
-		 }
+
 		 auto TexInfo = TextureManager::instance().Get_TexInfo(ObjKey, _Info.StateKey, _Info.DrawID);
 		 RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width  * _Info.SrcScale.x,
 					   TexInfo->ImageInfo.Height * _Info.SrcScale.y };

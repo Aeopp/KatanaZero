@@ -27,7 +27,10 @@ std::wstring_view Door::GetName() const&
 
 void Door::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
 {
-
+    if (_CollisionInfo._ID == OBJECT_ID::ATTACK_SLASH)
+    {
+        Open(_CollisionInfo.PosDir.x);
+    }
 }
 
 void Door::Initialize() & noexcept
@@ -91,7 +94,7 @@ void Door::SetUpInitState(int32_t InitKey, float XDir)
         _RenderComp->Anim(true, false, StateKey, 1, 0.1f, {} , D3DCOLOR_ARGB(255, 255, 255, 255),
             0, { 1,1 }, L"Door", LAYER::ELAYER::EOBJECT_UNDER);
 
-        if (_State != Door::State::Mansion)
+        if ( !(_State == Door::State::Mansion || _State ==Door::State::Club) ) 
         {
             _RenderCompDoorGlow->Anim(false, true, L"spr_door_glow", 1, 1.f, {}, D3DCOLOR_ARGB(255, 255, 255, 255),
                 0, { 1,1 }, L"Door", LAYER::ELAYER::EOBJECT_UNDER);
@@ -108,11 +111,11 @@ void Door::Open(float XDir)
   /*  _CollisionComp->_CollisionInfo.Width *= 100.f;*/
 
     RenderComponent::NotifyType _Notify;
-    _Notify[3] = [this]()
+    _Notify[0] = [this]()
     {
         bOpening = true;
     };
-    _Notify[4] = [this]()
+    _Notify[1] = [this]()
     {  
         _CollisionComp->bCollision = false;
         bOpening = false;
