@@ -91,8 +91,12 @@ void Door::SetUpInitState(int32_t InitKey, float XDir)
         _RenderComp->Anim(true, false, StateKey, 1, 0.1f, {} , D3DCOLOR_ARGB(255, 255, 255, 255),
             0, { 1,1 }, L"Door", LAYER::ELAYER::EOBJECT_UNDER);
 
-        _RenderCompDoorGlow->Anim(false, true, L"spr_door_glow", 1, 1.f, {}, D3DCOLOR_ARGB(255, 255, 255, 255),
-            0, { 1,1 }, L"Door", LAYER::ELAYER::EOBJECT_UNDER);
+        if (_State != Door::State::Mansion)
+        {
+            _RenderCompDoorGlow->Anim(false, true, L"spr_door_glow", 1, 1.f, {}, D3DCOLOR_ARGB(255, 255, 255, 255),
+                0, { 1,1 }, L"Door", LAYER::ELAYER::EOBJECT_UNDER);
+        }
+        
 
         _TransformComp->Position += vec3{ 16,10 ,0 };
 }

@@ -15,12 +15,13 @@ public:
     void Interaction();
     std::shared_ptr<class LaserTrap> PushTrap(vec3 Location, const float YScale,
         vec3 Speed,float MovementDuration);
+    std::vector<std::weak_ptr<class LaserTrap>> _Traps;
 private:
     std::shared_ptr<class CollisionComponent> _CollisionComp;
     std::shared_ptr<class RenderComponent> _RenderComp;
     std::shared_ptr<class RenderComponent> _RenderCompPressKey;
 
-    std::vector<std::weak_ptr<class LaserTrap>> _Traps;
+ 
 private:
     bool bInteraction = false; 
     void On();

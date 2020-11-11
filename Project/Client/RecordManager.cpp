@@ -172,7 +172,14 @@ void RecordManager::ReplayEnd()
 	BgmPlayFromSceneID(_SceneID);
 	SceneManager::instance().Scene_Change(_SceneID);
 
-	
+
+	SOUNDPLAY("sound_transition_begin", 0.7f);
+
+	Time::instance().TimerRegist(1.f, 1.f, 1.f, []()
+	{
+		SOUNDPLAY("sound_transition_end", 0.7f);
+		return true;
+	});
 }
 void RecordManager::ReplayUpdate()
 {

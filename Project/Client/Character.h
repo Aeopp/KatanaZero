@@ -27,6 +27,12 @@ protected:
 	bool bBlooding = false;
 	float BloodingDelta = 0.1f;
 	float BloodingOverHeadDelta = 0.1f;
+	const float BloodingSoundTime = 0.3f;
+	float CurBloodingSoundTime = BloodingSoundTime;
+
+	const float BloodSplatSoundTime = 0.3f;
+	float CurBloodSplatSoundTime = BloodSplatSoundTime;
+
 	// 피격 마무리
 	void BloodingOverHead();
 	// 피격중 물리 받는 상태에서 호출

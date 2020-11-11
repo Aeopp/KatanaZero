@@ -305,6 +305,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		bFatal = true;
 		bHurt = true;
 
+
 		ObjectManager::instance()._Camera.lock()->CameraShake(
 			500.f, math::Rand<int32_t>({ 0,1 }) ? vec3{ 1,0,0 } : vec3{ -1,0,0 }, 0.7f);
 		
@@ -339,6 +340,9 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 				return false; });
 		}
 
+		SOUNDPLAY("sound_laser_explosion", 0.75f, false);
+		
+
 		_CurrentState = Player::State::Hurt_Ground;
 		bHurtGroundMotionEnd = true;
 		ReWindStart();
@@ -371,7 +375,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		float ImpactRotZ = atan2f(-_CollisionInfo.PosDir.y, -_CollisionInfo.PosDir.x);
 
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 			_PhysicComp->Position + -_CollisionInfo.PosDir * 77,
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);
@@ -422,7 +426,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);
@@ -488,7 +492,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);
@@ -581,13 +585,13 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 
 			EffectManager::instance().EffectPush(L"Effect",
-				L"spr_slashfx", 5, 0.02f,
-				0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
+				L"spr_slashfx", 5, 0.08f,
+				0.08f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
 				{ 0,0,0 }, { 2.9,2.9,0 });
 
 			float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 			EffectManager::instance().EffectPush(L"Effect",
-				L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+				L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 				_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 				{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 				255, false, 0, ImpactRotZ, 0, 0);
@@ -650,6 +654,8 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		_RefEftInfo->get().bPhysic = false;
 		_RefEftInfo->get().Scale.x *= 4.f;
 
+		RAND_SOUNDPLAY("sound_bullethit", { 1,3 }, 1.f);
+
 		if (_CurrentState == Player::State::Attack && AtAttackDir.has_value())
 		{
 			vec3 BulletDir = _CollisionInfo.PosDir;
@@ -686,7 +692,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);
@@ -750,15 +756,14 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		if(!bCheat)
 			bFatal = true;
 
-
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_slashfx", 5, 0.02f,
-			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
+			L"spr_slashfx", 5, 0.08f,
+			0.08f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
 			{ 0,0,0 }, { 2.9,2.9,0 });
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);
@@ -1168,7 +1173,8 @@ void Player::KeyBinding() & noexcept
 		'P', InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(
-		InputManager::instance().EventRegist([]() {RenderManager::instance()._Terrain.bDebugGridRender = !RenderManager::instance()._Terrain.bDebugGridRender; }, 'I', InputManager::EKEY_STATE::DOWN));
+		InputManager::instance().EventRegist([]() {RenderManager::instance()._Terrain.bDebugGridRender = 
+		!RenderManager::instance()._Terrain.bDebugGridRender; }, 'I', InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(
 		InputManager::instance().EventRegist([]() {Time::instance().bTimeInfoRender = !Time::instance().bTimeInfoRender; }, 'O', InputManager::EKEY_STATE::DOWN)
@@ -1326,7 +1332,15 @@ void Player::KeyBinding() & noexcept
 		_SpCurItem->Throw(MyLocation, ToMouse);
 		_SpUIItemIcon->SetIcon(EItem::None);
 	},
-		'Z', InputManager::EKEY_STATE::DOWN));
+		'Q', InputManager::EKEY_STATE::DOWN));
+
+	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
+	{
+		if (!object::IsValid(Observer))return;
+		if (global::IsReWind() && global::IsReplay())return;
+		RecordManager::instance().ReplayStart();
+	},
+		VK_F1, InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
@@ -1337,13 +1351,13 @@ void Player::KeyBinding() & noexcept
 	},
 		VK_F2, InputManager::EKEY_STATE::DOWN));
 
-
 	_Anys.emplace_back(InputManager::instance().EventRegist([this, Observer]()
 	{
 		if (!object::IsValid(Observer))return;
-		RecordManager::instance().ReplayStart();
+		if (global::IsReWind() && global::IsReplay())return;
+		ReWindStart();
 	},
-		VK_F1, InputManager::EKEY_STATE::DOWN));
+		VK_F3, InputManager::EKEY_STATE::DOWN));
 }
 
 void Player::ReWindStart()
@@ -1465,7 +1479,7 @@ void Player::DoorKick()
 	}
 	vec3 DoorKickImpactLocation = _PhysicComp->Position + ToDoor *DoorKickRich;
 	EffectManager::instance().EffectPush(L"Effect",
-		L"spr_hit_impact", 5, 0.1f, 5 * 0.1f + 0.01f, OBJECT_ID::DOOR_KICK_IMPACT, true,
+		L"spr_hit_impact", 5, 0.05f, 5 * 0.05f + 0.01f, OBJECT_ID::DOOR_KICK_IMPACT, true,
 		DoorKickImpactLocation, { 0,0,0 }, { 2.5,2.5,1 }, false, true, false, false, 50, 50, 255, false, 0, RotZ, 0, 0, 0, 0, 0);
 	//EffectManager::instance().
 
@@ -1709,7 +1723,8 @@ void Player::HurtGround()
 		bBloodingOverHead = true;
 
 	_Notify[6] = [this]() 
-	{
+	{		RAND_SOUNDPLAY("sound_head", { 1,2 }, 0.65f);
+
 		bBloodingOverHead = false;
 		bHurtGroundMotionEnd = true; 
 	};
@@ -1719,14 +1734,13 @@ void Player::HurtGround()
 	if (bFatal)
 	{
 		ReWindStart();
-
+		SOUNDPLAY("sound_head_bloodspurt", 1);
 	};
 }
 void Player::HurtGroundState()
 {
 	if (bHurtGroundMotionEnd && bAttackKeyCheck)
 	{
-	
 		// 치명적인 공격을 입은것이라면
 		if (bFatal)
 		{

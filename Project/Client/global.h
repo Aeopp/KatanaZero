@@ -32,7 +32,7 @@ public:
 	static inline std::chrono::milliseconds DeltaMax = std::chrono::milliseconds(40ul);
 	static inline bool bActive{ true }; 
 	static inline HWND hWND{ nullptr };
-	static inline bool bDebug{ true };
+	static inline bool bDebug{ false };
 	static inline bool bRePlay{ false };
 
 public : 

@@ -22,6 +22,7 @@ public:
 	
 	vec3 CameraLockLT{ 0,0,0 };
 	vec3 CameraLockRB{ 1,1,1 };
+	vec3 PrevCameraLocation{ 0,0,0 };
 
 	bool bUpdate = true;
 	bool bMouseFollow = false;

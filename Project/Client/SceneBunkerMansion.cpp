@@ -31,8 +31,8 @@ void SceneBunkerMansion::Initialize()
 
 	SceneManager::instance()._NextScene = ESceneID::EBoss;
 	auto _Camera = ObjectManager::instance().InsertObject<Camera>();
-	_Camera->CameraLockLT = { 798,1194,0 };
-	_Camera->CameraLockRB = { 5357 ,2532 , 0 };
+	_Camera->CameraLockLT = { 850,1160,0 };
+	_Camera->CameraLockRB = { 5270,2500, 0 };
 	ObjectManager::instance()._Camera = _Camera;
 	SceneManageObjs.push_back(_Camera);
 
@@ -42,24 +42,25 @@ void SceneBunkerMansion::Initialize()
 
 
 	auto _Panic = ObjectManager::instance().InsertObject<PanicSwitch>(
-		vec3{ 1060,2000,0 });
+		vec3{ 2360,2358,0 });
 
-	_Panic->PushTrap({ 1100,2000,0 }, 1, vec3{ 1,0,0 }*100, 2.f);
-	_Panic->PushTrap({ 1500,2000,0 }, 2, vec3{ -1,0,0 }*100, 2.f);
-	_Panic->PushTrap({ 1300,2000,0 }, 3, vec3{ 1,0,0 }*200, 3.f);
-	_Panic->PushTrap({ 1400,2000,0 }, 4, vec3{ 1,0,0 }*200, 3.f);
-	_Panic->PushTrap({ 1500,2000,0 }, 5.f, {0,0,0}, 0.f);
-	_Panic->PushTrap({ 1600,2000,0 }, 6.f, {0,0,0}, 0.f);
+	auto _PanicEnd = ObjectManager::instance().InsertObject<PanicSwitch>(
+		vec3{ 3730,2354,0 });
+
+	const float YScale = (2450.f - 2215)/213.f;
+	const int32_t TrapNum = 13;
+	const vec3 StartLocation = { 2500.f,(2450.f + 2215) / 2.f,0.f };
+	const float XDiff = (3550.f - 2540.f) / TrapNum;
+
+	for(size_t i=1;i< TrapNum+1;++i)
+	{
+		vec3 InitLocation = StartLocation;
+		InitLocation.x += XDiff * i; 
+		_PanicEnd->_Traps.push_back(_Panic->PushTrap(InitLocation, YScale, { 0,0,0 }, 0));
+	}
 
 	SceneManageObjs.push_back(_Panic);
-
-	/*for (int i = 0; i < 1; ++i)
-	{
-		auto spDoor = ObjectManager::instance().InsertObject<Door>({ 1300+(float)i*100,2048,0 });
-		spDoor->SetUpInitState(i%4, 0);
-		ObjectManager::instance()._Doors.push_back(spDoor);
-		SceneManageObjs.push_back(spDoor);
-	}*/
+	SceneManageObjs.push_back(_PanicEnd);
 	
 	Scene::Initialize();
 }

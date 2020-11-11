@@ -66,6 +66,12 @@ private:
 	void FollowRouteProcedure();
 private:
 	int32_t SmokeCount = 0;
+
+	const float RunSoundTime = 0.5f;
+	float CurRunSoundTime = RunSoundTime;
+	const float WalkSoundTime = 0.5f;
+	float CurWalkSoundTime = WalkSoundTime;
+
 public:
 	float DoorTurnDuration = 1.f;
 

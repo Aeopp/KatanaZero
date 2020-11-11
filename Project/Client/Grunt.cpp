@@ -36,7 +36,6 @@ void Grunt::Initialize() & noexcept
 
 	_TransformComp->Scale *= 2.5f;
 	_PhysicComp->Mass = 100.f;
-	
 
 	_RenderComp->bRender = true;
 	
@@ -51,13 +50,13 @@ void Grunt::Initialize() & noexcept
 
 	Speed = 700.f ;
 	MoveGoalTime = 2.f;
-	DetectionRange = 400.f;
+	DetectionRange = 800.f;
 	AttackRange = 100.f;
 
 	_CurrentState = Grunt::State::Idle;
 
-	PursuitRange = 700.f;
-	NarrowRange = 180.f;
+	PursuitRange = 800.f;
+	NarrowRange = 360.f;
 
 	_SpAttack = ObjectManager::instance().InsertObject < Grunt_Slash>();
 	_SpAttack->SetOwner(_This);
@@ -87,6 +86,10 @@ void Grunt::LateUpdate()
 	const float Dt = Time::instance().Delta();
 	DoorTurnDuration -= Dt;
 
+	CurRunSoundTime -= Dt;
+	CurWalkSoundTime -= Dt;
+
+
 	//bFrameCurrentCharacterInput = false;
 	//bMoveKeyCheck = false;
 	//bJumpKeyCheck = false;
@@ -106,9 +109,9 @@ void Grunt::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 	{
 		if (
 			(math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 4))) ||
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 3.5f))) ||
 			(math::almost_equal(vec3{ -1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 4)))
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 3.5f)))
 			)
 		{
 			Turn();
@@ -212,6 +215,7 @@ void Grunt::Attack()
 		bAttackMotionEnd = true;
 		_SpAttack->AttackStart(ToTarget * AttackRich, ToTarget);
 	};
+
 	_RenderComp->Anim(false, false, L"spr_grunt_attack", 8, 0.6f, std::move(_Notify));
 	AtTheAttackDir = _PhysicComp->Dir;
 	SOUNDPLAY("punch", 0.8f, false);
@@ -286,6 +290,10 @@ void Grunt::HurtGround()
 
 	_RenderComp->Anim(false, false, L"spr_grunt_hurtground",
 		16, 1.6f, std::move(_Notify));
+
+	SOUNDPLAY("sound_head_bloodspurt", 1);
+
+
 }
 
 void Grunt::HurtGroundState()
@@ -293,6 +301,7 @@ void Grunt::HurtGroundState()
 	if (bHurtGroundMotionEnd)
 	{
 		bHurtGroundMotionEnd = false;
+		RAND_SOUNDPLAY("sound_head", { 1,2 }, 0.65f);
 	}
 }
 
@@ -389,6 +398,16 @@ void Grunt::RunState()
 		FollowRouteProcedure();
 	}
 	
+
+
+	if (CurRunSoundTime < 0.f)
+	{
+		CurRunSoundTime = RunSoundTime;
+		RAND_SOUNDPLAY("sound_generic_enemy_run", { 1,4 }, 0.6f);
+	}
+
+
+
 	Move(_PhysicComp->Dir, Speed);
 }
 
@@ -465,6 +484,14 @@ void Grunt::WalkState()
 			Run();
 		}
 	};
+
+
+	if (CurWalkSoundTime < 0.f)
+	{
+		CurWalkSoundTime = WalkSoundTime;
+		RAND_SOUNDPLAY("sound_generic_enemy_walk", { 1,4 }, 0.6f);
+	}
+
 
 	Move(_PhysicComp->Dir, Speed *0.25f);
 }

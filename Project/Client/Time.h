@@ -23,7 +23,7 @@ public:
 	void SetT(const float T);
 
 	float a, b, c;
-	bool bTimeInfoRender=true;
+	bool bTimeInfoRender=false;
 public:
 	// 시작 시간 , 반복 주기 , 종료 시간 , 이벤트
 	// 반환값 true 시 종료 시간 상관 없이 이벤트 삭제

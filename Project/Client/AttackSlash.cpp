@@ -7,6 +7,8 @@
 #include "EffectManager.h"
 #include "Time.h"
 #include "sound_mgr.h"
+#include "ObjectManager.h"
+#include "Camera.h"
 
 OBJECT_ID::EID Attack_Slash::GetID()
 {
@@ -139,6 +141,25 @@ void Attack_Slash::Hit(std::weak_ptr<class object> _Target, math::Collision::Hit
             5, 0.13f, 5 * 0.13f + 0.01f, OBJECT_ID::EID::ENONE, true, _PhysicComp->Position,
             { 0,0,0 }, { 2.25,2.25,0 }, false, false, false, false, 0, 0, 255, false, 0,
             0);*/
+        RAND_SOUNDPLAY("sound_bullethit", { 1,3 }, 1.f);
+
+
+
+        float ImpactRotZ = atan2f(-initDir.y, -initDir.x);
+
+        EffectManager::instance().EffectPush(L"Effect",
+            L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+            _CollisionInfo.Position + -initDir * 77,
+            { 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
+            255, false, 0, ImpactRotZ, 0, 0);
+
+        EffectManager::instance().EffectPush(L"Effect",
+            L"spr_slashfx", 5, 0.08f,
+            0.08f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _CollisionInfo.Position,
+            { 0,0,0 }, { 2.9,2.9,0 });
+
+        ObjectManager::instance()._Camera.lock()->CameraShake(
+            500.f, initDir, 0.3f);
 
         EffectManager::instance().EffectPush(L"Effect",L"spr_bulletreflect",
             5, 0.13f,5* 0.13f +0.01f,OBJECT_ID::EID::REFLECT,true,_CollisionInfo.Position,

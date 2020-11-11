@@ -102,7 +102,6 @@ void LaserTrap::Initialize() & noexcept
     _TransformComp->Scale *= 1;
     _TransformComp->bFollowOwner = false;
 
-
     _RenderComp->bFixedScale = true;
     _RenderComp->FixedScale = { 5,1,1 };
 

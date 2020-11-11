@@ -29,8 +29,8 @@ void ScenePrison3rd::Initialize()
 
 	SceneManager::instance()._NextScene = ESceneID::EBunkerMansion;
 	auto _Camera = ObjectManager::instance().InsertObject<Camera>();
-	_Camera->CameraLockLT= { 700,4400,0 };
-	_Camera->CameraLockRB = { 5000 ,5600 , 0  };
+	_Camera->CameraLockLT= { 1000,4100,0 };
+	_Camera->CameraLockRB = { 4850,5600 , 0  };
 	ObjectManager::instance()._Camera = _Camera;
 	SceneManageObjs.push_back(_Camera);
 

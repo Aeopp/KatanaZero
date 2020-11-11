@@ -60,13 +60,13 @@ void Gangster::Initialize() & noexcept
 
 	Speed = 633.f;
 	MoveGoalTime = 2.f;
-	DetectionRange = 850.f;
-	AttackRange = 770.f;
+	DetectionRange = 1000.f;
+	AttackRange = 870.f;
 
 	_CurrentState = Gangster::State::Idle;
 
 	PursuitRange = 700.f;
-	NarrowRange = 180.f;
+	NarrowRange = 360.f;
 	//TODO::
 	/*_SpAttack = ObjectManager::instance().InsertObject < Grunt_Slash>();
 	_SpAttack->SetOwner(_This);*/
@@ -112,6 +112,8 @@ void Gangster::LateUpdate()
 	const float Dt = Time::instance().Delta();
 	DoorTurnDuration -= Dt;
 	AttackCoolTime -= Dt;
+	CurRunSoundTime -=Dt;	
+	CurWalkSoundTime -= Dt;
 }
 
 void Gangster::MapHit(typename math::Collision::HitInfo _CollisionInfo)
@@ -122,9 +124,9 @@ void Gangster::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 	{
 		if (
 			(math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 4))) ||
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 3.5f))) ||
 			(math::almost_equal(vec3{ -1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 4)))
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 3.5f)))
 			)
 		{
 			Turn();
@@ -282,7 +284,8 @@ void Gangster::AttackState()
 			constexpr float BulletSpeed = 1800.f;
 
 			RAND_SOUNDPLAY("gun_fire", { 1,2 }, 0.8f);
-
+			RAND_SOUNDPLAY("sound_enemy_fire", { 1,2 }, 1);
+			
 			vec3 ToTarget = _Target->_TransformComp->Position;
 			ToTarget -= _PhysicComp->Position;
 			D3DXVec3Normalize(&ToTarget, &ToTarget);
@@ -377,6 +380,9 @@ void Gangster::HurtGround()
 		14, 1.8f, std::move(_Notify));
 
 	_RenderComp->PositionCorrection = { 0,0,0 };
+
+	SOUNDPLAY("sound_head_bloodspurt", 1 );
+
 }
 
 void Gangster::HurtGroundState()
@@ -384,6 +390,7 @@ void Gangster::HurtGroundState()
 	if (bHurtGroundMotionEnd)
 	{
 		bHurtGroundMotionEnd = false;
+		RAND_SOUNDPLAY("sound_head", { 1,2 }, 0.65f);
 	}
 }
 
@@ -479,6 +486,12 @@ void Gangster::RunState()
 		FollowRouteProcedure();
 	}
 
+	if (CurRunSoundTime < 0.f)
+	{
+		CurRunSoundTime = RunSoundTime;
+		RAND_SOUNDPLAY("sound_generic_enemy_run", { 1,4 }, 0.6f);
+	}
+
 	Move(_PhysicComp->Dir, Speed);
 }
 
@@ -551,6 +564,13 @@ void Gangster::WalkState()
 			Run();
 		}
 	}
+
+	if (CurWalkSoundTime < 0.f)
+	{
+		CurWalkSoundTime = WalkSoundTime;
+		RAND_SOUNDPLAY("sound_generic_enemy_walk", { 1,4 }, 0.6f);
+	}
+
 
 	Move(_PhysicComp->Dir, Speed * 0.25f);
 }

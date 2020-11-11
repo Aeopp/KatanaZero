@@ -141,6 +141,7 @@ void Item::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
     }
     else if (_CollisionInfo._ID == OBJECT_ID::EID::BULLET && bThrow)
     {
+        RAND_SOUNDPLAY("sound_bullethit", { 1,3 }, 1.f);
         Interaction(std::move(_CollisionInfo));
     }
 }
@@ -173,6 +174,7 @@ void Item::Update()
 void Item::KnifeInteraction(math::Collision::HitInfo _Info)
 {
     BulletInteraction(_Info);
+    RAND_SOUNDPLAY("sound_knife", { 1,3 }, 1.f);
 
     /*auto _Enemy = std::dynamic_pointer_cast<NormalEnemy> (_Info._Target.lock());
     _Enemy->_EnemyState = NormalEnemy::State::Die;*/

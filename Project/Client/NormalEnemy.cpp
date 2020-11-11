@@ -145,6 +145,8 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			true, _TransformComp->Position, { 0,0,0 }, Scale, false, false, false, false, 0, 0, 255, true, 0, 0, 0, _RenderComp->_Info.GetCurFrame(), false,
 			0, 0, false, Scale, Scale, { 1,1 }, { 1,0 });
 
+		SOUNDPLAY("sound_laser_explosion", 0.75f, false);
+
 		for (size_t i = 0; i < 7; ++i)
 		{
 			Time::instance().TimerRegist(0.75f, (std::numeric_limits<float>::min)(), 2.f, [this, Observer = _This, SparkParticleLocation = _TransformComp->Position]() {
@@ -175,11 +177,13 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 				_CollisionInfo.PushDir);
 
 			BloodInit(_CollisionInfo.PushDir);
+			RAND_SOUNDPLAY("death_generic", { 1,3 }, 0.6f, false);
+			SOUNDPLAY("blunt", 0.9f);
 
 			float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 
 			EffectManager::instance().EffectPush(L"Effect",
-				L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+				L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 				_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 				{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 				255, false, 0, ImpactRotZ, 0, 0);
@@ -233,17 +237,17 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);
-
+		SwordDeathSound();
 		BloodInit(_CollisionInfo.PushDir);
 
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_slashfx", 5, 0.02f,
-			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
+			L"spr_slashfx", 5, 0.08f,
+			0.08f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
 			{ 0,0,0 }, { 2.9,2.9,0 });
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);
@@ -299,10 +303,11 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			_CollisionInfo.IntersectAreaScale * _CollisionInfo.PushForce * 0.01f,
 			0.3f,
 			_CollisionInfo.PushDir);
+		RAND_SOUNDPLAY("death_generic", { 1,3 }, 0.6f, false);
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);
@@ -358,7 +363,7 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 
 			float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 			EffectManager::instance().EffectPush(L"Effect",
-				L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+				L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 				_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 				{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 				255, false, 0, ImpactRotZ, 0, 0);
@@ -416,6 +421,7 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			_RefEftInfo->get().bPhysic = false;
 			_RefEftInfo->get().Scale.x *= 4.f;
 			SOUNDPLAY("death_bullet", 0.9f);
+			RAND_SOUNDPLAY("sound_bullethit", { 1,3 }, 1.f);
 		}
 		else
 		{
@@ -430,13 +436,13 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 		BloodInit(_CollisionInfo.PushDir);
 
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_slashfx", 5, 0.02f,
-			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false , _PhysicComp->Position,
+			L"spr_slashfx", 5, 0.08f,
+			0.08f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false , _PhysicComp->Position,
 			{ 0,0,0 }, { 2.9,2.9,0 });
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false ,
+			L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false ,
 			_PhysicComp->Position + -_CollisionInfo.PushDir*77, 
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);

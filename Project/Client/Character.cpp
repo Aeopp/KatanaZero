@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Character.h"
+#include "sound_mgr.h"
+
 #include "ComponentManager.h"
 #include "RenderComponent.h"
 #include "ObjectManager.h"
@@ -52,11 +54,22 @@ void Character::LateUpdate()
 
     Super::LateUpdate();
 
+    bool bBloodSplat =false ;
+
+    bBloodSplat = bBlooding | bBloodingOverHead;
+
     if (BloodingDelta < 0.f && bBlooding)
     {
+        
         BloodingDelta = 0.020f;
         BloodingPastDir();
     }
+
+    if (CurBloodingSoundTime < 0.f && bBlooding)
+    {
+        CurBloodingSoundTime = BloodingSoundTime;
+        RAND_SOUNDPLAY("sound_enemy_blood_squirt", { 1,3 }, 0.4f);
+    };
 
     if (BloodingOverHeadDelta < 0.f && bBloodingOverHead)
     {
@@ -64,8 +77,17 @@ void Character::LateUpdate()
         BloodingOverHead();
     }
 
+    if (CurBloodSplatSoundTime < 0.f && bBloodSplat)
+    {
+        CurBloodSplatSoundTime = BloodSplatSoundTime;
+        RAND_SOUNDPLAY("sound_enemy_bloodsplat", { 1,4 }, 1.f);
+
+    }
+
     BloodingDelta -= dt;
     BloodingOverHeadDelta -= dt;
+    CurBloodingSoundTime -= dt;
+    CurBloodSplatSoundTime -= dt;
 };
 
 void Character::Move(vec3 Dir, const float AddSpeed)
@@ -105,6 +127,16 @@ void Character::BloodingPastDir()
 
 void Character::BloodInit(vec3 Dir)
 {
+    if (GetTag() == OBJECT_TAG::EENEMY)
+    {
+        SOUNDPLAY("sound_enemy_intro_blood_01", 0.15f);
+    }
+
+    if (GetTag() == OBJECT_TAG::EENEMY)
+    {
+        RAND_SOUNDPLAY("sound_enemy_bloodsplat", { 1,4 }, 1.f);
+    }
+
     float BloodInitTime = 0.0f;
     float BloodInitNum = 30;
     float BloodInitDelta = 0.0005f;

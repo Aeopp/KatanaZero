@@ -30,6 +30,11 @@ void Camera::Initialize() & noexcept
 
 void Camera::Update()
 {
+
+	if (isnan(global::CameraPos.x) || isnan(global::CameraPos.y))
+	{
+		global::CameraPos = PrevCameraLocation;
+	}
 	// 여기서 널임
 	const float Dt = Time::instance().Delta();
 	const float T = Time::instance().T();
@@ -43,7 +48,6 @@ void Camera::Update()
 
 	if (bMouseFollow &&  global::IsPlay()  )
 	{
-		
 		vec3 Goal = global::MousePosScreen;
 		Goal = CurrentCameraPos + Goal * 0.8f;
 		Goal.x -= global::ClientSize.first / 2.f;
@@ -77,6 +81,8 @@ void Camera::Update()
 		global::CameraPos = math::lerp(global::CameraPos, Goal, 0.45f, Time::instance().Delta());
 		return;
 	}
+
+	PrevCameraLocation = global::CameraPos;
 };
 
 OBJECT_ID::EID Camera::GetID()

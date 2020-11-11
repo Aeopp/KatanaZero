@@ -15,6 +15,7 @@
 #include "ComponentManager.h"
 #include "Door.h"
 #include "Grenade.h"
+#include "sound_mgr.h"
 
 OBJECT_ID::EID Boss::GetID()
 {
@@ -166,13 +167,13 @@ void Boss::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
 		BloodInit(_CollisionInfo.PushDir);
 
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_slashfx", 5, 0.02f,
-			0.02f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
+			L"spr_slashfx", 5, 0.08f,
+			0.08f * 5 + 0.01f, OBJECT_ID::EID::SLASH_FX, false, _PhysicComp->Position,
 			{ 0,0,0 }, { 2.9,2.9,0 });
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 		EffectManager::instance().EffectPush(L"Effect",
-			L"spr_hit_impact", 5, 0.02f, 0.02f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
+			L"spr_hit_impact", 5, 0.08f, 0.08f * 5 + 0.01f, OBJECT_ID::HIT_IMPACT, false,
 			_PhysicComp->Position + -_CollisionInfo.PushDir * 77,
 			{ 0,0,0 }, { 3.3,3.3,0 }, false, false, false, false, 0, 0,
 			255, false, 0, ImpactRotZ, 0, 0);
@@ -900,6 +901,10 @@ void Boss::WallJumpState()
 					{ 0,0,0 }, { GunSparkScale,GunSparkScale,0 }, false, false, false, false, 0, 0,
 					255, false, 0, atan2f(FireDir.y, FireDir.x), 0, 0, false, false, 0, false);
 			}
+
+
+			RAND_SOUNDPLAY("gun_fire", { 1,2 }, 0.8f);
+			RAND_SOUNDPLAY("sound_enemy_fire", { 1,2 }, 1);
 
 			EffectManager::instance().EffectPush(L"Effect", L"spr_bullet", 1,
 				1.f, 5.f, OBJECT_ID::EID::BULLET, true, InitLocation, FireDir * BulletSpeed,
@@ -1694,12 +1699,17 @@ void Boss::DieLand()
 	_Notify[4] = [this]() {bBloodingOverHead = false;  };
 	_Notify[8] = [this]() {      bDieLandEnd = true;  }; 
 	_RenderComp->Anim(false, false, L"spr_headhunter_dieland", 8, 1.1f, std::move(_Notify));
+
+	SOUNDPLAY("sound_head_bloodspurt", 1);
+
+
 }
 
 void Boss::DieLandState()
 {
 	if (bDieLandEnd)
 	{
+		RAND_SOUNDPLAY("sound_head", { 1,2 }, 0.65f);
 		bDieLandEnd = false;
 		Dead();
 	}

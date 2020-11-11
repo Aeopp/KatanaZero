@@ -78,6 +78,11 @@ void TransformComponent::LateUpdate()
 {
 	Component::LateUpdate();
 
+	if (isnan(Position.x) || isnan(Position.y))
+	{
+		Position = PastLocation;
+	}
+
 	if (PastLocation == vec3{ 0,0,0 })
 	{
 		PastLocation = Position;
@@ -88,4 +93,6 @@ void TransformComponent::LateUpdate()
 		PastLocation = Position;
 		D3DXVec3Normalize(&PastDir, &PastDir);
 	}
+
+
 }

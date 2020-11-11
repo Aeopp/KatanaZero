@@ -17,6 +17,8 @@
 #include "Drum.h"
 #include "Door.h"
 #include "sound_mgr.h"
+#include "Time.h"
+
 
 
 Scene::~Scene() noexcept

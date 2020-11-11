@@ -73,6 +73,11 @@ private:
 	float DoorTurnDuration = 1.f;
 
 	void FollowRouteProcedure();
+
+	const float RunSoundTime = 0.5f;
+	float CurRunSoundTime = RunSoundTime;
+	const float WalkSoundTime = 0.5f;
+	float CurWalkSoundTime = WalkSoundTime;
 public:
 	bool bTurnMotionEnd{ false };
 	bool bWhipMotionEnd{ false };

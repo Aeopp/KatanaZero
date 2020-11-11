@@ -21,7 +21,7 @@ HRESULT App::Initialize()
 	ShowCursor(false);
 
 #pragma region Application Initialize
-	static constexpr bool bAppWindowScreenMode = TRUE;
+	static constexpr bool bAppWindowScreenMode = FALSE;
 	static constexpr uint32_t AppFrameLimit = 60ul;
 
 	sound_mgr::instance().initialize();
@@ -56,7 +56,7 @@ HRESULT App::Initialize()
 	sound_mgr::instance().Stop(sound_mgr::instance().CurrentBgmKey);
 	sound_mgr::instance().Play("song_katanazero"s, true, 1.f);
 
-	SceneMgrRef.Scene_Change(ESceneID::EPrison1st);
+	SceneMgrRef.Scene_Change(ESceneID::EMultiPlayer);
 
 	//TimeRef.TimerRegist(10.f, 10.f, 10.f, [&]()
 	//{

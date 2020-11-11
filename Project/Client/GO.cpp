@@ -115,7 +115,7 @@ void GO::Update()
         }
     }
 
-    ScreenPos.x = InitScreenPos.x + (std::sinf(T)*5.f)* XRange;
+    ScreenPos.x = InitScreenPos.x + (std::sinf(T*5.f))* XRange;
 }
 
 void GO::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _CollisionInfo)
