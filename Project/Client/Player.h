@@ -151,6 +151,13 @@ public :
 	float ToDoorX = 1.f;
 	// 테스트끝나고수정
 	const float DashCoolTime = 2.f;
+	const float RunSoundRepeatTime = 0.5f;
+	float CurRunSoundRepeatTime = RunSoundRepeatTime;
+	const float WallSlideTime = 1.f;
+	float CurWallSlideTime = WallSlideTime;
+	const float FootStepSoundTime = 0.5f;
+	float CurFootStepSoundTime = FootStepSoundTime;
+
 	// 
 	float CurDashCoolTime = 0.f;
 	void JumpWallRide();

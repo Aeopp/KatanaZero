@@ -13,7 +13,7 @@ public :
     void Initialize() & noexcept override;
 public:
     void Interaction();
-    void PushTrap(vec3 Location, const float YScale,
+    std::shared_ptr<class LaserTrap> PushTrap(vec3 Location, const float YScale,
         vec3 Speed,float MovementDuration);
 private:
     std::shared_ptr<class CollisionComponent> _CollisionComp;

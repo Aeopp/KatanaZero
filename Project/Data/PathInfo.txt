@@ -433,7 +433,7 @@ Gunspark2
 ..\Resource\Texture\EditObject\PlaceDisplay\Object%d.png
 EditObject
 PlaceDisplay
-17
+18
 ..\Resource\Texture\Go\Go\%d.png
 Go
 Go
@@ -493,6 +493,10 @@ spr_door_animation_iron
 ..\Resource\Texture\Door\spr_door_animation_mansion\%d.png
 Door
 spr_door_animation_mansion
+20
+..\Resource\Texture\Door\spr_door_animation_club\%d.png
+Door
+spr_door_animation_club
 20
 ..\Resource\Texture\Door\spr_door_glow\%d.png
 Door

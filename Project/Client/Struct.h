@@ -84,6 +84,7 @@ struct ObjectInfo
 		DoorMansion=11,
 		DoorWood=12,
 		Drum=13,
+		DoorClub=17,
 	};
 	ObjectInfo() = default;
 	//ObjectInfo(const uint32_t _ObjectID, const vec3& Position) : _ObjectID{ _ObjectID }, Position{ Position } {};

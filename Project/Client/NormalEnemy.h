@@ -23,8 +23,9 @@ public :
 
     NormalEnemy::State _EnemyState = NormalEnemy::State::Idle;
 protected:
+    void SwordDeathSound();
     static inline std::pair<float, float> IsSamefloorRange{-169.f,+48.f};
-    bool IsSamefloor(vec3 TargetPos);
+    bool IsSamefloor(vec3 TargetPos,bool bDoor);
     bool IsDetectDoorCheck();
 
     std::shared_ptr<class RenderComponent> _MsgRenderComp;

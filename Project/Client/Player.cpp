@@ -25,6 +25,8 @@
 #include "Door.h"
 #include "Boss.h"
 #include "PanicSwitch.h"
+#include "sound_mgr.h"
+
 
 
 using namespace std;
@@ -249,7 +251,10 @@ void Player::LateUpdate()
 	WallRideEffectDelta -= Dt;
 	CurAttackCoolTime -= Dt;
 	InvincibleTime -= Dt;
-	CurDashCoolTime -= Dt;
+	CurDashCoolTime -= Dt; 
+	CurRunSoundRepeatTime -= Dt;
+	CurWallSlideTime -= Dt;
+	CurFootStepSoundTime -= Dt;
 
 	if (!_SpBattery->IsUse())
 	{
@@ -427,6 +432,8 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		if (!bCheat)
 			bFatal = true;
+		sound_mgr::instance().Play("dragon_death", false, 0.6f);
+		SOUNDPLAY("playerdie", 1.f, false);
 
 		ObjectManager::instance()._Camera.lock()->CameraShake(
 			2500.f, _CollisionInfo.PushDir, 0.2f);
@@ -475,6 +482,8 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 
 		if (!bCheat)
 			bFatal = true;
+		sound_mgr::instance().Play("dragon_death", false, 0.6f);
+		SOUNDPLAY("playerdie", 1.f, false);
 
 		float ImpactRotZ = atan2f(-_CollisionInfo.PushDir.y, -_CollisionInfo.PushDir.x);
 
@@ -485,6 +494,7 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 			255, false, 0, ImpactRotZ, 0, 0);
 
 		vec3 Pos = _PhysicComp->Position + (-_CollisionInfo.PushDir * 4000);
+	
 
 		EffectManager::instance().EffectPush(L"Effect",
 			L"HitEffect", 1, 0.2f, 0.201f, OBJECT_ID::EID::HIT_EFFECT, false, Pos,
@@ -504,6 +514,8 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 					InitLoc, { 0,0,0 },
 					{ 3,3,0 }, false, true, false, true, 33, 33,
 					255, false, 0.f, 0.f, 0.f, 0);
+				RAND_SOUNDPLAY("explosion", { 1,3 }, 1.f);
+
 			}
 		}
 
@@ -561,6 +573,8 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 				_CollisionInfo.PushDir);
 
 			BloodInit(_CollisionInfo.PushDir);
+			sound_mgr::instance().Play("dragon_death", false, 0.6f);
+			SOUNDPLAY("playerdie", 1.f, false);
 
 			if (!bCheat)
 				bFatal = true;
@@ -659,6 +673,8 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		}
 
 		BloodInit(_CollisionInfo.PushDir);
+		sound_mgr::instance().Play("dragon_death", false, 0.6f);
+		SOUNDPLAY("playerdie", 1.f, false);
 
 		if(!bCheat)
 			bFatal = true;
@@ -727,7 +743,10 @@ void Player::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _
 		}
 
 		BloodInit(_CollisionInfo.PushDir);
-
+		sound_mgr::instance().Play("dragon_death", false, 0.6f);
+		SOUNDPLAY("playerdie", 1.f, false);
+		SOUNDPLAY("punch_hit", 0.85f, false);
+		
 		if(!bCheat)
 			bFatal = true;
 
@@ -882,6 +901,8 @@ void Player::IdleToRun()
 			false, false, false, false, 0.f, 0.f, 255, false, 0.f, 0.f, 0.f, 0);
 		return false;
 	});
+
+	SOUNDPLAY("player_prerun", 0.35f, false);
 }
 
 void Player::IdleToRunState()
@@ -950,7 +971,16 @@ void Player::RunState()
 	{
 		Sneak();
 	}
+
+	if (CurRunSoundRepeatTime < 0.f)
+	{
+		CurRunSoundRepeatTime = RunSoundRepeatTime;
+		RAND_SOUNDPLAY("player_running", { 1,4 }, 0.6f, false);
+	}
+
 	Move(_PhysicComp->Dir, 0.f);
+
+
 }
 
 void Player::RunToIdle()
@@ -1004,6 +1034,8 @@ void Player::FallState()
 {
 	if (_PhysicComp->bLand&& !_CollisionComp->bDownJump)
 	{
+		SOUNDPLAY("player_land", 1.f, false);
+
 		Idle(); 
 		EffectManager::instance().EffectPush(L"Effect", L"spr_landcloud",
 			7, 0.05f, 7 * 0.05f + 0.01f, OBJECT_ID::EID::LAND_CLOUD, true, _PhysicComp->Position + vec3{ 0.f,+15,0.f },
@@ -1011,6 +1043,7 @@ void Player::FallState()
 	}	
 	if (bCurWallRideCollision)
 	{
+
 		WallRide(); 
 	}
 	if (bMoveKeyCheck)
@@ -1042,6 +1075,9 @@ void Player::Jump()
 	EffectManager::instance().EffectPush(L"Effect", L"spr_jumpcloud", 4, 0.05f,
 		0.05f * 4.f + 0.01f, OBJECT_ID::EID::JUMP_CLOUD, true,_PhysicComp->Position + vec3{ 0.f,-23.f,0.f },
 		{ 0,0,0 }, { 2.5,2.5,2.5 });
+
+	SOUNDPLAY("player_jump", 0.65f, false);
+
 }
 
 void Player::FSM()
@@ -1327,6 +1363,8 @@ void Player::ReWindStart()
 	EffectManager::instance().EffectPush(L"Effect", L"Nothing", 1, 0.2f,
 		FLT_MAX, OBJECT_ID::EID::ENONE, false, ScreenCenter, { 0,0,0 }, { 2,2,2 }, false
 		, false, false, false, 0, 0, 255, false, 0, 0, 0, 0, true, 0.4f, 1);
+
+//	SOUNDPLAY("Rewind", 1.f, false);
 }
 
 void Player::JumpState()
@@ -1353,6 +1391,7 @@ void Player::Attack()
 	RenderComponent::NotifyType _Notify;
 	_Notify[7] = [this]() {bAttackMotionEnd = true; };
 	_RenderComp->Anim(false, false, L"spr_dragon_attack", 7, 0.20f, std::move(_Notify));
+	
 	
 	_PhysicComp->Position.z = 0.f;
 	vec3 Distance = global::MousePosWorld - _PhysicComp->Position;
@@ -1429,6 +1468,8 @@ void Player::DoorKick()
 		L"spr_hit_impact", 5, 0.1f, 5 * 0.1f + 0.01f, OBJECT_ID::DOOR_KICK_IMPACT, true,
 		DoorKickImpactLocation, { 0,0,0 }, { 2.5,2.5,1 }, false, true, false, false, 50, 50, 255, false, 0, RotZ, 0, 0, 0, 0, 0);
 	//EffectManager::instance().
+
+	SOUNDPLAY("kickdoor", 1.f, false);
 };
 
 void Player::DoorKickState()
@@ -1553,6 +1594,13 @@ void Player::SneakState()
 		Jump();
 	}
 
+	if (CurFootStepSoundTime < 0.f )
+	{
+		CurFootStepSoundTime = FootStepSoundTime;
+		SOUNDPLAY("footstep", 1.f, false);
+
+	}
+
 	Move(_PhysicComp->Dir, 0.f);
 };
 
@@ -1594,6 +1642,7 @@ void Player::HurtFlyState()
 	if (_PhysicComp->bLand)
 	{
 			bBlooding = false;
+			SOUNDPLAY("player_land", 1.f, false);
 		HurtGround();
 	}
 }
@@ -1712,6 +1761,9 @@ void Player::HurtRecoverState()
 		bHurt = false;
 		_PhysicComp->ForceClear();
 		InvincibleTime = 1.f;
+		SOUNDPLAY("player_land", 1.f, false);
+
+
 		Idle();
 	}
 };
@@ -1737,6 +1789,7 @@ void Player::Roll()
 	_RenderComp->Anim(false, false, L"spr_dragon_roll",7, 0.35f ,std::move(_Notify));
 	_RenderComp->PositionCorrection.y += 10.f;
 	_RenderComp->AfterImgOn();
+	SOUNDPLAY("player_roll", 1.f, false);
 }
 
 void Player::RollState()
@@ -1828,6 +1881,12 @@ void Player::WallRideState()
 		Fall();
 		return;
 	}
+
+	if (CurWallSlideTime < 0.f)
+	{
+		CurWallSlideTime = WallSlideTime;
+		SOUNDPLAY("wallslide", 1.f, false);
+	}
 	
 }
 void Player::Flip()
@@ -1850,6 +1909,10 @@ void Player::Flip()
 	EffectManager::instance().EffectPush(L"Effect", L"spr_jumpcloud", 4, 0.05f, 0.05f * 4 + 0.01f,
 		OBJECT_ID::EID::JUMP_CLOUD, true, CurWallRideLinePos + Dir, { 0,0,0 }, { 2.5,2.5,2.5 },false
 	,false,false,false,0,0,255,false,0, RotZ);
+	SOUNDPLAY("player_roll", 1.f, false);
+
+	 // RAND_SOUNDPLAY("wallkick", { 1,3 }, 0.9f, false);
+
 
 }
 void Player::FlipState()

@@ -6,6 +6,7 @@
 #include "CollisionComponent.h"
 #include "EffectManager.h"
 #include "Time.h"
+#include "sound_mgr.h"
 
 OBJECT_ID::EID Attack_Slash::GetID()
 {
@@ -144,6 +145,8 @@ void Attack_Slash::Hit(std::weak_ptr<class object> _Target, math::Collision::Hit
             {0,0,0}, { 2.25,2.25,0 },false,false,false,false,0,0,255,false,0,
             atan2f(initDir.y, initDir.x));
 
+        sound_mgr::instance().Play("slash_bullet", false, 0.75f);
+
         EffectManager::instance().EffectPush(L"Effect", L"spr_bullet",
             1, (std::numeric_limits<float>::max)(), 10.f, OBJECT_ID::EID::REFLECT_BULLET,
             true, _CollisionInfo.Position, initDir * BulletSpeed, { 1,1,1 }, false,
@@ -179,6 +182,8 @@ void Attack_Slash::DashAttackStart(vec3 AttackPos, vec3 Dir)
 {
     RenderComponent::NotifyType _Notify;
 
+   //  RAND_SOUNDPLAY("slash", { 1,3 }, 0.9f, false);
+
     _Notify[5] = [this]()
     {
         bSlashEffectEnd = true;
@@ -212,6 +217,7 @@ void Attack_Slash::DashAttackStart(vec3 AttackPos, vec3 Dir)
 void Attack_Slash::AttackStart(vec3 AttackPos,vec3 Dir)
 {
     RenderComponent::NotifyType _Notify;
+    RAND_SOUNDPLAY("slash", { 1,3 }, 0.9f, false);
 
     _Notify[5] = [this]()
     {

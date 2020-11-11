@@ -14,6 +14,7 @@
 #include "SceneManager.h"
 #include "Gangster.h"
 #include "GO.h"
+#include "LaserTrap.h"
 
 void ScenePrison1st::Initialize()
 {
@@ -29,7 +30,7 @@ void ScenePrison1st::Initialize()
 
 	SceneManager::instance()._NextScene = ESceneID::EPrison2nd;
 	auto _Camera = ObjectManager::instance().InsertObject<Camera>();
-	_Camera->CameraLockLT = { 2922,4725,0 };
+	_Camera->CameraLockLT = { 2922,4680,0 };
 	_Camera->CameraLockRB = { 6002,5931, 0 };
 	ObjectManager::instance()._Camera = _Camera;
 	SceneManageObjs.push_back(_Camera);
@@ -37,6 +38,53 @@ void ScenePrison1st::Initialize()
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<Mouse>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<HUD>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<UITimer>());
+
+
+	
+	
+	{
+		const vec3 InitLocation = { 4717,5728.5f,0.f };
+		const float YScale = 1.309859;
+		const float XDiff = 73;
+		for (int32_t i = 0; i < 6; ++i)
+		{
+			auto _LaserTrap = ObjectManager::instance().InsertObject<LaserTrap>();
+			vec3 SpawnLocation = InitLocation;
+			SpawnLocation.x += XDiff * i;
+			_LaserTrap->Init(std::move(SpawnLocation), YScale, { 0,0,0 }, 0);
+			SceneManageObjs.push_back(_LaserTrap);
+		}
+	}
+
+	{
+		const vec3 InitLocation = { 5578,(5508 + 5157) / 2.f,0.f };
+		const float XDiff = 5800 - 5578;
+		const float YScale = 1.647887;
+		for (int32_t i = 0; i < 2; ++i)
+		{
+			auto _LaserTrap = ObjectManager::instance().InsertObject<LaserTrap>();
+			vec3 SpawnLocation = InitLocation;
+			SpawnLocation.x += XDiff * i;
+			_LaserTrap->Init(std::move(SpawnLocation), YScale, { 0,0,0 }, 0);
+			SceneManageObjs.push_back(_LaserTrap);
+		}
+	}
+
+	{
+		const float YScale = (5078.f - 4797.f) / 213.f;
+		const float XDiff = 80;
+		const vec3 InitLocation = { 5133,(5078 + 4797) / 2.f,0.f };
+		const vec3 InitDir = { 1,0,0 };
+		const float Speed = 200.f;
+		for (int32_t i = 0; i < 3; ++i)
+		{
+			auto _LaserTrap = ObjectManager::instance().InsertObject<LaserTrap>();
+			vec3 SpawnLocation = InitLocation;
+			SpawnLocation.x += XDiff * i;
+			_LaserTrap->Init(std::move(SpawnLocation), YScale, InitDir*Speed, 3.f);
+			SceneManageObjs.push_back(_LaserTrap);
+		}
+	}
 
 
 	Scene::Initialize();

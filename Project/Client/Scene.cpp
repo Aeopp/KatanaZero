@@ -16,6 +16,8 @@
 #include "Item.h"
 #include "Drum.h"
 #include "Door.h"
+#include "sound_mgr.h"
+
 
 Scene::~Scene() noexcept
 {
@@ -47,6 +49,7 @@ void Scene::Initialize()
 	CollisionTileManager::instance().LoadCollisionTile(LoadCollisionTileInfoFilePath);
 	CollisionLineManager::instance().LoadCollisionLine(LoadLineInfoFilePath);
 	AStarManager::instance().Load(LoadAStarInfoFilePath);
+
 	LoadObjectInfo();
 }
 
@@ -143,6 +146,13 @@ void Scene::LoadObjectInfo()
 			_SpawnObj = ObjectManager::instance().InsertObject<Door>(_ObjectInfo.Position);
 			_Door = std::dynamic_pointer_cast<Door>(_SpawnObj);
 			_Door->SetUpInitState(3, 0);
+			SceneManageObjs.push_back(_SpawnObj);
+			ObjectManager::instance()._Doors.push_back(_Door);
+			break;
+		case ObjectInfo::DoorClub:
+			_SpawnObj = ObjectManager::instance().InsertObject<Door>(_ObjectInfo.Position);
+			_Door = std::dynamic_pointer_cast<Door>(_SpawnObj);
+			_Door->SetUpInitState(4, 0);
 			SceneManageObjs.push_back(_SpawnObj);
 			ObjectManager::instance()._Doors.push_back(_Door);
 			break;

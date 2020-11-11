@@ -30,6 +30,9 @@ public:
 
     bool bReplayInit = false;
 
+    const float SoundTime = 2.f;
+    float CurSoundTime = 1.f;
+
     int32_t RewindSpeed = -8;
     int32_t TimingSpeed = 1;
     int32_t EndTiming = 0;
@@ -38,4 +41,6 @@ private:
                         //Timing  Pos
     std::map<int32_t, vec3>_TimingCameraPos;
     std::vector<std::any> _Anys;
+
+    void BgmPlayFromSceneID(ESceneID _SceneID);
 };

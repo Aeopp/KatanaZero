@@ -100,6 +100,23 @@ void TextureManager::LoadTexturesFromTexInfoFile(const std::wstring& FileName) &
 			{
 				ERR_MSG(__FUNCTIONW__);
 			}
+
+			// Èæ¹é »çÁø »ðÀÔ......
+
+			{
+				std::wstring RelativePathModeBW = _TexPath.RelativePath;
+				size_t TextureBegin =RelativePathModeBW.find(L"Texture");
+				RelativePathModeBW.insert(TextureBegin +7, L"BW");
+
+				if (FAILED(InsertTexture(TextureManager::MULTI_TEX, RelativePathModeBW,
+					_TexPath.ObjectKey+L"BW", _TexPath.StateKey, _TexPath.Count)))
+				{
+					ERR_MSG(__FUNCTIONW__);
+				}
+			}
+			/////////////
+
+
 		}
 	}
 }

@@ -8,6 +8,7 @@
 #include "PhysicTransformComponent.h"
 #include "EffectManager.h"
 #include "Texture_Manager.h"
+#include "sound_mgr.h"
 
 OBJECT_ID::EID Door::GetID()
 {
@@ -80,6 +81,9 @@ void Door::SetUpInitState(int32_t InitKey, float XDir)
         case Door::State::Mansion:
             StateKey += L"_mansion";
             break;
+        case Door::State::Club:
+            StateKey += L"_club";
+            break;
         default:
             break;
         }
@@ -116,6 +120,9 @@ void Door::Open(float XDir)
 
     _RenderComp->Anim(true, false, StateKey, 20, 1.5f, std::move(_Notify), D3DCOLOR_ARGB(255, 255, 255, 255),
         1, { 1,1 }, L"Door", LAYER::ELAYER::EOBJECT);
+
+    SOUNDPLAY("doorkick", 1.f, false);
+    SOUNDPLAY("dooropen", 1.f, false);
 
     if (XDir < 0.f)
     {

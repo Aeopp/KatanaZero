@@ -17,8 +17,7 @@
 #include "SmokeCloud.h"
 #include "Texture_Manager.h"
 #include "GraphicDevice.h"
-
-
+#include "sound_mgr.h"
 
 
 OBJECT_ID::EID Item::GetID()
@@ -117,6 +116,8 @@ void Item::Hit(std::weak_ptr<class object> _Target, math::Collision::HitInfo _Co
             _Player->EqItem(std::dynamic_pointer_cast<Item> (_This.lock()));
             _RenderComp->bRender = false;
 
+            SOUNDPLAY("pickup", 0.6f, false);
+
             EffectManager::instance().EffectPush(L"Item", EQStateKey, 2, 0.15f, 2.f, OBJECT_ID::EID::ENONE, false,
                 EQEffectPosCorre + _PhysicComp->Position, { 0,0,0 }, { 1.7,1.7,0 }, true, false, false, false, 0, 0, 255, true, 0, 0, 0, 0);
 
@@ -179,12 +180,20 @@ void Item::KnifeInteraction(math::Collision::HitInfo _Info)
 
 void Item::ExplosiveInteraction(math::Collision::HitInfo _Info)
 {
-    EffectManager::instance().EffectPush(L"Effect", L"spr_explosion_1",
-        11, 0.1f, 11 * 0.1f + 0.01f, OBJECT_ID::EID::EXPLOSION, true,
-        _PhysicComp->Position, { 0,0,0 },
-        { 4,4,0 }, false, true, false, true, 33, 33,
-        255, false, 0.f, 0.f, 0.f, 0);
+    for (size_t i = 0; i < 4; ++i)
+    {
+        float rich = math::Rand<float>({ 25,50 });
+        vec3 Dir = math::RotationVec({ 1,0,0 }, math::Rand<float>({ -360,360 }));
+        vec3 InitLocation = _PhysicComp->Position + Dir * rich;
 
+        EffectManager::instance().EffectPush(L"Effect", L"spr_explosion_1",
+            11, 0.1f, 11 * 0.1f + 0.01f, OBJECT_ID::EID::EXPLOSION, true,
+            InitLocation, { 0,0,0 },
+            { 4,4,0 }, false, true, false, true, 33, 33,
+            255, false, 0.f, 0.f, 0.f, 0);
+
+        RAND_SOUNDPLAY("explosion", { 1,3 }, 1.f);
+    }
  //   BulletInteraction(_Info);
 }
 
@@ -295,6 +304,8 @@ void Item::Throw(vec3 InitLocation, vec3 Dir)
     _RenderComp->bRender = true;
     
     _PhysicComp->Position = InitLocation;
+    SOUNDPLAY("player_throw", 1.f, false);
+
     _PhysicComp->Move(Dir * Speed, Speed * 0.1f, 10.f, Dir, 0);
     CurThrowRotZ = atan2f(Dir.y, Dir.x);
     _RenderComp->AfterImgOn();

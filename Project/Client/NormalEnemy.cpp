@@ -14,6 +14,8 @@
 #include "Camera.h"
 #include "ComponentManager.h"
 #include "Door.h"
+#include "sound_mgr.h"
+
 
 void NormalEnemy::Initialize() & noexcept
 {
@@ -128,6 +130,9 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 
 		ObjectManager::instance()._Camera.lock()->CameraShake(
 			500.f, math::Rand<int32_t>({ 0,1 }) ? vec3{ 1,0,0 } : vec3{ -1,0,0 }, 0.7);
+
+
+		RAND_SOUNDPLAY("death_generic", { 1,3 }, 0.6f, false);
 
 		_MsgRenderComp->bRender = false;
 		_EnemyState = NormalEnemy::State::Die;
@@ -277,6 +282,7 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			_RenderComp->NormalAfterImgPushDelta *= 1.f;
 			return true;
 		});
+		SwordDeathSound();
 
 		Die();
 	}
@@ -366,6 +372,9 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 				0, 0);
 
 			_MsgRenderComp->bRender = false;
+			SOUNDPLAY("blunt", 0.9f);
+
+			SOUNDPLAY("death_knife", 0.8f);
 
 			_RenderComp->AfterImgOn();
 			//_EnemyState = NormalEnemy::State::Die;
@@ -406,6 +415,11 @@ void NormalEnemy::Hit(std::weak_ptr<class object> _Target, math::Collision::HitI
 			_RefEftInfo->get().MaxT = 5.f;
 			_RefEftInfo->get().bPhysic = false;
 			_RefEftInfo->get().Scale.x *= 4.f;
+			SOUNDPLAY("death_bullet", 0.9f);
+		}
+		else
+		{
+			SwordDeathSound();
 		}
 
 		_PhysicComp->Move((_CollisionInfo.PushDir) * (_CollisionInfo.PushForce *3.5f),
@@ -471,14 +485,25 @@ bool NormalEnemy::IsAlive() const&
 		return 	_EnemyState != NormalEnemy::State::Die;
 }
 
+void NormalEnemy::SwordDeathSound()
+{
+	RAND_SOUNDPLAY("death_sword", { 1,2 }, 0.6f, false);
 
+	RAND_SOUNDPLAY("death_generic", { 1,3 }, 0.6f, false);
+}
 
-bool NormalEnemy::IsSamefloor(vec3 TargetPos)
+bool NormalEnemy::IsSamefloor(vec3 TargetPos,bool bDoor)
 {
 	float y = _PhysicComp->Position.y;
 
 	float upper = y + IsSamefloorRange.second;
 	float lower = y + IsSamefloorRange.first;
+
+	if (bDoor)
+	{
+		lower -= 80; 
+		upper += 80;
+	}
 
 	if (TargetPos.y > lower && TargetPos.y < upper)
 	{
@@ -496,7 +521,7 @@ bool NormalEnemy::IsDetectDoorCheck()
 		auto spDoor = std::dynamic_pointer_cast<Door>(wpDoor.lock());
 		if ( spDoor&&!spDoor->bOpen)
 		{
-			if (IsSamefloor(spDoor->_TransformComp->Position))
+			if (IsSamefloor(spDoor->_TransformComp->Position,true))
 			{
 				vec3 ToTarget = _Target->_TransformComp->Position - _TransformComp->Position;
 				vec3 DoorLocationCorrection = spDoor->_TransformComp->Position;
@@ -559,7 +584,7 @@ bool NormalEnemy::IsRangeInnerTarget()
 	{
 	case NormalEnemy::State::Idle:
 	case NormalEnemy::State::Walk:
-		if (IsSamefloor(TargetLocation))
+		if (IsSamefloor(TargetLocation,false ))
 		{
 			// 감지범위 이내에 존재하고 바라보는 방향에 있다면 성공
 			IsRangeInner |= ToTargetDistance < _DetectionRange && (Dot > 0.f);

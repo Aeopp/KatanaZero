@@ -20,6 +20,7 @@
 #include "GangsterArm.h"
 #include "Door.h"
 
+#include "sound_mgr.h"
 
 using namespace std;
 
@@ -53,12 +54,14 @@ void Gangster::Initialize() & noexcept
 	_CollisionComp->_CollisionInfo.Height = 35;
 	_CollisionComp->_CollisionInfo.Width = 18;
 
+	_CollisionComp->bDownJump = false;
+
 	_PhysicComp->bGravity = true;
 
 	Speed = 633.f;
 	MoveGoalTime = 2.f;
-	DetectionRange = 730.f;
-	AttackRange = 730.f;
+	DetectionRange = 850.f;
+	AttackRange = 770.f;
 
 	_CurrentState = Gangster::State::Idle;
 
@@ -270,13 +273,15 @@ void Gangster::AttackState()
 		};
 	};
 	
-	if (TargetDistance < AttackRange && IsSamefloor(_Target->_TransformComp->Position))
+	if (TargetDistance < AttackRange && IsSamefloor(_Target->_TransformComp->Position,false))
 	{
 		if (AttackCoolTime < 0.f)
 		{
 			AttackCoolTime = 0.66f;
 			constexpr float AttackRich = 70.f;
 			constexpr float BulletSpeed = 1800.f;
+
+			RAND_SOUNDPLAY("gun_fire", { 1,2 }, 0.8f);
 
 			vec3 ToTarget = _Target->_TransformComp->Position;
 			ToTarget -= _PhysicComp->Position;
@@ -436,7 +441,7 @@ void Gangster::RunState()
 
 	if (ToTargetDistance < AttackRange)
 	{
-		if (IsSamefloor(_Target->_TransformComp->Position))
+		if (IsSamefloor(_Target->_TransformComp->Position,false ))
 		{
 			Attack();
 			return;
@@ -680,7 +685,7 @@ void Gangster::FollowRouteProcedure()
 
 	vec3 ToPath = CurMoveMark - _PhysicComp->Position;
 	_Y = ToPath.y;
-	if (ToPath.y > 40.f)
+	if (ToPath.y > 40.f &&_TransformComp->bLineMode)
 	{
 		_CollisionComp->bDownJump = true;
 	}

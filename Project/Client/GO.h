@@ -17,7 +17,7 @@ public:
     float XDir = 1.f;
 
 
-    float XRange = 250.f;
+    float XRange = 100.f;
 
     vec2 InitScreenPos;
 

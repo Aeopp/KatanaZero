@@ -31,6 +31,7 @@ private:
         Wood=1,
         Iron,
         Mansion,
+        Club,
     };
     std::wstring StateKey = L"spr_door_animation";
     std::shared_ptr<class CollisionComponent> _CollisionComp;

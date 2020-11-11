@@ -26,11 +26,11 @@ void SceneChinaTown1st::Initialize()
 	LoadLineInfoFilePath = L"..\\Data\\ChinaTown\\1st\\Line.txt"s;
 	LoadAStarInfoFilePath = L"..\\Data\\ChinaTown\\1st\\AStar.txt"s;
 	LoadObjectInfoFilePath = L"..\\Data\\ChinaTown\\1st\\ObjectInfo.txt"s;
-
+	
 	SceneManager::instance()._NextScene = ESceneID::EChinaTown2nd;
 	auto _Camera = ObjectManager::instance().InsertObject<Camera>();
-	_Camera->CameraLockLT = { 1116,2951,0 };
-	_Camera->CameraLockRB = { 4235,3786, 0 };
+	_Camera->CameraLockLT = { 1164,3026,0 };
+	_Camera->CameraLockRB = { 3800,4000, 0 };
 	ObjectManager::instance()._Camera = _Camera;
 	SceneManageObjs.push_back(_Camera);
 

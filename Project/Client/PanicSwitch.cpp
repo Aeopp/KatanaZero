@@ -94,15 +94,16 @@ void PanicSwitch::Interaction()
     {
         On();
     }
-}
+};
 
-void PanicSwitch::PushTrap(vec3 Location,const float YScale,
+std::shared_ptr<class LaserTrap>  PanicSwitch::PushTrap(vec3 Location,const float YScale,
     vec3 Speed, float MovementDuration)
 {
     auto _spTrap = ObjectManager::instance().InsertObject<LaserTrap>();
     _spTrap->Init(std::move(Location), YScale,
         std::move( Speed ) , MovementDuration);
     _Traps.push_back(_spTrap);
+    return _spTrap;
 }
 
 void PanicSwitch::On()

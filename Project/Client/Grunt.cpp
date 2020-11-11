@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Grunt.h"
 #include "Player.h"
+#include "sound_mgr.h"
+
 #include "AStarManager.h"
 #include "Grunt_Slash.h"
 #include "CollisionComponent.h"
@@ -212,6 +214,7 @@ void Grunt::Attack()
 	};
 	_RenderComp->Anim(false, false, L"spr_grunt_attack", 8, 0.6f, std::move(_Notify));
 	AtTheAttackDir = _PhysicComp->Dir;
+	SOUNDPLAY("punch", 0.8f, false);
 };
 
 void Grunt::AttackState()
@@ -562,7 +565,7 @@ void Grunt::FollowRouteProcedure()
 
 	vec3 ToPath = CurMoveMark - _PhysicComp->Position;
 	_Y = ToPath.y;
-	if (ToPath.y > 40.f)
+	if (ToPath.y > 40.f && _PhysicComp->bLineMode)
 	{
 		_CollisionComp->bDownJump = true;
 	}

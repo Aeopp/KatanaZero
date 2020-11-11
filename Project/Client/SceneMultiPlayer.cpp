@@ -25,11 +25,11 @@ void SceneMultiPlayer::Initialize()
 	LoadLineInfoFilePath = L"..\\Data\\Multiplayer\\Line.txt"s;
 	LoadAStarInfoFilePath = L"..\\Data\\Multiplayer\\AStar.txt"s;
 	LoadObjectInfoFilePath = L"..\\Data\\Multiplayer\\ObjectInfo.txt"s;
-
+	
 	SceneManager::instance()._NextScene = ESceneID::EChinaTown1st;
 	auto _Camera = ObjectManager::instance().InsertObject<Camera>();
-	_Camera->CameraLockLT = { 900,2000,0 };
-	_Camera->CameraLockRB = { 3800 ,3300, 0 };
+	_Camera->CameraLockLT = { 1000,2000,0 };
+	_Camera->CameraLockRB = { 3650 ,3250, 0 };
 	ObjectManager::instance()._Camera = _Camera;
 	SceneManageObjs.push_back(_Camera);
 
@@ -37,6 +37,7 @@ void SceneMultiPlayer::Initialize()
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<HUD>());
 	SceneManageObjs.push_back(ObjectManager::instance().InsertObject<UITimer>());
 
+	
 
 	Scene::Initialize();
 }

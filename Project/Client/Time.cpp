@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 #include "MainApp.h"
+#include "sound_mgr.h"
+
 
 void Time::Initialize(const uint32_t LimitFrame,std::chrono::milliseconds DeltaMax)
 {
@@ -109,12 +111,14 @@ NotifyEventType _NotifyEvent)
 void Time::SlowDownTime()
 {
 	TimeScale = 0.2f;
+	SOUNDPLAY("slomo_engage", 0.31f);
 	global::_CurGameState = global::ECurGameState::PlaySlow;
 }
 
 void Time::Return()
 {
 	TimeScale = 1.f;
+	SOUNDPLAY("slomo_disengage", 0.31f);
 	global::_CurGameState = global::ECurGameState::Play;
 }
 

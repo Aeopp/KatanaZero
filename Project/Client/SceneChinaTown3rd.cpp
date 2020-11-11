@@ -33,8 +33,8 @@ void SceneChinaTown3rd::Initialize()
 
 	SceneManager::instance()._NextScene = ESceneID::EChinaTown4th;
 	auto _Camera = ObjectManager::instance().InsertObject<Camera>();
-	_Camera->CameraLockLT = { 1410,2751,0 };
-	_Camera->CameraLockRB = { 4307,3747, 0 };
+	_Camera->CameraLockLT = { 1410,2650,0 };
+	_Camera->CameraLockRB = { 4106,3747, 0 };
 	ObjectManager::instance()._Camera = _Camera;
 	SceneManageObjs.push_back(_Camera);
 

@@ -13,6 +13,7 @@
 #include "AStarManager.h"
 #include "EffectManager.h"
 #include "RecordManager.h"
+#include "sound_mgr.h"
 
 
 HRESULT App::Initialize()
@@ -22,6 +23,8 @@ HRESULT App::Initialize()
 #pragma region Application Initialize
 	static constexpr bool bAppWindowScreenMode = TRUE;
 	static constexpr uint32_t AppFrameLimit = 60ul;
+
+	sound_mgr::instance().initialize();
 
 	GraphicDevice& GraphicDeviceRef = GraphicDevice::instance();
 	GraphicDeviceRef.Initialize(bAppWindowScreenMode);
@@ -49,8 +52,11 @@ HRESULT App::Initialize()
 
 	SceneManager& SceneMgrRef = SceneManager::instance();
 	SceneMgrRef.Initialize();
-	
-	SceneMgrRef.Scene_Change(ESceneID::EBunkerMansion);
+
+	sound_mgr::instance().Stop(sound_mgr::instance().CurrentBgmKey);
+	sound_mgr::instance().Play("song_katanazero"s, true, 1.f);
+
+	SceneMgrRef.Scene_Change(ESceneID::EPrison1st);
 
 	//TimeRef.TimerRegist(10.f, 10.f, 10.f, [&]()
 	//{
@@ -75,6 +81,7 @@ HRESULT App::Initialize()
 
 void App::Update()
 {
+	sound_mgr::instance().Frame(Time::instance().Delta());
 	Time::instance().NotificationCheck();
 	InputManager::instance().Update();
 	ObjectManager::instance().Update();
@@ -113,6 +120,7 @@ void App::Render()
 
 void App::Release()
 {
-	
+	sound_mgr::instance().Release();
+
 }
 

@@ -12,19 +12,31 @@
 #include "Texture_Manager.h"
 #include "Camera.h"
 #include "ObjectManager.h"
+#include "sound_mgr.h"
 
 RecordManager::RecordManager()
 {
 	_Anys.emplace_back(InputManager::instance().EventRegist([this]()
-	{ if (global::IsReplay())	++TimingSpeed; },
+	{ if (global::IsReplay())
+		{
+			++TimingSpeed;
+		}
+	},
 		VK_RIGHT, InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this]()
-	{ if (global::IsReplay())--TimingSpeed; },
+	{ if (global::IsReplay())
+		{
+			--TimingSpeed;
+	 // 	SOUNDPLAY("replay_ff", 0.9f);
+		}
+		 },
 		VK_LEFT, InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this]()
-	{ if (global::IsReplay())	TimingSpeed = 0; },
+	{ if (global::IsReplay())
+		SOUNDPLAY("pause", 1.f);
+		TimingSpeed = 0; },
 		VK_SPACE, InputManager::EKEY_STATE::DOWN));
 
 	_Anys.emplace_back(InputManager::instance().EventRegist([this]()
@@ -47,8 +59,10 @@ void RecordManager::Update()
 
 void RecordManager::ReWindUpdate()
 {
-	InputManager::instance().Update();
+	const float dt  =Time::instance().Delta();
 
+	InputManager::instance().Update();
+	sound_mgr::instance().Frame(dt);
 	Timing += RewindSpeed;
 	if (Timing <= 1)
 	{
@@ -63,6 +77,8 @@ void RecordManager::ReWindUpdate()
 
 void RecordManager::ReWindStart()
 {
+	SOUNDPLAY("Rewind", 1.f, false);
+
 	global::_CurGameState = global::ECurGameState::ReWind;
 	RewindSpeed =  -(Timing / 100);
 	if (RewindSpeed >= -1)
@@ -150,20 +166,25 @@ void RecordManager::ReplayEnd()
 	Time::instance()._T = 0;
 	RecordManager::Timing = 0;
 
-	SceneManager::instance().Scene_Change(SceneManager::instance().GetNextSceneID());
 
-	int i = 0;
+	
+	ESceneID _SceneID = SceneManager::instance().GetNextSceneID(); 
+	BgmPlayFromSceneID(_SceneID);
+	SceneManager::instance().Scene_Change(_SceneID);
 
+	
 }
 void RecordManager::ReplayUpdate()
 {
+	const float dt =Time::instance().Delta();
+
 	if (!bReplayInit)
 	{
 		InputManager::instance().Update();
 		Time::instance().NotificationCheck();
 		return;
 	};
-
+	sound_mgr::instance().Frame(dt);
 	InputManager::instance().Update();
 	if (_TimingCameraPos.empty())
 	{
@@ -182,6 +203,20 @@ void RecordManager::ReplayUpdate()
 	if (Timing <= 1)
 	{
 		Timing = 1;
+	}
+
+	CurSoundTime -= (dt *std::abs(TimingSpeed));
+	if (CurSoundTime < 0.f)
+	{
+		CurSoundTime += SoundTime;
+		if (TimingSpeed < 0)
+		{
+			//SOUNDPLAY("replay_rew", 0.9f);
+		}
+		else
+		{
+			// SOUNDPLAY("replay_ff", 0.9f);
+		}
 	}
 }
 void RecordManager::RePlayRender()
@@ -219,22 +254,22 @@ void RecordManager::RePlayRender()
 		diff /= EndTiming;
 
 		{
-			int32_t Alpha = 160 - (diff * 160);
+			//int32_t Alpha = 160 - (diff * 160);
 
-			D3DXCOLOR _Color = D3DCOLOR_ARGB(Alpha, 255, 255, 255);
+			//D3DXCOLOR _Color = D3DCOLOR_ARGB(Alpha, 255, 255, 255);
 
-			auto TexInfo = TextureManager::instance().Get_TexInfo(L"Effect", L"ReplayBack", 0);
-			RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width ,
-						  TexInfo->ImageInfo.Height };
-			vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
-			matrix MScale, MTrans, MWorld;
-			D3DXMatrixScaling(&MScale, 1920, 1080, 0);
-			D3DXMatrixTranslation(&MTrans, 1920.f / 2.f, 1080.f / 2.f, 0);
-			MWorld = MScale * MTrans;
-			GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
-			GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
-				&_srcRT, &__TextureCenter, nullptr,
-				_Color);
+			//auto TexInfo = TextureManager::instance().Get_TexInfo(L"Effect", L"ReplayBack", 0);
+			//RECT _srcRT = { 0,0,TexInfo->ImageInfo.Width ,
+			//			  TexInfo->ImageInfo.Height };
+			//vec3 __TextureCenter = { TexInfo->ImageInfo.Width / 2.f,TexInfo->ImageInfo.Height / 2.f,0.f };
+			//matrix MScale, MTrans, MWorld;
+			//D3DXMatrixScaling(&MScale, 1920, 1080, 0);
+			//D3DXMatrixTranslation(&MTrans, 1920.f / 2.f, 1080.f / 2.f, 0);
+			//MWorld = MScale * MTrans;
+			//GraphicDevice::instance().GetSprite()->SetTransform(&MWorld);
+			//GraphicDevice::instance().GetSprite()->Draw(TexInfo->pTexture,
+			//	&_srcRT, &__TextureCenter, nullptr,
+			//	_Color);
 		}
 
 		{
@@ -270,6 +305,47 @@ void RecordManager::RePlayRender()
 	}
 	Time::instance().Render();
 	GraphicDevice::instance().RenderEnd();
+}
+void RecordManager::BgmPlayFromSceneID(ESceneID _SceneID)
+{
+	switch (_SceneID)
+	{
+	case ESceneID::ENone:
+		break;
+	case ESceneID::EPrison3rd:
+		break;
+	case ESceneID::EPrison2nd:
+		break;
+	case ESceneID::EPrison1st:
+		sound_mgr::instance().Stop(sound_mgr::instance().CurrentBgmKey);
+		sound_mgr::instance().Play("song_dragon"s, true, 1.f);
+		break;
+	case ESceneID::EMultiPlayer:
+		sound_mgr::instance().Stop(sound_mgr::instance().CurrentBgmKey);
+		sound_mgr::instance().Play("song_katanazero"s, true, 1.f);
+		break;
+	case ESceneID::EBoss:
+		sound_mgr::instance().Stop(sound_mgr::instance().CurrentBgmKey);
+		sound_mgr::instance().Play("song_fullconfession"s, true, 1.f);
+		break;
+	case ESceneID::EBunkerMansion:
+		sound_mgr::instance().Stop(sound_mgr::instance().CurrentBgmKey);
+		sound_mgr::instance().Play("song_bunker_1"s, true, 1.f);
+		break;
+	case ESceneID::EChinaTown1st:
+		sound_mgr::instance().Stop(sound_mgr::instance().CurrentBgmKey);
+		sound_mgr::instance().Play("song_chinatown"s, true, 1.f);
+		break;
+		break;
+	case ESceneID::EChinaTown2nd:
+		break;
+	case ESceneID::EChinaTown3rd:
+		break;
+	case ESceneID::EChinaTown4th:
+		break;
+	default:
+		break;
+	}
 };
 
 

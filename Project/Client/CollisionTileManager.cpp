@@ -313,13 +313,12 @@ void CollisionTileManager::Update()&
 				//밀어낸 이후에 위에 존재한다면 땅에닿았었다는 처리
 				if (std::abs(WorldRectPt[2].y - _CollisionTile[0].y) < LandCheckDistance)
 				{
-			
-
 					bLand = true;
 					auto spPhysicTransform = std::dynamic_pointer_cast<PhysicTransformComponent>
 						(spOwner->_TransformComp);
 					if (!spPhysicTransform)continue;
 					bFly = spPhysicTransform->bFly;
+				
 					if (spOwner->GetID() == OBJECT_ID::EID::EPLAYER)
 					{
 						auto _Player = std::dynamic_pointer_cast<Player>(spOwner);
@@ -327,6 +326,10 @@ void CollisionTileManager::Update()&
 						{
 							spPhysicTransform->DownLanding();
 						}
+					}
+					else
+					{
+						spPhysicTransform->DownLanding();
 					}
 				
 				}

@@ -61,6 +61,9 @@
     <Filter Include="Component\Transform">
       <UniqueIdentifier>{d0edbf95-52c9-4e3d-889e-7045805e5107}</UniqueIdentifier>
     </Filter>
+    <Filter Include="FMOD">
+      <UniqueIdentifier>{a3cfe137-a54a-4cc5-a7c1-4d0d389955b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -248,6 +251,31 @@
     <ClInclude Include="Grenade.h" />
     <ClInclude Include="PanicSwitch.h" />
     <ClInclude Include="LaserTrap.h" />
+    <ClInclude Include="sound_mgr.h" />
+    <ClInclude Include="fmod.h">
+      <Filter>FMOD</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod.hpp">
+      <Filter>FMOD</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod_codec.h">
+      <Filter>FMOD</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod_common.h">
+      <Filter>FMOD</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod_dsp.h">
+      <Filter>FMOD</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod_dsp_effects.h">
+      <Filter>FMOD</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod_errors.h">
+      <Filter>FMOD</Filter>
+    </ClInclude>
+    <ClInclude Include="fmod_output.h">
+      <Filter>FMOD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -411,6 +439,7 @@
     <ClCompile Include="Grenade.cpp" />
     <ClCompile Include="PanicSwitch.cpp" />
     <ClCompile Include="LaserTrap.cpp" />
+    <ClCompile Include="sound_mgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -429,5 +458,36 @@
     <Text Include="ReadMe.txt">
       <Filter>Default</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fmod.cs">
+      <Filter>FMOD</Filter>
+    </None>
+    <None Include="fmod.dll">
+      <Filter>FMOD</Filter>
+    </None>
+    <None Include="fmod_dsp.cs">
+      <Filter>FMOD</Filter>
+    </None>
+    <None Include="fmod_errors.cs">
+      <Filter>FMOD</Filter>
+    </None>
+    <None Include="fmodL.dll">
+      <Filter>FMOD</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="fmod_vc.lib">
+      <Filter>FMOD</Filter>
+    </Library>
+    <Library Include="fmodL_vc.lib">
+      <Filter>FMOD</Filter>
+    </Library>
+    <Library Include="libfmod.a">
+      <Filter>FMOD</Filter>
+    </Library>
+    <Library Include="libfmodL.a">
+      <Filter>FMOD</Filter>
+    </Library>
   </ItemGroup>
 </Project>

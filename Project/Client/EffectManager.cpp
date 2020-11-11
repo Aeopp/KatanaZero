@@ -58,7 +58,7 @@ void EffectManager::Render()
 			_Color.r = 0;
 			_Color.g = 0;
 			_Color.b = 0;
-		}			
+		};
 
 		D3DXCOLOR RecordColor = _Color;
 
@@ -506,6 +506,121 @@ D3DXCOLOR EffectManager::SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCO
 		break;
 	};
 
+	return _Color;
+}
+
+D3DXCOLOR EffectManager::ConvertRecordColorFromEffectID(OBJECT_ID::EID _EffectID, D3DXCOLOR _Color)
+{
+	switch (_EffectID)
+	{
+	case OBJECT_ID::LASER_DEAD:
+		break;
+	case OBJECT_ID::LASER_TRAP:
+		break;
+	case OBJECT_ID::PANIC_SWITCH:
+		break;
+	case OBJECT_ID::BOSS_RECOVER_BOMB:
+		break;
+	case OBJECT_ID::GRENADE:
+		break;
+	case OBJECT_ID::BOSS_JUMP:
+		break;
+	case OBJECT_ID::BOSS_LASER:
+		break;
+	case OBJECT_ID::BOSS_DASH:
+		break;
+	case OBJECT_ID::BOSS:
+		break;
+	case OBJECT_ID::DOOR_KICK_IMPACT:
+		break;
+	case OBJECT_ID::DOOR:
+		break;
+	case OBJECT_ID::DRAGON_DASH:
+		break;
+	case OBJECT_ID::SMOKE_CLOUD:
+		break;
+	case OBJECT_ID::REFLECT:
+		break;
+	case OBJECT_ID::DRUM:
+		break;
+	case OBJECT_ID::EXPLOSION:
+		break;
+	case OBJECT_ID::ITEM:
+		break;
+	case OBJECT_ID::GO:
+		break;
+	case OBJECT_ID::GANGSTER_GUN:
+		break;
+	case OBJECT_ID::REFLECT_BULLET:
+		break;
+	case OBJECT_ID::BULLET:
+		break;
+	case OBJECT_ID::HIT_EFFECT:
+		break;
+	case OBJECT_ID::GANGSTER:
+		break;
+	case OBJECT_ID::HIT_IMPACT:
+		break;
+	case OBJECT_ID::STOMPER_CLOUD:
+		break;
+	case OBJECT_ID::JUMP_CLOUD:
+		break;
+	case OBJECT_ID::LAND_CLOUD:
+		break;
+	case OBJECT_ID::SLASH_FX:
+		break;
+	case OBJECT_ID::WHITE_BLOOD:
+		_Color.r = 255;
+		_Color.g = 255;
+		_Color.b = 255;
+		break;
+	case OBJECT_ID::GRUNT_SLASH:
+		break;
+	case OBJECT_ID::GRUNT:
+		break;
+	case OBJECT_ID::DustCloud:
+		break;
+	case OBJECT_ID::Effect:
+		break;
+	case OBJECT_ID::ATTACK:
+		break;
+	case OBJECT_ID::ATTACK_SLASH:
+		break;
+	case OBJECT_ID::ELINE:
+		break;
+	case OBJECT_ID::ETILE:
+		break;
+	case OBJECT_ID::EDOWNJUMPTILE:
+		break;
+	case OBJECT_ID::EWALLRIDELINE:
+		break;
+	case OBJECT_ID::EPLAYER:
+		break;
+	case OBJECT_ID::CHARACTER:
+		break;
+	case OBJECT_ID::CAMERA:
+		break;
+	case OBJECT_ID::UI_TIMER:
+		break;
+	case OBJECT_ID::UI_ITEMICONS:
+		break;
+	case OBJECT_ID::HUD:
+		break;
+	case OBJECT_ID::BATTERY:
+		break;
+	case OBJECT_ID::MOUSE:
+		break;
+	case OBJECT_ID::EENEMY1:
+		break;
+	case OBJECT_ID::EENEMY2:
+		break;
+	case OBJECT_ID::EENEMY3:
+		break;
+	case OBJECT_ID::ENONE:
+		break;
+	default:
+		break;
+	}
 	return _Color;
 }
 

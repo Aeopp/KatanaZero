@@ -11,6 +11,8 @@
 #include "EffectManager.h"
 #include "ObjectManager.h"
 #include "Camera.h"
+#include "sound_mgr.h"
+
 
 OBJECT_ID::EID LaserTrap::GetID()
 {
@@ -92,13 +94,17 @@ void LaserTrap::Initialize() & noexcept
     _CollisionComp->_CollisionInfo._ShapeType =
         CollisionComponent::CollisionInfo::EShapeType::Rect;
     _CollisionComp->_CollisionInfo.Height = 220;
-    _CollisionComp->_CollisionInfo.Width = 10;
+    _CollisionComp->_CollisionInfo.Width = 5;
     _CollisionComp->_Tag = CollisionComponent::ETag::ELASER_TRAP;
     _CollisionComp->bCollision = true;
 
     _TransformComp->bMapSlide = false;
-    _TransformComp->Scale *= 10;
+    _TransformComp->Scale *= 1;
     _TransformComp->bFollowOwner = false;
+
+
+    _RenderComp->bFixedScale = true;
+    _RenderComp->FixedScale = { 5,1,1 };
 
     bOn = true;
 }
@@ -108,7 +114,9 @@ void LaserTrap::Init(vec3 Location, float YScale,vec3 Speed, float MovementDurat
     _TransformComp->Position = std::move(Location);
     _TransformComp->Scale.y = YScale;
     _RenderCompCellingGun->PositionCorrection.y *= YScale;
-    
+    _RenderComp->FixedScale.y = YScale;
+
+
     _TransformComp->Dir = Speed;
     CurMovementDuration = this->    MovementDuration = MovementDuration;
 }
@@ -120,6 +128,9 @@ void LaserTrap::On()
     _RenderComp->bRender = true;
     _RenderCompCellingGun->Anim(true, true, L"spr_ceiling_laser_tread_on", 3,
         0.1f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 });
+    
+    SOUNDPLAY("lasers_on", 1.f);
+
 }
 
 void LaserTrap::Off()
@@ -129,4 +140,6 @@ void LaserTrap::Off()
     _RenderComp->bRender = false;
     _RenderCompCellingGun->Anim(true, true, L"spr_ceiling_laser_tread_off", 3,
         0.1f, {}, D3DCOLOR_ARGB(255, 255, 255, 255), 0, { 1,1 });
+
+    SOUNDPLAY("lasers_off", 1.f);
 }

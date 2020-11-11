@@ -84,6 +84,7 @@ public :
 	bool bRender = true;
 	D3DXCOLOR SwitchColorFromGameState(OBJECT_ID::EID _EffectID, D3DXCOLOR _Color);
 	D3DXCOLOR SwitchColorFromEffectID(OBJECT_ID::EID _EffectID,D3DXCOLOR _Color);
+	D3DXCOLOR ConvertRecordColorFromEffectID(OBJECT_ID::EID _EffectID, D3DXCOLOR _Color);
 
 	void EffectPush(
 		const std::wstring_view& _ObjKey,
