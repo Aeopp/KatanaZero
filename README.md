@@ -1,4 +1,11 @@
 # KatanaZero
+## 개발환경
+C++ VS2019 DirectX FMOD Git 
+## 조작법
+P 디버그 토글 O 디버그 타임 토글 I 디버그 그리드 토글
+치트 F1 리플레이 진입 F2 무적 F3 시간 되감기
+Q 아이템 사용 SPACE BAR 상호작용
+나머지는 카타나제로 원작과 동일 WASD 이동 마우스 사용 
 ## 일반상태에서 잔상 남기며 그리기
 현재 생각중인 색깔
 AfterStartColor = 0,255,255
