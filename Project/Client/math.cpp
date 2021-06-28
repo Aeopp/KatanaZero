@@ -133,7 +133,11 @@ bool math::IsPointInnerRect(const std::array<vec3, 4>& RectPoint, const vec3& Po
 
 float_t math::GetPointDistance(const std::pair<vec3, vec3>& TargetPoints)
 {
-	return D3DXVec3Length(&(TargetPoints.first - TargetPoints.second));
+	const vec3 Lhs = TargetPoints.first;
+	const vec3 Rhs = TargetPoints.second;
+	const vec3 ToLhs = Lhs - Rhs;
+
+	return D3DXVec3Length(&ToLhs);
 }
 
 RECT math::ConvertLocalPtToRECT(const std::array<vec3, 4ul>& LocalPt)
@@ -375,3 +379,4 @@ typename math::Collision::IsCollision_Dir math::Collision::SegmentAndRect(
 
 	return std::nullopt;
 }
+

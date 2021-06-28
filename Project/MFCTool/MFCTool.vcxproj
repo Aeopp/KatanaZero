@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6C57D1FD-7C5A-44BD-8AF1-02BF284C2F91}</ProjectGuid>
     <RootNamespace>MFCTool</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <Keyword>MFCProj</Keyword>
     <ProjectName>Editor</ProjectName>
   </PropertyGroup>

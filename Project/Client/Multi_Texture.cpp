@@ -53,7 +53,7 @@ HRESULT Multi_Texture::Insert_Texture(const std::wstring & FilePath, const std::
 
 std::shared_ptr<class TexInfo> Multi_Texture::Get_TexInfo(const std::wstring & StateKey, const uint32_t Index)
 {
-	auto& iter_find = _TextureMap.find(StateKey);
+	auto iter_find = _TextureMap.find(StateKey);
 
 	if (_TextureMap.end() == iter_find)
 		return nullptr;

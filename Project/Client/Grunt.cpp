@@ -106,11 +106,14 @@ void Grunt::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 
 	if (_CurrentState == Grunt::State::Walk && _CollisionInfo._ID == OBJECT_ID::ETILE)
 	{
+		static const vec3 RightVector{ 1.f,0.f,0.f };
+		static const vec3 LeftVector{ -1.f,0.f,0.f };
+
 		if (
 			(math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 3.5f))) ||
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &RightVector) > cosf(math::PI / 3.5f))) ||
 			(math::almost_equal(vec3{ -1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 3.5f)))
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &LeftVector) > cosf(math::PI / 3.5f)))
 			)
 		{
 			Turn();
@@ -598,8 +601,9 @@ void Grunt::FollowRouteProcedure()
 	{
 		_CollisionComp->bDownJump = false;
 	}
-
-	if (D3DXVec3Dot(&ConvertXAxisDir(_PhysicComp->Dir), &ConvertXAxisDir(ToPath)) < 0.f)
+	 auto PhysicCompDir = ConvertXAxisDir(_PhysicComp->Dir); 
+	 auto ToPathVector = ConvertXAxisDir(ToPath); 
+	if (D3DXVec3Dot(&PhysicCompDir, &ToPathVector) < 0.f)
 	{
 		_PhysicComp->Dir = ConvertXAxisDir(ToPath);
 		Turn();

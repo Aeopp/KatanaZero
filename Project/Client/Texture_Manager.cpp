@@ -91,7 +91,8 @@ void TextureManager::LoadTexturesFromTexInfoFile(const std::wstring& FileName) &
 			if (FileIn.eof())
 				break;
 			TexPath _TexPath;
-			FileIn >> _TexPath.RefTuple();
+			auto _Target = _TexPath.RefTuple(); 
+			FileIn >> _Target;
 
 			if (!_TexPath.Count) continue;
 

@@ -66,9 +66,11 @@ void NormalEnemy::Initialize() & noexcept
 				_PointArr[i].y = Pos.y;
 				_PointArr[i].x -= global::CameraPos.x;
 				_PointArr[i].y -= global::CameraPos.y;
+				const auto CameraJoomMatrix = math::GetCameraJoomMatrix(global::JoomScale,
+					vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
+
 				D3DXVec2TransformCoord(&_PointArr[i], &_PointArr[i],
-					&math::GetCameraJoomMatrix(global::JoomScale,
-						vec3{ global::ClientSize.first,global::ClientSize.second,0.f }));
+					&CameraJoomMatrix);
 		}
 
 		GraphicDevice::instance().GetSprite()->End();

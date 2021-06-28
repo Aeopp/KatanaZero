@@ -95,7 +95,7 @@ void GO::Update()
     {
         ClearCheckTime = 1.3f;
         
-        auto& EnemyMapIter = ObjectManager::instance()._ObjectMap.find(OBJECT_TAG::ETAG::EENEMY);
+        auto EnemyMapIter = ObjectManager::instance()._ObjectMap.find(OBJECT_TAG::ETAG::EENEMY);
 
         if (EnemyMapIter == std::end(ObjectManager::instance()._ObjectMap))return;
 

@@ -1837,7 +1837,10 @@ void Player::RollState()
 		vec3 Pos = _PhysicComp->Position;
 		Pos.y += 55.f;
 		vec3 Dir;
-		D3DXVec3Lerp(&Dir, &-_PhysicComp->Dir, &vec3{ 0,-1.f,0 }, math::Rand<float>({ 0,1 }));
+		static const vec3 Down{ 0.f,-1.f,0.f };
+		static const auto PhysicCompDir = -_PhysicComp->Dir;
+
+		D3DXVec3Lerp(&Dir, &PhysicCompDir,&Down, math::Rand<float>({ 0,1 }));
 		Pos += Dir*20;
 		Dir *= 250;
 		EffectManager::instance().EffectPush(L"Effect", L"spr_dustcloud",

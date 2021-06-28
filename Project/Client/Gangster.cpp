@@ -124,11 +124,13 @@ void Gangster::MapHit(typename math::Collision::HitInfo _CollisionInfo)
 
 	if (_CurrentState == Gangster::State::Walk && _CollisionInfo._ID == OBJECT_ID::ETILE)
 	{
+			const vec3 RightVector{ 1.f,0.f,0.f };   
+			const vec3 LeftVector{ -1.f,0.f,0.f };
 		if (
 			(math::almost_equal(vec3{ 1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ 1.f,0.f,0.f }) > cosf(math::PI / 3.5f))) ||
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &RightVector ) > cosf(math::PI / 3.5f))) ||
 			(math::almost_equal(vec3{ -1.f,0.f,0.f }, _CollisionInfo.Normal)
-				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &vec3{ -1.f,0.f,0.f }) > cosf(math::PI / 3.5f)))
+				&& (D3DXVec3Dot(&_CollisionInfo.PosDir, &LeftVector) > cosf(math::PI / 3.5f)))
 			)
 		{
 			Turn();
@@ -725,8 +727,10 @@ void Gangster::FollowRouteProcedure()
 	{
 		_CollisionComp->bDownJump = false;
 	}
+	const auto PhysicCompDir = ConvertXAxisDir(_PhysicComp->Dir);
+	const auto  ToPathVector = ConvertXAxisDir(ToPath); 
 
-	if (D3DXVec3Dot(&ConvertXAxisDir(_PhysicComp->Dir), &ConvertXAxisDir(ToPath)) < 0.f)
+	if (D3DXVec3Dot(&PhysicCompDir, &ToPathVector) < 0.f)
 	{
 		_PhysicComp->Dir = ConvertXAxisDir(ToPath);
 		Turn();

@@ -65,15 +65,19 @@ void Grenade::Initialize() & noexcept
 
         for (uint32_t i = 0; i < CirclePointCount*2+2; ++i)
         {
-            vec2 Pos = (Center + 
+            vec3 Pos3D = (Center + 
                         vec3{ cosf(PointBetWeenAngle * i) * CurRadius,
                         sinf(PointBetWeenAngle * i) * CurRadius ,0.f });
+            vec2 Pos{ Pos3D.x,Pos3D.y };
+
             _PointArr[i] = std::move(Pos);
             _PointArr[i].x -= global::CameraPos.x;
             _PointArr[i].y -= global::CameraPos.y;
-            D3DXVec2TransformCoord(&_PointArr[i], &_PointArr[i],
-                &math::GetCameraJoomMatrix(global::JoomScale,
-                    vec3{ global::ClientSize.first,global::ClientSize.second,0.f }));
+
+            const auto _CameraJoomMatrix = math::GetCameraJoomMatrix(global::JoomScale,
+                vec3{ global::ClientSize.first,global::ClientSize.second,0.f });
+
+            D3DXVec2TransformCoord(&_PointArr[i], &_PointArr[i],&_CameraJoomMatrix);
         }
 
         GraphicDevice::instance().GetSprite()->End();
@@ -105,6 +109,7 @@ void Grenade::LateUpdate()
 {
     Super::LateUpdate();
     const float dt = Time::instance().Delta();
+
 
     if(_CurState==State::Movement)
     {

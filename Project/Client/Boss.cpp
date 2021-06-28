@@ -1733,7 +1733,8 @@ void Boss::DieFly()
 	_BossState = Boss::State::DieFly;
 	_RenderComp->Anim(false, true, L"spr_headhunter_diefly", 4, 1);
 	vec3 Dir = _PhysicComp->Dir;
-	D3DXVec3Lerp(&Dir, &vec3{ 0,-1,0 }, &Dir, 0.5f);
+	static const vec3 Down{ 0.f,-1.f,0.f };
+	D3DXVec3Lerp(&Dir, &Down, &Dir, 0.5f);
 
 	SOUNDPLAY("sound_voiceboss_huntress_ko_01", 0.4f);
 

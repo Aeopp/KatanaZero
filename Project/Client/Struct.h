@@ -14,10 +14,10 @@ struct TexPath
 	auto RefTuple() & noexcept
 	{
 		return std::make_tuple(
-			std::ref(RelativePath),
-			std::ref(ObjectKey),
-			std::ref(StateKey)
-			, std::ref(Count));
+				std::ref(RelativePath),
+				std::ref(ObjectKey),
+				std::ref(StateKey)
+			,   std::ref(Count));
 	}
 };
 
