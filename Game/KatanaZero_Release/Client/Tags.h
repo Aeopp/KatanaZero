@@ -1,0 +1,108 @@
+#pragma once
+
+namespace OBJECT_ID
+{
+	using uint8_t = unsigned int;
+
+	// 태그 다음 집합
+	enum EID : uint8_t
+	{
+		LASER_DEAD,
+		LASER_TRAP,
+		PANIC_SWITCH,
+		BOSS_RECOVER_BOMB,
+		GRENADE,
+		BOSS_JUMP,
+		BOSS_LASER,
+		BOSS_DASH,
+		BOSS,
+		DOOR_KICK_IMPACT,
+		DOOR,
+		DRAGON_DASH,
+		SMOKE_CLOUD,
+		REFLECT,
+		DRUM,
+		EXPLOSION,
+		ITEM,
+		GO,
+		GANGSTER_GUN,
+		REFLECT_BULLET,
+		BULLET,
+		HIT_EFFECT,
+		GANGSTER,
+		HIT_IMPACT,
+		STOMPER_CLOUD,
+		JUMP_CLOUD,
+		LAND_CLOUD,
+		SLASH_FX,
+		WHITE_BLOOD,
+		GRUNT_SLASH,
+		GRUNT,
+		DustCloud ,
+		Effect, 
+		ATTACK,
+		ATTACK_SLASH,
+		ELINE,
+		ETILE,
+		EDOWNJUMPTILE,
+		EWALLRIDELINE,
+		EPLAYER,
+		CHARACTER,
+		CAMERA,
+		UI_TIMER,
+		UI_ITEMICONS,
+		HUD,
+		BATTERY,
+		MOUSE,
+		EENEMY1,
+		EENEMY2,
+		EENEMY3,
+		ENONE,
+	};
+};
+
+namespace OBJECT_TAG
+{
+	using uint8_t = unsigned int;
+
+	// 집합
+	enum ETAG : uint8_t
+	{
+		REFELECT,
+		BOSS,
+		SMOKE_CLOUD,
+		INTERACTION_OBJECT,
+		ITEM,
+		ATTACK,
+		PLAYER_ATTACK,
+		ENEMY_ATTACK,
+		ETERRAIN,
+		CHARCTER,
+		EOBJECT,
+		EENEMY,
+		EPLAYER,
+		EEFFECT,
+		EUI,
+		ENONE,
+	};
+};
+
+namespace LAYER
+{
+	using uint8_t = unsigned int;
+
+	enum ELAYER : uint8_t
+	{
+		ETERRAIN,
+		EOBJECT_UNDER,
+		EOBJECT,
+		EOBJECT_OVER,
+		EEFFECT,
+		EEFFECT_OVER,
+		EUI,
+		EMOUSE,
+
+		ENONE,
+	};
+};
+
